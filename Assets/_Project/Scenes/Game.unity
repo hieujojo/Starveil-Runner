@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 288287879}
   - component: {fileID: 288287878}
   - component: {fileID: 288287877}
+  - component: {fileID: 288287881}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -172,7 +173,7 @@ MonoBehaviour:
   poolSize: 12
   recycleDistance: 15
   player: {fileID: 1348608049}
-  obstacleManager: {fileID: 0}
+  obstacleManager: {fileID: 288287881}
 --- !u!114 &288287879
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,6 +201,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &288287881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288287876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96f3742d41a024a43a68745321eeb09b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Core.World.ObstacleManager
+  obstacleTypes:
+  - {fileID: 11400000, guid: 9874225e27c3e874d9769a777558c9a9, type: 2}
+  - {fileID: 11400000, guid: 1c16141dedd20164c8e61a9f4401b30b, type: 2}
+  spawnChance: 0.45
+  laneCount: 3
+  laneWidth: 2
 --- !u!1 &504009621
 GameObject:
   m_ObjectHideFlags: 0
