@@ -1,6 +1,6 @@
 # Void Runner — Kế hoạch hành động (Action Plan)
 
-> Hyper-casual endless runner 3D + **AI Chase** · Unity 6 URP · Portfolio Game Developer
+> Hyper-casual endless runner 3D + **AI Chase** · Unity 6 URP · Game Production
 > ⚠️ **Trạng thái:** Đã chốt concept — CHƯA bắt đầu code. Tick checkbox khi hoàn thành từng task.
 
 ---
@@ -21,7 +21,7 @@ Chạy + né obstacle → thu coin / power-up → chạy thoát Void → chết 
 | Engine | Unity 6 · URP 17.4.0 |
 | Ngôn ngữ | C# thuần — không asset store gameplay |
 | Nền tảng build | **WebGL** (itch.io chính + Unity Play dự phòng) |
-| Mục tiêu | Portfolio apply Game Developer |
+| Mục tiêu | Game production hoàn chỉnh, phát hành WebGL |
 
 ---
 
@@ -38,7 +38,7 @@ Chạy + né obstacle → thu coin / power-up → chạy thoát Void → chết 
 | Prefab `DynamicBox`, `DynamicBox 1`, `PickUp` | ✅ Có | Giữ làm obstacle di động + coin placeholder |
 | Materials (Background, Enemy, PickUp, Player...) | ✅ Có | Giữ làm placeholder |
 | NavMesh setup (`NavMesh-Ground.asset`) | ✅ Có | Bake lại cho track của scene Game |
-| Windows build (`Builds/`) | ✅ Có | Không dùng cho portfolio — thay bằng WebGL |
+| Windows build (`Builds/`) | ✅ Có | Không dùng cho release — thay bằng WebGL |
 | MainMenu scene, Object Pool, Score, PowerUp, Audio, Save, Difficulty | ❌ Chưa có | Xây mới (G1–G3) |
 | Cinemachine, DOTween | ❌ Chưa có | Cài package (G0) |
 

@@ -108,4 +108,5 @@ Assets/_Project/
 
 ## 📄 Giấy phép
 
-Dự án cá nhân phục vụ học tập & portfolio. Toàn bộ code viết tay thuộc về tác giả.
+- **Code:** Toàn bộ code viết tay thuộc về tác giả.
+- **Assets:** UI & âm thanh từ [Kenney.nl](https://kenney.nl) — giấy phép **CC0 (Public Domain)**, dùng thoải mái không cần ghi công. Xem `License.txt` kèm theo từng gói.
