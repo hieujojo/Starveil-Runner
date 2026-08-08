@@ -144,13 +144,13 @@ Assets/
 ### Giai đoạn 1 — Core Gameplay
 > Mục tiêu: **chạy được · né được · chết được** — core loop hoàn chỉnh
 
-- [ ] **`PlayerController.cs`** (viết lại): Rigidbody bóng tự lăn về trước; chuyển lane trái/phải (A/D + swipe); lerp mượt giữa 3 lane; `OnTriggerEnter` obstacle → chết (trừ khi có Shield)
-- [ ] **`TileSpawner.cs`** (Object Pool): pool sẵn N tile, tile `Translate` về phía player, ra khỏi camera → về pool, spawn tile mới phía trước — không Instantiate/Destroy giữa chừng
-- [ ] **`Tile.cs`**: nhận `ObstacleManager` gắn obstacle/coin ngẫu nhiên khi spawn
-- [ ] **`VoidChase.cs`** (từ `EnemyMovement.cs`): NavMeshAgent đuổi theo player; tốc độ + scale tăng dần theo thời gian; bắt kịp → kích hoạt Game Over
-- [ ] **`GameManager.cs`**: state machine (Menu/Playing/GameOver); sự kiện `OnGameOver`, `OnRestart`; reset track + Void + score
-- [ ] **`ObstacleManager.cs` + `ObstacleData.cs`** (SO): 2–3 loại obstacle (Ramp cố định, Pillar cần né, DynamicBox di động — tái sử dụng prefab có sẵn)
-- [ ] Dựng scene `Game`: track tile + ground NavMesh (bake bằng NavMeshSurface từ package `com.unity.ai.navigation` có sẵn), đặt Void phía sau player
+- [x] **`PlayerController.cs`** (viết lại): Rigidbody bóng tự lăn về trước; chuyển lane trái/phải (A/D + mũi tên); lerp mượt giữa 3 lane; `OnTriggerEnter` obstacle → chết — ✅ code xong, commit `feat(player)`
+- [x] **`TileSpawner.cs`** (Object Pool): pool sẵn N tile, spawn phía trước + recycle sau lưng player — không Instantiate/Destroy giữa chừng — ✅ commit `feat(world)`
+- [x] **`Tile.cs`**: activate/deactivate, `ObstacleManager` gắn obstacle khi spawn — ✅ commit `feat(world)`
+- [x] **`VoidChase.cs`** (từ `EnemyMovement.cs`): NavMeshAgent đuổi theo player; tốc độ + scale tăng dần theo thời gian; bắt kịp → Game Over — ✅ commit `feat(void)`
+- [x] **`GameManager.cs`**: state machine (Menu/Playing/GameOver); event `OnGameOver`/`OnRestart`; reset track + Void + player; phím R restart — ✅ commit `feat(core)`
+- [x] **`ObstacleManager.cs` + `ObstacleData.cs`** (SO): spawn weighted random, luôn chừa ≥1 lane an toàn; auto-add `Obstacle` marker — ✅ commit `feat(world)` + `feat(data)`
+- [~] Dựng scene `Game`: ✅ ground + NavMeshSurface (bake xong) + player + void + CinemachineCamera + Tile.prefab — ⚠️ **còn thiếu bước 8**: Managers (GameManager/InputReader/TileSpawner), ObstacleManager, ObstacleData assets, gắn `Obstacle` vào DynamicBox.prefab
 
 **✅ Milestone G1:** Core loop chạy ổn định — bóng chạy, né obstacle, Void đuổi, chết → restart được
 
