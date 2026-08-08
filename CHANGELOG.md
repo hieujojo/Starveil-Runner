@@ -16,6 +16,22 @@
 
 ---
 
+## 2026-08-09 — Bước 8 hoàn tất (scene Game đủ hệ thống)
+
+### Đã xong
+
+- Tạo `Ramp.prefab` (cube dẹt + component `Obstacle`) — asset `Ramp.asset` giờ có prefab thật (GUID khớp `.prefab.meta`).
+- Gán prefab vào cả 2 `ObstacleData` (`DynamicBox.asset` + `Ramp.asset`) — trước đó `prefab: {fileID: 0}` (null).
+- Scene `Game.unity` đã có **ObstacleManager** với 2 asset trong list.
+- Xóa file rác `DynamicBox 1.prefab` (bản copy lỗi, Rigidbody mass 0.1 sẽ bay lung tung).
+
+### Bài học
+
+- **Asset đang mở trong Unity thì file trên đĩa chưa cập nhật** — phải `Ctrl+S` (File → Save) mới ghi xuống đĩa để commit được. Kiểm tra asset luôn đọc từ đĩa.
+- Khi asset `prefab: {fileID: 0}` nghĩa là **chưa kéo prefab vào Inspector** — không phải lỗi code. Kiểm tra cả GUID khớp giữa asset và `.prefab.meta`.
+
+---
+
 ## 2026-08-07 — Giai đoạn 1: 11 script core gameplay
 
 ### Lỗi compile

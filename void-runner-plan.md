@@ -150,7 +150,7 @@ Assets/
 - [x] **`VoidChase.cs`** (từ `EnemyMovement.cs`): NavMeshAgent đuổi theo player; tốc độ + scale tăng dần theo thời gian; bắt kịp → Game Over — ✅ commit `feat(void)`
 - [x] **`GameManager.cs`**: state machine (Menu/Playing/GameOver); event `OnGameOver`/`OnRestart`; reset track + Void + player; phím R restart — ✅ commit `feat(core)`
 - [x] **`ObstacleManager.cs` + `ObstacleData.cs`** (SO): spawn weighted random, luôn chừa ≥1 lane an toàn; auto-add `Obstacle` marker — ✅ commit `feat(world)` + `feat(data)`
-- [~] Dựng scene `Game`: ✅ ground + NavMeshSurface (bake xong) + player + void + CinemachineCamera + Tile.prefab — ⚠️ **còn thiếu bước 8**: Managers (GameManager/InputReader/TileSpawner), ObstacleManager, ObstacleData assets, gắn `Obstacle` vào DynamicBox.prefab
+- [x] Dựng scene `Game`: ✅ ground + NavMeshSurface (bake xong) + player + void + CinemachineCamera + Tile.prefab + **Managers** (GameManager/InputReader/TileSpawner) + **ObstacleManager** (2 ObstacleData: DynamicBox + Ramp, đã gán prefab) + gắn `Obstacle` vào DynamicBox.prefab — ✅ hoàn tất, đã Play test
 
 **✅ Milestone G1:** Core loop chạy ổn định — bóng chạy, né obstacle, Void đuổi, chết → restart được
 
