@@ -100,9 +100,9 @@ Assets/_Project/
 
 ## 🛠️ Quy ước phát triển
 
-- **Commit convention:** Conventional Commits (xem [`COMMIT_TEMPLATES.md`](./COMMIT_TEMPLATES.md))
-- **Changelog & bài học:** [`CHANGELOG.md`](./CHANGELOG.md)
-- **Kế hoạch chi tiết:** [`void-runner-plan.md`](./void-runner-plan.md)
+- **Commit convention:** Conventional Commits (xem [`agent/COMMIT_TEMPLATES.md`](./agent/COMMIT_TEMPLATES.md))
+- **Changelog & bài học:** [`agent/CHANGELOG.md`](./agent/CHANGELOG.md)
+- **Kế hoạch chi tiết:** [`agent/void-runner-plan.md`](./agent/void-runner-plan.md)
 
 ---
 
