@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-08-08 — ObstacleData wiring (Obstacle.cs, ObstacleData.cs, ObstacleManager.cs)
+
+### Ghi chú kỹ thuật
+
+- **`Obstacle.cs`** giờ có `[SerializeField] private ObstacleData _data` + property `Data` + method `SetData(data)` — component biết mình thuộc loại obstacle nào (phục vụ G2: shield, vfx, xử lý theo type).
+- **`ObstacleData.cs`** thêm enum `ObstacleType { Pillar, Ramp, Dynamic }` + field `obstacleType`.
+- **`ObstacleManager.SpawnOnTile`** gọi `comp.SetData(data)` sau khi spawn — data lúc runtime luôn khớp với data đã pick theo weight.
+- **Lưu ý tránh trùng lặp:** `ObstacleData.isDynamic` (bool) đang chồng lấn ngữ nghĩa với `ObstacleType.Dynamic` (enum) — gộp lại trong refactor tương lai (giữ cả hai hiện tại, chưa phá vỡ cấu hình cũ).
+
+---
+
 ## 2026-08-07 — Giai đoạn 1: 11 script core gameplay
 
 ### Lỗi compile

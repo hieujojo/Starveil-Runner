@@ -43,10 +43,13 @@ namespace VoidRunner.Core.World
         {
             GameObject obstacle = Instantiate(data.prefab, tile.transform);
             obstacle.transform.localPosition = new Vector3(x, 0f, Random.Range(0f, tile.Length * 0.6f));
-            if (obstacle.GetComponent<Obstacle>() == null)
+
+            Obstacle comp = obstacle.GetComponent<Obstacle>();
+            if (comp == null)
             {
-                obstacle.AddComponent<Obstacle>();
+                comp = obstacle.AddComponent<Obstacle>();
             }
+            comp.SetData(data); // gán data đã chọn — component biết mình thuộc loại nào
         }
 
         private ObstacleData PickRandomType()
