@@ -51,7 +51,11 @@ ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
+
+# Visual Studio config (machine-specific)
+.vsconfig
 *.tmp
 *.user
 *.userprefs
