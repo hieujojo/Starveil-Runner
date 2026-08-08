@@ -157,7 +157,7 @@ Assets/
 ### Giai đoạn 2 — Hệ thống game
 > Mục tiêu: game hoàn chỉnh về logic — score, power-up, âm thanh, save, độ khó
 
-- [ ] **`ScoreSystem.cs`**: score theo khoảng cách + coin; **combo multiplier** (×2, ×3...) khi không va chạm lâu; dùng `event Action<int>` → UI không coupling
+- [x] **`ScoreSystem.cs`**: score theo khoảng cách + coin; **combo multiplier** (×2, ×3...) khi không va chạm lâu; dùng `event Action<int>` → UI không coupling — ✅ commit `feat(score)`
 - [ ] **`UIManager.cs`**: HUD (score, multiplier, tốc độ); Game Over panel (score, best score, Retry/Menu); fade chuyển scene bằng DOTween
 - [ ] **`MainMenuManager.cs`**: nút Play / How to play / Highscore / Sound toggle
 - [ ] **`PowerUpSystem.cs` + `PowerUpData.cs`** (SO): **Shield** (miễn nhiễm 1 va chạm, 3s), **Magnet** (hút coin quanh player), **Slow-mo** (`Time.timeScale` tạm thời — Void chậm lại)

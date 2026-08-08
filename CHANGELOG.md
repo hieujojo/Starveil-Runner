@@ -5,6 +5,19 @@
 
 ---
 
+## 2026-08-09 — G2 bắt đầu: ScoreSystem
+
+### Đã xong
+
+- `Systems/Score/ScoreSystem.cs`: score theo khoảng cách chạy (`deltaZ × 10 × multiplier`) + coin (`coinScore × multiplier`); combo ×2…×5 tăng theo `comboInterval` (5s) sống liên tục, reset khi dính obstacle; event-driven `OnScoreChanged`/`OnComboChanged` — UI subscribe, không coupling.
+
+### Bài học
+
+- Đo điểm theo **`deltaZ` thực tế** (`player.position.z` mỗi frame) thay vì `speed * dt` — độc lập với DifficultyManager (tốc độ thay đổi theo thời gian) sắp tới, không cần sửa ScoreSystem khi tăng tốc.
+- **File .cs mới tạo khi Unity đang mở sẽ chưa có `.meta`** — commit code trước, quay lại Unity để editor sinh `.meta`, commit `.meta` sau (không tự tay gõ GUID).
+
+---
+
 ## 2026-08-08 — ObstacleData wiring (Obstacle.cs, ObstacleData.cs, ObstacleManager.cs)
 
 ### Ghi chú kỹ thuật
