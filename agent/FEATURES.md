@@ -44,8 +44,8 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | # | Tính năng | File | Cách hoạt động | Ghi chú |
 |---|---|---|---|---|
 | 12 | UI Kenney (Blue + font) | `Editor/MainMenuUIBuilder.cs` + `Editor/HUDUIBuilder.cs` | Tự dựng menu + HUD: sprite `panel_glass`, button Blue `button_rectangle_gloss/flat`, font `Kenney Future SDF` (sampling 128); tự gán field qua `SerializedObject` | 1608 PNG đã convert Sprite; tool chạy 1 nút |
-| 13 | Game HUD + Game Over | `UI/UIManager.cs` | ScorePanel + coin icon + score + combo (ẩn khi ×1); Game Over: title + điểm + cao nhất + **nút CHƠI LẠI / MENU** | Panel fade DOTween; nút mới thêm (Retry/Menu) |
-| 14 | VFX | *(chưa làm)* | Particle coin/powerup, trail void, screen shake (Cinemachine Impulse), popup bounce | ⏳ Bước tiếp theo |
+| 13 | Game HUD + Game Over | `UI/UIManager.cs` | ScorePanel + coin icon + score + combo (ẩn khi ×1); Game Over: title + điểm + cao nhất + **nút CHƠI LẠI / MENU** | Panel fade DOTween; nút CHƠI LẠI gọi `GameManager.Restart()`, MENU load scene MainMenu |
+| 14 | VFX | *(đang làm)* | Particle coin/powerup, trail void, screen shake (Cinemachine Impulse), popup bounce | ⏳ Đang code |
 | 15 | Post-processing | *(chưa làm)* | Bloom, Vignette, Color Grading (Global Volume) | ⏳ Sau VFX |
 | 16 | WebGL + deploy | *(chưa làm)* | Build Brotli → itch.io + Unity Play + README | ⏳ Cuối cùng |
 
