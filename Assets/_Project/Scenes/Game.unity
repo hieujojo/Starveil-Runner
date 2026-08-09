@@ -135,6 +135,8 @@ GameObject:
   - component: {fileID: 288287882}
   - component: {fileID: 288287883}
   - component: {fileID: 288287884}
+  - component: {fileID: 288287886}
+  - component: {fileID: 288287885}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -177,6 +179,7 @@ MonoBehaviour:
   recycleDistance: 15
   player: {fileID: 1348608049}
   obstacleManager: {fileID: 288287881}
+  pickupSpawner: {fileID: 0}
 --- !u!114 &288287879
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -297,6 +300,42 @@ MonoBehaviour:
   maxSpeed: 20
   startSpawnChance: 0.45
   maxSpawnChance: 0.75
+--- !u!114 &288287885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288287876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0544f4d725b110141959a8765e2d8655, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Core.World.PickupSpawner
+  coinPrefab: {fileID: 5596664671853306974, guid: ee5e6b066413c1148a6c72a95e2ad8f1, type: 3}
+  powerUpTypes:
+  - {fileID: 11400000, guid: dd03054f82544ee42bb8dfc4f9163240, type: 2}
+  - {fileID: 11400000, guid: b7372bc9b9140694c8973b78aee76a5b, type: 2}
+  - {fileID: 11400000, guid: f066d28b56423b24790bcfc4beaa764e, type: 2}
+  coinChance: 0.5
+  powerUpChance: 0.08
+  coinRowCount: 4
+  coinSpacing: 1.2
+  laneCount: 3
+  laneWidth: 2
+--- !u!114 &288287886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288287876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af66fb539a4f28c408990f428f9554ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Systems.PowerUp.PowerUpSystem
+  player: {fileID: 0}
 --- !u!1 &306935014
 GameObject:
   m_ObjectHideFlags: 0
