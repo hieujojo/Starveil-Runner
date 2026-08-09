@@ -1,6 +1,8 @@
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using VoidRunner.Core;
 using VoidRunner.Systems.Save;
 using VoidRunner.Systems.Score;
@@ -21,6 +23,8 @@ namespace VoidRunner.UI
         [SerializeField] private GameObject gameOverPanel;
         [SerializeField] private TextMeshProUGUI finalScoreText;
         [SerializeField] private TextMeshProUGUI bestScoreText;
+        [SerializeField] private Button retryButton;
+        [SerializeField] private Button menuButton;
 
         [Header("Hiệu ứng")]
         [SerializeField] private float fadeDuration = 0.4f;
@@ -49,6 +53,9 @@ namespace VoidRunner.UI
         private void Start()
         {
             gameOverPanel?.SetActive(false);
+
+            if (retryButton != null) retryButton.onClick.AddListener(RestartGame);
+            if (menuButton != null) menuButton.onClick.AddListener(GoToMenu);
 
             _scoreSystem = FindAnyObjectByType<ScoreSystem>();
             if (_scoreSystem == null)
@@ -100,6 +107,25 @@ namespace VoidRunner.UI
         private void HideGameOver()
         {
             gameOverPanel?.SetActive(false);
+        }
+
+        private void OnDestroy()
+        {
+            if (retryButton != null) retryButton.onClick.RemoveListener(RestartGame);
+            if (menuButton != null) menuButton.onClick.RemoveListener(GoToMenu);
+        }
+
+        private void RestartGame()
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.Restart();
+            }
+        }
+
+        private void GoToMenu()
+        {
+            SceneManager.LoadScene("MainMenu");
         }
     }
 }
