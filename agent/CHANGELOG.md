@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-09 — G2: MainMenuManager + scene MainMenu
+
+### Đã xong
+
+- `UI/Screens/MainMenuManager.cs`: Play (load scene Game), How to play (toggle panel), best score (SaveSystem), sound toggle (SaveSystem.Volume + AudioManager.SetVolume); subscribe/remove listener cân bằng.
+- Scene `MainMenu.unity`: Canvas (Scaler 1920×1080 Match 0.5) + EventSystem (**Input System UI module** — bắt buộc vì project dùng Input System, KHÔNG dùng StandaloneInputModule cũ) + AudioManager copy từ Game (DontDestroyOnLoad) + Build Settings: MainMenu index 0, Game index 1.
+
+### Bài học (từ lỗi user gặp)
+
+- **"Select Button" trống dù đã tạo nút:** 3 "nút" thực chất được tạo bằng **UI → Text - TextMeshPro** nên chỉ có TMP text, KHÔNG có component `Button` — object picker lọc theo đúng loại component nên không hiện. Fix: chọn object → Add Component → **Button** (UI). Kiểm tra scene: grep `m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button` phải = 3.
+- **Warning `\u25B6` (▶) not found in font:** LiberationSans SDF **không có glyph ▶** (U+25B6) → TMP thay bằng `□` + log warning. Fix: KHÔNG dùng ký tự icon ngoài bảng glyph của font TMP. Nếu muốn icon: dùng ký tự có sẵn (`>`, `»`) hoặc cài font có glyph đầy đủ (vd Noto Sans Symbols).
+- **File scene chưa được Ctrl+S thì grep trên đĩa vẫn thấy state cũ** — phải chờ user Save rồi mới kiểm tra/commit.
+- **Field `soundButtonText` là text con nằm TRONG nút âm thanh** — nhắc user kéo đúng text con (hoặc vì các nút tự nó là TMP text nên gán thẳng object nút vào field Text).
+
+---
+
 ## 2026-08-09 — G2: AudioManager
 
 ### Đã xong
