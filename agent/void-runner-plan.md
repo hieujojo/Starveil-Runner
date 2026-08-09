@@ -162,9 +162,9 @@ Assets/
 - [ ] **`MainMenuManager.cs`**: nút Play / How to play / Highscore / Sound toggle
 - [x] **`PowerUpSystem.cs` + `PowerUpData.cs`** (SO): **Shield** (miễn nhiễm 1 va chạm, 3s), **Magnet** (hút coin quanh player), **Slow-mo** (`Time.timeScale` tạm thời — Void chậm lại)
 - [ ] **`AudioManager.cs`** (Singleton + `DontDestroyOnLoad`): BGM loop; SFX: collect, die, power-up, chuyển lane; volume lưu PlayerPrefs
-- [ ] **`SaveSystem.cs`**: lưu/load best score + volume bằng PlayerPrefs
+- [x] **`SaveSystem.cs`**: lưu/load best score + volume bằng PlayerPrefs
 - [x] **`DifficultyManager.cs`**: tốc độ tile tăng theo score (AnimationCurve); mật độ obstacle tăng dần; **giới hạn tốc độ tối đa** (fair)
-- [ ] Prefab power-up (Shield/Magnet/Slow-mo) + coin (giữ Rotator.cs)
+- [x] Prefab power-up (Shield/Magnet/Slow-mo) + coin — đã tạo trong Unity: `Prefabs/Pickups/Coin.prefab`, `Prefabs/PowerUps/Pickup_{Shield,Magnet,SlowMo}.prefab` + 3 asset `ScriptableObjects/{Shield,Magnet,SlowMo}.asset`; `PickupSpawner` + `PowerUpSystem` gắn vào Managers — ⚠️ Coin thiếu `Rotator` (thêm sau, không ảnh hưởng chức năng)
 
 **✅ Milestone G2:** Chơi hoàn chỉnh — score, combo, 3 power-up, âm thanh, best score lưu lại, độ khó tăng dần
 

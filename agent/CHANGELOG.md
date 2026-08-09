@@ -16,6 +16,13 @@
 - `Core/World/PickupSpawner.cs`: spawn hàng coin (1 lane ngẫu nhiên) + power-up hiếm (weighted) lên tile — TileSpawner gọi song song với ObstacleManager.
 - `PlayerController.cs`: kiểm tra `PowerUpSystem.Instance.IsShieldActive` trước khi `Die()`.
 
+### Assets / prefab (user làm trong Unity)
+
+- 3 asset `ScriptableObjects/{Shield,Magnet,SlowMo}.asset` (PowerUpData) — GUID đã khớp với 3 prefab pickup.
+- `Prefabs/Pickups/Coin.prefab`: Coin component + Is Trigger ✅ — **thiếu `Rotator`** (coin không xoay; thêm sau, không ảnh hưởng chức năng).
+- `Prefabs/PowerUps/Pickup_{Shield,Magnet,SlowMo}.prefab`: mỗi prefab có `PowerUpPickup` + `data` gán đúng asset (Shield→dd03, Magnet→b737, SlowMo→f066).
+- Scene: `PowerUpSystem` + `PickupSpawner` gắn vào Managers; `coinPrefab` + `powerUpTypes` (3 asset) đã kéo đủ.
+
 ### Bài học (từ code-review)
 
 - **Mọi chỗ đụng `Time.timeScale` đều phải restore đầy đủ:** EndPowerUp (hết hạn), ResetAll (restart/game over) **và OnDisable** — nếu SlowMo đang chạy mà component bị tắt/scene unload, quên restore sẽ làm game chậm vĩnh viễn.
