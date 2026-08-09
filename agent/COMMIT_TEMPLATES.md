@@ -62,7 +62,7 @@ docs(readme): cập nhật README với link demo
 ```
 
 ### Quy tắc
-1. Subject dùng tiếng Việt, nhất quán trong 1 PR
+1. Subject dùng tiếng Việt **có đầy đủ dấu** (không viết tắt không dấu), nhất quán trong 1 PR — ví dụ `feat(player): thêm khả năng chuyển lane` (không phải `feat(player): them kha nang chuyen lane`)
 2. Subject **KHÔNG** viết hoa chữ đầu
 3. Subject **KHÔNG** có dấu chấm cuối
 4. Viết commit body khi cần giải thích thêm logic hoặc lý do thay đổi
