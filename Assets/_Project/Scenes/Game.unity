@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 288287881}
   - component: {fileID: 288287882}
   - component: {fileID: 288287883}
+  - component: {fileID: 288287884}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -255,6 +256,47 @@ MonoBehaviour:
   finalScoreText: {fileID: 306935016}
   bestScoreText: {fileID: 948886410}
   fadeDuration: 0.4
+--- !u!114 &288287884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288287876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a8d1fbddabcae94c8b1880fea8fb7b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Systems.Difficulty.DifficultyManager
+  difficultyCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  rampDuration: 60
+  startSpeed: 10
+  maxSpeed: 20
+  startSpawnChance: 0.45
+  maxSpawnChance: 0.75
 --- !u!1 &306935014
 GameObject:
   m_ObjectHideFlags: 0
