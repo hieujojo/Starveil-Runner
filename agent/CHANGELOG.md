@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-09 — G2: PowerUpSystem
+
+### Đã xong
+
+- `Data/PowerUpData.cs` (SO): enum `PowerUpType { Shield, Magnet, SlowMo }` + cấu hình (duration, magnetRadius, slowMoScale, spawnWeight) — tạo asset qua menu `VoidRunner/PowerUp Data`.
+- `Systems/PowerUp/PowerUpSystem.cs`: singleton — Shield (miễn nhiễm va chạm trong 3s), Magnet (hút coin trong bán kính về player), SlowMo (`Time.timeScale = 0.5` tạm thời); event `OnPowerUpActivated/OnPowerUpExpired` + `GameEvents.OnPowerUpActivated`; reset khi Restart/GameOver.
+- `Core/World/Coin.cs`: trigger pickup, tự đăng ký vào `Coin.Active` (registry tĩnh), phát `RaiseCoinCollected(1)`.
+- `Core/World/PowerUpPickup.cs`: trigger pickup — gọi `PowerUpSystem.Activate(data)` rồi tự hủy.
+- `Core/World/PickupSpawner.cs`: spawn hàng coin (1 lane ngẫu nhiên) + power-up hiếm (weighted) lên tile — TileSpawner gọi song song với ObstacleManager.
+- `PlayerController.cs`: kiểm tra `PowerUpSystem.Instance.IsShieldActive` trước khi `Die()`.
+
+### Bài học (từ code-review)
+
+- **Mọi chỗ đụng `Time.timeScale` đều phải restore đầy đủ:** EndPowerUp (hết hạn), ResetAll (restart/game over) **và OnDisable** — nếu SlowMo đang chạy mà component bị tắt/scene unload, quên restore sẽ làm game chậm vĩnh viễn.
+- **KHÔNG `FindObjectsByType<Coin>` mỗi frame khi Magnet hoạt động** (tạo GC array mỗi frame — tệ cho WebGL). Thay bằng **static registry**: `List<Coin> Active` + coin tự Add/Remove trong OnEnable/OnDisable.
+- **`Time.timeScale` là global state** — mọi hệ thống dùng `Time.deltaTime` (DifficultyManager, combo timer...) đều chậm theo khi SlowMo; đó là ý đồ (cả thế giới chậm), nhưng phải nhớ nó ảnh hưởng toàn cục.
+- Shield hiện cho **miễn nhiễm toàn bộ va chạm trong 3s** (không chỉ 1 lần) — khớp comment code, plan đã ghi rõ; nếu muốn đúng "1 va chạm" phải tiêu hao shield khi trúng (chưa làm).
+
+---
+
 ## 2026-08-09 — G2: DifficultyManager
 
 ### Đã xong
