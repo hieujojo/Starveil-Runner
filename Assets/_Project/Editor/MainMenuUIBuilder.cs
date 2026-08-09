@@ -33,13 +33,12 @@ namespace VoidRunner.EditorTools
                 return;
             }
 
-            // 1. Font asset
+            // 1. Font asset — tự tạo nếu chưa có (không cần chạy tool font riêng)
             var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
             if (font == null)
             {
-                EditorUtility.DisplayDialog("Void Runner",
-                    $"Chưa có font TMP tại:\n{FontAssetPath}\n\nChạy tool 'Create TMP Font (Kenney Future)' trước.", "OK");
-                return;
+                font = CreateFontAssetIfMissing();
+                if (font == null) return; // đã hiện dialog lỗi
             }
 
             // 2. Tìm/nhận diện các object gốc
@@ -95,7 +94,37 @@ namespace VoidRunner.EditorTools
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorUtility.DisplayDialog("Void Runner",
-                "Đã dựng xong UI MainMenu!\n\nĐã tự gán 6 field vào MainMenuManager.\nBấm ▶ Play để test.", "OK");
+                "Đã dựng xong UI MainMenu!\n\n- Đã tự tạo font (nếu chưa có)\n- Đã gán 6 field vào MainMenuManager\n\nNhớ Ctrl+S lưu scene, rồi bấm ▶ Play để test.", "OK");
+        }
+
+        /// <summary>Tự tạo TMP font từ Kenney Future.ttf nếu chưa có (idempotent).</summary>
+        private static TMP_FontAsset CreateFontAssetIfMissing()
+        {
+            var font = AssetDatabase.LoadAssetAtPath<Font>("Assets/_Project/Art/kenney_ui-pack/Font/Kenney Future.ttf");
+            if (font == null)
+            {
+                EditorUtility.DisplayDialog("Void Runner",
+                    "Không tìm thấy font 'Kenney Future.ttf' trong gói kenney_ui-pack.\n\nKiểm tra Assets/_Project/Art/kenney_ui-pack/Font/", "OK");
+                return null;
+            }
+
+            if (!AssetDatabase.IsValidFolder("Assets/_Project/Art/Fonts"))
+            {
+                AssetDatabase.CreateFolder("Assets/_Project/Art", "Fonts");
+            }
+
+            if (File.Exists(FontAssetPath))
+            {
+                AssetDatabase.DeleteAsset(FontAssetPath);
+                AssetDatabase.Refresh();
+            }
+
+            var fontAsset = TMP_FontAsset.CreateFontAsset(font, 128, 9, GlyphRenderMode.SDFAA, 1024, 1024);
+            AssetDatabase.CreateAsset(fontAsset, FontAssetPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"[VoidRunner] Đã tự tạo TMP font: {FontAssetPath}");
+            return fontAsset;
         }
 
         // ---------- Helpers ----------
