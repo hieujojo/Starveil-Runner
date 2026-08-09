@@ -171,6 +171,7 @@ Assets/
 ### Giai đoạn 3 — Polish & Deploy
 > Mục tiêu: game đẹp, có link demo gắn CV
 
+- [x] **UI Kenney (Blue + font Kenney Future)**: 2 gói `kenney_ui-pack` + `kenney_ui-pack-space-expansion` (1608 PNG, CC0) → đã convert Sprite bằng Editor tool (`Tools/Void Runner/Convert Kenney UI PNG to Sprites`) — UI MainMenu tông Blue, font game-y `Kenney Future SDF` (sampling 128), tự dựng bằng `Editor/MainMenuUIBuilder.cs` (xóa UI cũ + dựng mới + tự gán field MainMenuManager) — ⏳ đang test trong Unity
 - [ ] VFX: Particle khi collect coin/power-up; trail theo Void; **screen shake** khi va chạm (Cinemachine Impulse); DOTween popup bounce khi score tăng
 - [ ] URP Post-processing: **Bloom, Vignette, Color Grading** (Global Volume)
 - [ ] Material PBR tối giản đồng bộ (tông "hư không": tím/đen phát sáng); lighting + skybox nhất quán
@@ -210,6 +211,9 @@ Assets/
 | DOTween | Fade UI, popup bounce, game feel | Asset Store / OpenUPM |
 | AI Navigation (2.0.12) | NavMesh cho Void chase | ✅ Có sẵn |
 | URP (17.4.0), Input System, TextMesh Pro | Nền tảng | ✅ Có sẵn |
+| kenney_ui-pack + space-expansion | Sprite UI (button/panel/icon) tông Blue | [kenney.nl](https://kenney.nl) — CC0, miễn phí |
+| kenney_music-jingles | BGM 8-bit | [kenney.nl](https://kenney.nl/assets/music-jingles) — CC0 |
+| Editor tools (`_Project/Editor/`) | Convert sprite, tạo font, dựng UI tự động | Tự viết (menu `Tools/Void Runner/`) |
 
 > Nguyên tắc: **không dùng asset gameplay từ Asset Store** — mọi logic tự viết (thể hiện skill).
 

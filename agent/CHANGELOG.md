@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-08-09 — G3: Editor Tools (UI Kenney + font)
+
+### Đã xong
+
+- `Editor/SpriteBatchConverter.cs`: batch convert **1608 PNG** của 2 gói Kenney (`kenney_ui-pack` + `kenney_ui-pack-space-expansion`) sang **Sprite mode** (textureType: Sprite, mipmap off, alphaIsTransparency) — menu `Tools/Void Runner/Convert Kenney UI PNG to Sprites`; idempotent (đã là Sprite thì bỏ qua).
+- `Editor/KenneyFontImporter.cs`: tạo TMP font asset từ `Kenney Future.ttf` — menu `Tools/Void Runner/Create TMP Font (Kenney Future)`; dùng overload `CreateFontAsset(font, 128, 9, SDFAA, 1024, 1024)` (sampling 128 cho nét chữ sắc khi hiển thị lớn).
+- `Editor/MainMenuUIBuilder.cs`: tự dựng lại UI MainMenu (background `panel_glass`, title + glow, 3 Button sprite Blue `button_rectangle_gloss/flat`, best score, HowToPlayPanel) rồi **tự gán 6 field vào MainMenuManager** qua `SerializedObject` — không cần kéo thả tay; **tự tạo font nếu chưa có** (không phụ thuộc thứ tự tool).
+
+### Bài học (quan trọng — 2 vòng sửa lỗi)
+
+- **Editor script dùng class runtime phải có `using` namespace đúng** — `MainMenuManager` ở `VoidRunner.UI` → thiếu `using VoidRunner.UI;` gây `CS0246`. Kiểm tra: mọi class dùng phải có using đầy đủ.
+- **`GlyphRenderMode` KHÔNG nằm trong `TMPro` namespace** — nó ở **`UnityEngine.TextCore.LowLevel`** (Unity 6/TMP mới). Thiếu using → `CS0103`. Bảng: `TMP_FontAsset.CreateFontAsset` overload đầy đủ cần `GlyphRenderMode` + `AtlasPopulationMode` → nhớ `using UnityEngine.TextCore.LowLevel;`.
+- **`File.Exists` cần `using System.IO;`** — Editor script hay dùng, dễ quên.
+- **Lỗi compile chặn Unity load project → tự vào SAFE MODE** — không phải dữ liệu hỏng; thoát bằng nút "Exit Safe Mode" sau khi fix xong. Bài học: **trước khi commit Editor script, rà soát toàn bộ `using` + API không dùng deprecated** (chạy compiler mental check).
+- **`Object.FindFirstObjectByType` obsolete (CS0618)** — đã ghi từ G1 nhưng tái phạm: dùng `FindAnyObjectByType`. Khi viết tool Editor mới phải kiểm tra lại bảng API này.
+- **`TMP_Text.enableWordWrapping` obsolete (CS0618)** — Unity 6 TMP mới: dùng **`textWrappingMode`** (`TextWrappingModes.Normal` / `NoWrap`).
+- **`Image` không tự convert sang `GameObject`** — khi truyền vào field kiểu `GameObject` phải `.gameObject` (`CS1503`).
+- **Sprite name lookup dùng `AssetDatabase.FindAssets(name + " t:Sprite")`** — ưu tiên `/Blue/` trước `/Grey/`; trả null → Image chỉ có màu (không crash) — chấp nhận được.
+- **Convert 1608 PNG thay đổi `.meta` hàng loạt** (textureType: Sprite) — commit riêng 1 lần, không gộp với code.
+
+---
+
 ## 2026-08-09 — G2: MainMenuManager + scene MainMenu
 
 ### Đã xong
