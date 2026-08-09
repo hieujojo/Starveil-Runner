@@ -91,7 +91,7 @@ namespace VoidRunner.EditorTools
             SetAnchors(panelText, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(640f, 400f));
 
             // 5. Gán field vào MainMenuManager
-            AssignFields(manager, playBtn, howBtn, soundBtn, panel, bestScore, soundBtn.GetComponentInChildren<TextMeshProUGUI>());
+            AssignFields(manager, playBtn, howBtn, soundBtn, panel.gameObject, bestScore, soundBtn.GetComponentInChildren<TextMeshProUGUI>());
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorUtility.DisplayDialog("Void Runner",
@@ -102,7 +102,7 @@ namespace VoidRunner.EditorTools
 
         private static Canvas FindOrCreateCanvas()
         {
-            var canvas = Object.FindFirstObjectByType<Canvas>();
+            var canvas = Object.FindAnyObjectByType<Canvas>();
             if (canvas != null) return canvas;
 
             var go = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -182,7 +182,7 @@ namespace VoidRunner.EditorTools
             tmp.fontStyle = style;
             tmp.text = content;
             tmp.alignment = TextAlignmentOptions.Center;
-            tmp.enableWordWrapping = true;
+            tmp.textWrappingMode = TextWrappingModes.Normal;
             return tmp;
         }
 
@@ -215,7 +215,7 @@ namespace VoidRunner.EditorTools
             tmp.fontStyle = FontStyles.Bold;
             tmp.text = label;
             tmp.alignment = TextAlignmentOptions.Center;
-            tmp.enableWordWrapping = false;
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
             Stretch(tmp.rectTransform);
 
             return btn;
