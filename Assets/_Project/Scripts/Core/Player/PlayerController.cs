@@ -1,18 +1,21 @@
 using UnityEngine;
 using VoidRunner.Core;
 using VoidRunner.Core.World;
+using VoidRunner.Systems.Difficulty;
 
 namespace VoidRunner.Core.Player
 {
     /// <summary>
     /// Bóng tự lăn về trước (forwardSpeed) và chuyển lane trái/phải.
     /// Điều khiển hoàn toàn qua Rigidbody velocity — mượt, không teleport.
+    /// Tốc độ chạy do DifficultyManager điều khiển (event-driven) — giữ forwardSpeed làm tốc độ nền.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerController : MonoBehaviour
     {
         [Header("Di chuyển")]
-        [SerializeField] private float forwardSpeed = 10f;
+        [SerializeField, Tooltip("Tốc độ nền — DifficultyManager có thể tăng dần lên tới maxSpeed")]
+        private float forwardSpeed = 10f;
         [SerializeField] private float laneWidth = 2f;
         [SerializeField] private float laneChangeSpeed = 8f;
         [SerializeField] private int laneCount = 3;
@@ -22,8 +25,9 @@ namespace VoidRunner.Core.Player
         private int _currentLane;
         private float _targetX;
         private bool _isDead;
+        private float _currentSpeed;
 
-        public float ForwardSpeed => forwardSpeed;
+        public float ForwardSpeed => _currentSpeed;
         public bool IsDead => _isDead;
 
         private void Awake()
@@ -32,19 +36,25 @@ namespace VoidRunner.Core.Player
             _startPos = transform.position;
             _currentLane = laneCount / 2;
             _targetX = 0f;
+            _currentSpeed = forwardSpeed;
         }
 
         private void OnEnable()
         {
             GameEvents.OnGameOver += HandleGameOver;
             GameEvents.OnRestart += HandleRestart;
+            DifficultyManager.OnDifficultyChanged += HandleDifficultyChanged;
         }
 
         private void OnDisable()
         {
             GameEvents.OnGameOver -= HandleGameOver;
             GameEvents.OnRestart -= HandleRestart;
+            DifficultyManager.OnDifficultyChanged -= HandleDifficultyChanged;
         }
+
+        /// <summary>Nhận tốc độ mới từ DifficultyManager (khi game đang chơi).</summary>
+        private void HandleDifficultyChanged(float speed, float _) => _currentSpeed = speed;
 
         public void MoveLeft() => MoveToLane(_currentLane - 1);
         public void MoveRight() => MoveToLane(_currentLane + 1);
@@ -66,7 +76,7 @@ namespace VoidRunner.Core.Player
             float maxStep = laneChangeSpeed * Time.fixedDeltaTime;
             float stepX = Mathf.Clamp(dx, -maxStep, maxStep);
 
-            _rb.linearVelocity = new Vector3(stepX / Time.fixedDeltaTime, _rb.linearVelocity.y, forwardSpeed);
+            _rb.linearVelocity = new Vector3(stepX / Time.fixedDeltaTime, _rb.linearVelocity.y, _currentSpeed);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -97,6 +107,7 @@ namespace VoidRunner.Core.Player
             _isDead = false;
             _currentLane = laneCount / 2;
             _targetX = 0f;
+            _currentSpeed = forwardSpeed; // DifficultyManager sẽ gửi lại tốc độ mới qua event
             _rb.linearVelocity = Vector3.zero;
             _rb.position = _startPos;
         }

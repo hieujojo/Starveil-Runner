@@ -1,25 +1,41 @@
 using System.Collections.Generic;
 using UnityEngine;
 using VoidRunner.Data;
+using VoidRunner.Systems.Difficulty;
 
 namespace VoidRunner.Core.World
 {
     /// <summary>
     /// Gắn obstacle ngẫu nhiên lên tile khi tile được spawn.
     /// Luôn chừa ít nhất 1 lane an toàn để người chơi có đường né.
+    /// Mật độ (spawnChance) tăng dần theo DifficultyManager.
     /// </summary>
     public class ObstacleManager : MonoBehaviour
     {
         [Header("Cấu hình")]
         [SerializeField] private ObstacleData[] obstacleTypes;
-        [SerializeField] private float spawnChance = 0.45f;
+        [SerializeField, Tooltip("Xác suất cơ bản — DifficultyManager có thể tăng dần")]
+        private float spawnChance = 0.45f;
         [SerializeField] private int laneCount = 3;
         [SerializeField] private float laneWidth = 2f;
+
+        /// <summary>Xác suất hiện tại: ưu tiên từ DifficultyManager, fallback về giá trị cấu hình.</summary>
+        private float CurrentSpawnChance
+        {
+            get
+            {
+                if (DifficultyManager.Instance != null)
+                {
+                    return DifficultyManager.Instance.CurrentSpawnChance;
+                }
+                return spawnChance;
+            }
+        }
 
         public void TrySpawn(Tile tile)
         {
             if (obstacleTypes == null || obstacleTypes.Length == 0) return;
-            if (Random.value > spawnChance) return;
+            if (Random.value > CurrentSpawnChance) return;
 
             ObstacleData data = PickRandomType();
             if (data == null || data.prefab == null) return;
