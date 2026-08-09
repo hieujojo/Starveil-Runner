@@ -2,6 +2,7 @@ using UnityEngine;
 using VoidRunner.Core;
 using VoidRunner.Core.World;
 using VoidRunner.Systems.Difficulty;
+using VoidRunner.Systems.PowerUp;
 
 namespace VoidRunner.Core.Player
 {
@@ -84,6 +85,11 @@ namespace VoidRunner.Core.Player
             if (_isDead) return;
             if (other.TryGetComponent<Obstacle>(out _))
             {
+                // Shield: miễn nhiễm va chạm 1 lần (PowerUpSystem tiêu hao qua timer, không ăn ngay)
+                if (PowerUpSystem.Instance != null && PowerUpSystem.Instance.IsShieldActive)
+                {
+                    return;
+                }
                 Die();
             }
         }

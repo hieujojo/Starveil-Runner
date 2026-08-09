@@ -20,6 +20,7 @@ namespace VoidRunner.Core.World
         [Header("Tham chiếu (tự gán qua Initialize)")]
         [SerializeField] private Transform player;
         [SerializeField] private ObstacleManager obstacleManager;
+        [SerializeField] private PickupSpawner pickupSpawner;
 
         private ObjectPool<Tile> _pool;
         private readonly List<Tile> _activeTiles = new List<Tile>();
@@ -53,6 +54,7 @@ namespace VoidRunner.Core.World
         {
             player = playerRef;
             obstacleManager = obstacles;
+            if (pickupSpawner == null) pickupSpawner = FindAnyObjectByType<PickupSpawner>();
             _initialized = true;
         }
 
@@ -105,6 +107,7 @@ namespace VoidRunner.Core.World
             tile.Activate(new Vector3(0f, 0f, z));
             _activeTiles.Add(tile);
             obstacleManager?.TrySpawn(tile);
+            pickupSpawner?.TrySpawn(tile);
         }
     }
 }
