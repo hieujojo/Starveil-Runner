@@ -1,4 +1,5 @@
 using System;
+using VoidRunner.Data;
 
 namespace VoidRunner.Core
 {
@@ -14,6 +15,7 @@ namespace VoidRunner.Core
         public static event Action<int> OnLaneChanged;
         public static event Action<int> OnCoinCollected;
         public static event Action OnObstacleHit;
+        public static event Action<PowerUpType> OnPowerUpActivated;
 
         public static void RaiseGameStarted() => OnGameStarted?.Invoke();
         public static void RaiseGameOver() => OnGameOver?.Invoke();
@@ -21,5 +23,6 @@ namespace VoidRunner.Core
         public static void RaiseLaneChanged(int lane) => OnLaneChanged?.Invoke(lane);
         public static void RaiseCoinCollected(int coins) => OnCoinCollected?.Invoke(coins);
         public static void RaiseObstacleHit() => OnObstacleHit?.Invoke();
+        public static void RaisePowerUpActivated(PowerUpType type) => OnPowerUpActivated?.Invoke(type);
     }
 }
