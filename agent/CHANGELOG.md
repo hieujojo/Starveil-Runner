@@ -15,8 +15,9 @@
 ### Bài học / lưu ý
 
 - **Scene đã có `AudioListener` trên Main Camera** — AudioManager có `RequireComponent(AudioListener)`, khi gắn vào sẽ có **2 listener → warning**. Phải xóa `AudioListener` khỏi Main Camera (AudioManager là DontDestroyOnLoad, giữ listener duy nhất).
-- **SFX có sẵn 2 gói Kenney** (`Audio/SFX/kenney_interface-sounds` + `kenney_sci-fi-sounds`) — gán clip từ đây; **BGM chưa có** (folder `Audio/Music` trống) — cần tải gói nhạc miễn phí.
+- **SFX có sẵn 2 gói Kenney** (`Audio/SFX/kenney_interface-sounds` + `kenney_sci-fi-sounds`) — gán clip từ đây; **BGM**: link cũ `kenney.nl/assets/background-music` bị **404** — dùng link mới `kenney.nl/assets/music-jingles` (86 jingle 8-bit, CC0).
 - **DontDestroyOnLoad + singleton:** check `Instance != this` rồi `Destroy` bản trùng; `OnDisable` phải reset `Instance` — tránh singleton zombie khi scene reload.
+- **Verify gán clip trong scene:** sau khi user kéo clip, grep block component trong `Game.unity` — mỗi field phải có `guid` riêng (không phải `{fileID: 0}`); đếm số `AudioListener` trong scene phải = 1.
 
 ---
 
