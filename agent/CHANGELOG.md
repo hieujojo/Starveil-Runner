@@ -5,6 +5,23 @@
 
 ---
 
+## 2026-08-09 — G2: DifficultyManager
+
+### Đã xong
+
+- `Systems/Difficulty/DifficultyManager.cs`: singleton — tốc độ player `10→20` + mật độ obstacle `0.45→0.75` tăng dần theo `AnimationCurve` trong `rampDuration` (60s); giới hạn tốc độ tối đa (fair play); event-driven `OnDifficultyChanged(float speed, float spawnChance)` — chỉ phát event khi giá trị đổi > 0.001 (tránh spam); reset ramp khi `OnGameStarted`/`OnRestart`.
+- `PlayerController.cs`: subscribe `OnDifficultyChanged` → `_currentSpeed` (giữ `forwardSpeed` làm tốc độ nền); `ForwardSpeed` trả `_currentSpeed` — **VoidChase tự động đuổi nhanh theo** (không phải sửa).
+- `ObstacleManager.cs`: `CurrentSpawnChance` ưu tiên đọc từ DifficultyManager, fallback về `spawnChance` cấu hình (không phụ thuộc cứng).
+
+### Bài học (từ code-review)
+
+- **Khởi tạo giá trị trong `Awake`, không phải `Start`** — `GameManager.Start()` → `StartTrack()` spawn tile đầu tiên trong cùng pha Start; nếu khởi tạo trong Start mà chạy sau GameManager.Start, tile đầu tiên đọc `CurrentSpawnChance = 0` → không spawn obstacle ở đầu game.
+- **`ResetRamp` phải reset cả giá trị hiện tại + phát event** — nếu chỉ reset `_runTime`, sau Restart có 1 frame tile mới đọc giá trị cũ (mật độ cao nhất) → obstacle dày bất thường ngay sau khi chơi lại.
+- **Static event phải unsubscribe cân bằng** (OnEnable/OnDisable) — PlayerController đã làm đúng; kiểm tra mọi subscriber static event.
+- **Giữ `spawnChance` của ObstacleManager làm fallback** dù DifficultyManager có `startSpawnChance` — 2 giá trị trùng (0.45) cần giữ đồng bộ khi chỉnh (chú thích Tooltip đã ghi rõ).
+
+---
+
 ## 2026-08-09 — G2: UIManager + Canvas HUD
 
 ### Đã xong
