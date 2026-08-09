@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-09 — G2: UIManager + Canvas HUD
+
+### Đã xong
+
+- `Systems/Save/SaveSystem.cs`: static wrapper PlayerPrefs — `BestScore` (chỉ ghi khi cao hơn) + `Volume` (clamp 0–1).
+- `UI/UIManager.cs`: HUD score/combo (subscribe `OnScoreChanged`/`OnComboChanged` từ ScoreSystem), Game Over panel fade bằng DOTween `CanvasGroup`, lưu best score khi chết; event-driven, không coupling.
+- Scene `Game.unity`: dựng Canvas HUD (ScoreText + ComboText, `ComboText` tắt sẵn) + `GameOverPanel` (tắt sẵn, nền đen alpha 0.8, FinalScoreText + BestScoreText); gắn `UIManager` vào `Managers` với đủ 5 field.
+
+### Bài học
+
+- **Khi làm theo hướng dẫn dựng UI tay, kiểm tra lại 2 điều trước khi test:** (1) các field trong Inspector đã kéo đủ chưa — dùng `grep fileID` trong scene để xác nhận không còn `{fileID: 0}`; (2) GameObject ẩn sẵn (`ComboText`, `GameOverPanel`) phải có `m_IsActive: 0` — nếu quên tắt, UI sẽ hiện ngay từ đầu game.
+- **File TMP Fallback asset bị Unity 6 tự upgrade format** (serializedVersion 6→8) khi mở project — là thay đổi hệ thống hợp lệ, commit luôn, không cần sửa.
+- **Trailing whitespace trong file Unity tự sinh** (asset/material) — thêm file đó vào danh sách loại trừ của `git diff --check` thay vì sửa file hệ thống.
+
+---
+
 ## 2026-08-09 — G2 bắt đầu: ScoreSystem
 
 ### Đã xong
