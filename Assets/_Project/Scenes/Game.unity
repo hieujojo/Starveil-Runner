@@ -137,6 +137,7 @@ GameObject:
   - component: {fileID: 288287884}
   - component: {fileID: 288287886}
   - component: {fileID: 288287885}
+  - component: {fileID: 288287887}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -336,6 +337,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Systems.PowerUp.PowerUpSystem
   player: {fileID: 0}
+--- !u!114 &288287887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288287876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a1e4dc77e4925544b6586d4c38c1672, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Rotator
 --- !u!1 &306935014
 GameObject:
   m_ObjectHideFlags: 0
@@ -733,8 +746,8 @@ GameObject:
   m_Component:
   - component: {fileID: 611608930}
   - component: {fileID: 611608929}
-  - component: {fileID: 611608928}
   - component: {fileID: 611608931}
+  - component: {fileID: 611608932}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -742,14 +755,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &611608928
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 611608927}
-  m_Enabled: 1
 --- !u!20 &611608929
 Camera:
   m_ObjectHideFlags: 0
@@ -848,6 +853,50 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
+--- !u!114 &611608932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 611608927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &652617794
 GameObject:
   m_ObjectHideFlags: 0
@@ -1511,6 +1560,68 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1348608048}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1604127188
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1604127191}
+  - component: {fileID: 1604127190}
+  - component: {fileID: 1604127189}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1604127189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604127188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71dcaf8a382607d41bc2f9fedcf34cf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Systems.Audio.AudioManager
+  bgmSource: {fileID: 0}
+  sfxSource: {fileID: 0}
+  bgmClip: {fileID: 8300000, guid: 1d0b7b50bc3df534a94ca0195cbc201d, type: 3}
+  coinSfx: {fileID: 8300000, guid: f3d65d922e67b2b469b320571f9ad024, type: 3}
+  deathSfx: {fileID: 8300000, guid: 5f1d3c0b0739c174cb1b849eff5b7bce, type: 3}
+  powerUpSfx: {fileID: 8300000, guid: cbca93659df625043b82b1bf7d08c39f, type: 3}
+  laneSwitchSfx: {fileID: 8300000, guid: 1d7f8649d22150446b5cbd8411ecd8f3, type: 3}
+  gameStartSfx: {fileID: 8300000, guid: 432e6df9eb4bf714982bcc74a3863386, type: 3}
+  sfxPitchRandom: 0.1
+--- !u!81 &1604127190
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604127188}
+  m_Enabled: 1
+--- !u!4 &1604127191
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604127188}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 23.44201, y: -0.00001, z: 3.26229}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1748163390
 GameObject:
   m_ObjectHideFlags: 0
@@ -1971,3 +2082,4 @@ SceneRoots:
   - {fileID: 288287880}
   - {fileID: 440046626}
   - {fileID: 1756517954}
+  - {fileID: 1604127191}
