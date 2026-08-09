@@ -3,6 +3,7 @@ using System.IO;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 
 namespace VoidRunner.EditorTools
 {

@@ -1,9 +1,11 @@
 #if UNITY_EDITOR
+using System.IO;
 using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.TextCore.LowLevel;
 using UnityEngine.UI;
 using VoidRunner.UI;
 
