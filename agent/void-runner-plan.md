@@ -161,7 +161,7 @@ Assets/
 - [x] **`UIManager.cs`**: HUD (score, multiplier, tốc độ); Game Over panel (score, best score, Retry/Menu); fade chuyển scene bằng DOTween
 - [ ] **`MainMenuManager.cs`**: nút Play / How to play / Highscore / Sound toggle
 - [x] **`PowerUpSystem.cs` + `PowerUpData.cs`** (SO): **Shield** (miễn nhiễm 1 va chạm, 3s), **Magnet** (hút coin quanh player), **Slow-mo** (`Time.timeScale` tạm thời — Void chậm lại)
-- [ ] **`AudioManager.cs`** (Singleton + `DontDestroyOnLoad`): BGM loop; SFX: collect, die, power-up, chuyển lane; volume lưu PlayerPrefs
+- [x] **`AudioManager.cs`** (Singleton + `DontDestroyOnLoad`): BGM loop; SFX: collect, die, power-up, chuyển lane; volume lưu PlayerPrefs — ✅ code xong; ⚠️ cần gắn vào scene + kéo clip (SFX có sẵn Kenney, BGM cần tải)
 - [x] **`SaveSystem.cs`**: lưu/load best score + volume bằng PlayerPrefs
 - [x] **`DifficultyManager.cs`**: tốc độ tile tăng theo score (AnimationCurve); mật độ obstacle tăng dần; **giới hạn tốc độ tối đa** (fair)
 - [x] Prefab power-up (Shield/Magnet/Slow-mo) + coin — đã tạo trong Unity: `Prefabs/Pickups/Coin.prefab`, `Prefabs/PowerUps/Pickup_{Shield,Magnet,SlowMo}.prefab` + 3 asset `ScriptableObjects/{Shield,Magnet,SlowMo}.asset`; `PickupSpawner` + `PowerUpSystem` gắn vào Managers — ⚠️ Coin thiếu `Rotator` (thêm sau, không ảnh hưởng chức năng)

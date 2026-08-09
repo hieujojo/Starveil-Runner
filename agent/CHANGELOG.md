@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-08-09 — G2: AudioManager
+
+### Đã xong
+
+- `Systems/Audio/AudioManager.cs`: singleton + `DontDestroyOnLoad` — 2 AudioSource (BGM loop + SFX one-shot, tự tạo nếu để trống); lắng nghe `GameEvents` (coin, obstacle hit, power-up, lane switch, game start) với named method để unsubscribe cân bằng; volume đọc/ghi qua `SaveSystem.Volume`; `PlaySfx` public + pitch biến thiên nhẹ (`sfxPitchRandom`) cho game feel.
+- `COMMIT_TEMPLATES.md`: quy ước mới — subject tiếng Việt **có đầy đủ dấu**.
+
+### Bài học / lưu ý
+
+- **Scene đã có `AudioListener` trên Main Camera** — AudioManager có `RequireComponent(AudioListener)`, khi gắn vào sẽ có **2 listener → warning**. Phải xóa `AudioListener` khỏi Main Camera (AudioManager là DontDestroyOnLoad, giữ listener duy nhất).
+- **SFX có sẵn 2 gói Kenney** (`Audio/SFX/kenney_interface-sounds` + `kenney_sci-fi-sounds`) — gán clip từ đây; **BGM chưa có** (folder `Audio/Music` trống) — cần tải gói nhạc miễn phí.
+- **DontDestroyOnLoad + singleton:** check `Instance != this` rồi `Destroy` bản trùng; `OnDisable` phải reset `Instance` — tránh singleton zombie khi scene reload.
+
+---
+
 ## 2026-08-09 — G2: PowerUpSystem
 
 ### Đã xong
