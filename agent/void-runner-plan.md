@@ -138,7 +138,7 @@ Assets/
 - [x] Thêm **Cinemachine 3.1.7** vào `Packages/manifest.json` (Unity tự import khi mở lại)
 - [x] Cài **DOTween** từ Asset Store (miễn phí) — đã import `Assets/Plugins/Demigiant/DOTween` + có `DOTweenSettings.asset`
 - [x] Tái cấu trúc `Assets/_Project/` theo kiến trúc mục 3: đã di chuyển Scripts → `Core/Player`, `Core/World`; Prefabs → `Pickups`, `Obstacles`; Materials → `Art/Materials`; Input actions → `Settings`; đã xóa `SampleScene`, `TutorialInfo`, `CameraController.cs`
-- [ ] Tạo 2 scene `MainMenu` + `Game`; đưa vào **Build Settings** (danh sách build đã dọn trống) — ⚠️ thao tác trong Unity
+- [x] Tạo 2 scene `MainMenu` + `Game`; đưa vào **Build Settings** (MainMenu index 0, Game index 1) — ✅ đã xong
 - [x] Archive scene `Minigame` + `NavMesh-Ground.asset` → `Assets/_Project/Scenes/_Archive/` (giữ làm nơi test NavMesh bake)
 
 ### Giai đoạn 1 — Core Gameplay
@@ -159,7 +159,7 @@ Assets/
 
 - [x] **`ScoreSystem.cs`**: score theo khoảng cách + coin; **combo multiplier** (×2, ×3...) khi không va chạm lâu; dùng `event Action<int>` → UI không coupling — ✅ commit `feat(score)`
 - [x] **`UIManager.cs`**: HUD (score, multiplier, tốc độ); Game Over panel (score, best score, Retry/Menu); fade chuyển scene bằng DOTween
-- [ ] **`MainMenuManager.cs`**: nút Play / How to play / Highscore / Sound toggle
+- [x] **`MainMenuManager.cs`**: nút Play / How to play / Highscore / Sound toggle — ✅ hoàn tất (scene MainMenu + Build Settings đã cấu hình)
 - [x] **`PowerUpSystem.cs` + `PowerUpData.cs`** (SO): **Shield** (miễn nhiễm 1 va chạm, 3s), **Magnet** (hút coin quanh player), **Slow-mo** (`Time.timeScale` tạm thời — Void chậm lại)
 - [x] **`AudioManager.cs`** (Singleton + `DontDestroyOnLoad`): BGM loop; SFX: collect, die, power-up, chuyển lane; volume lưu PlayerPrefs — ✅ hoàn tất: gắn vào scene + kéo đủ clip (BGM Kenney Music Jingles + 5 SFX Kenney), xóa AudioListener trùng trên Main Camera
 - [x] **`SaveSystem.cs`**: lưu/load best score + volume bằng PlayerPrefs
