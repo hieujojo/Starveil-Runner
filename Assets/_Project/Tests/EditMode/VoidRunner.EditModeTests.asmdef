@@ -1,0 +1,21 @@
+{
+    "name": "VoidRunner.EditModeTests",
+    "rootNamespace": "VoidRunner.Tests",
+    "references": [
+        "Assembly-CSharp"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
