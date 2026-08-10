@@ -1,12 +1,7 @@
 {
-    "name": "VoidRunner.Core",
-    "rootNamespace": "VoidRunner",
-    "references": [
-        "Unity.TextMeshPro",
-        "Unity.InputSystem",
-        "Unity.Cinemachine",
-        "DOTween.Modules"
-    ],
+    "name": "DOTween.Modules",
+    "rootNamespace": "",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

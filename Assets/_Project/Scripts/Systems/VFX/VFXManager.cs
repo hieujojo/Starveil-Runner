@@ -161,6 +161,7 @@ namespace VoidRunner.Systems.VFX
         private void HandleObstacleHit()
         {
             if (_impulseSource == null) return;
+            _impulseSource.ImpulseDefinition.ImpulseDuration = shakeDuration;
             _impulseSource.GenerateImpulseWithVelocity(new Vector3(0.4f, 0.15f, 0f) * shakeForce);
         }
 
