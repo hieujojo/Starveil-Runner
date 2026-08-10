@@ -58,10 +58,18 @@ namespace VoidRunner.EditorTools
                 return;
             }
 
-            // Gán field qua SerializedObject (không dùng public setter phá vỡ Inspector)
+            // Gán field qua SerializedObject — ÉP GHI ĐÈ toàn bộ giá trị layout chuẩn
+            // (tránh scene giữ giá trị CŨ của bản tool trước → đồ đạc vẫn lung tung)
             var so = new SerializedObject(scroller);
             var playerProp = so.FindProperty("player");
             var prefabList = so.FindProperty("propPrefabs");
+            SetField(so, "sideOffset", 6f);
+            SetField(so, "spacing", 9f);
+            SetField(so, "countPerSide", 10);
+            SetField(so, "recycleDistance", 18f);
+            SetField(so, "jitter", 0.15f);
+            SetField(so, "maxRotY", 20f);
+            SetField(so, "scaleVariation", 0.1f);
 
             if (playerProp != null && playerProp.objectReferenceValue == null)
             {
@@ -81,6 +89,23 @@ namespace VoidRunner.EditorTools
             Debug.Log($"[VoidRunner] Ambient OK: {prefabs.Count} prop types, 2 bên × {countPerSide(scroller)} prop.");
             EditorUtility.DisplayDialog("Void Runner — Ambient",
                 $"Đã dựng ambient 2 bên đường với {prefabs.Count} loại mô hình Space Kit.\nNhớ Ctrl+S lưu scene.", "OK");
+        }
+
+        /// <summary>Ép ghi đè 1 field serialized của AmbientScroller (luôn áp giá trị chuẩn).</summary>
+        private static void SetField(SerializedObject so, string name, object value)
+        {
+            var prop = so.FindProperty(name);
+            if (prop == null) return;
+
+            switch (value)
+            {
+                case float f when prop.propertyType == SerializedPropertyType.Float:
+                    prop.floatValue = f;
+                    break;
+                case int i when prop.propertyType == SerializedPropertyType.Integer:
+                    prop.intValue = i;
+                    break;
+            }
         }
 
         private static int countPerSide(AmbientScroller s)

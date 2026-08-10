@@ -67,6 +67,7 @@ namespace VoidRunner.EditorTools
                 }
                 if (profile.TryGet<ColorAdjustments>(out var colorAdj))
                 {
+                    colorAdj.postExposure.Override(0f);   // hết "bù sáng" tổng thể
                     colorAdj.contrast.Override(12f);
                     colorAdj.saturation.Override(5f);
                     changed++;
