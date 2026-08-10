@@ -2,7 +2,7 @@
     "name": "VoidRunner.PlayModeTests",
     "rootNamespace": "VoidRunner.Tests",
     "references": [
-        "Assembly-CSharp"
+        "VoidRunner.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

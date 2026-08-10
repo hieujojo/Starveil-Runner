@@ -2,7 +2,7 @@
     "name": "VoidRunner.EditModeTests",
     "rootNamespace": "VoidRunner.Tests",
     "references": [
-        "Assembly-CSharp"
+        "VoidRunner.Core"
     ],
     "includePlatforms": [
         "Editor"
