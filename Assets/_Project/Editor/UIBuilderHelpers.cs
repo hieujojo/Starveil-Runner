@@ -17,11 +17,14 @@ namespace VoidRunner.EditorTools
         public const string KenneyFontPath = "Assets/_Project/Art/kenney_ui-pack/Font/Kenney Future.ttf";
         public const string FontsFolder = "Assets/_Project/Art/Fonts";
 
-        /// <summary>Tự tạo TMP font từ Kenney Future.ttf nếu chưa có (idempotent).</summary>
+        /// <summary>
+        /// Tự tạo TMP font từ Kenney Future.ttf nếu chưa có, HOẶC nếu font bị hỏng
+        /// (thiếu atlas texture — bài học m_AtlasTextures: texture/material phải AddObjectToAsset).
+        /// </summary>
         public static TMP_FontAsset CreateFontAssetIfMissing(string fontAssetPath)
         {
             var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontAssetPath);
-            if (existing != null) return existing;
+            if (existing != null && existing.atlasTexture != null) return existing;
 
             var font = AssetDatabase.LoadAssetAtPath<Font>(KenneyFontPath);
             if (font == null)
@@ -42,8 +45,25 @@ namespace VoidRunner.EditorTools
                 AssetDatabase.Refresh();
             }
 
+            return CreateFontAssetCore(font, fontAssetPath);
+        }
+
+        /// <summary>
+        /// Tạo TMP font + LƯU CẢ texture/material làm sub-asset — dùng chung cho mọi tool UI.
+        /// (Bài học m_AtlasTextures: CreateFontAsset tạo texture/material trong memory, không tự lưu;
+        /// thiếu AddObjectToAsset → file .asset ghi fileID 0 → mở lại Unity là font rỗng + exception.)
+        /// </summary>
+        public static TMP_FontAsset CreateFontAssetCore(Font font, string fontAssetPath)
+        {
             var fontAsset = TMP_FontAsset.CreateFontAsset(font, 128, 9, GlyphRenderMode.SDFAA, 1024, 1024);
             AssetDatabase.CreateAsset(fontAsset, fontAssetPath);
+
+            // BẮT BUỘC: lưu atlas texture + material làm sub-asset
+            if (fontAsset.atlasTexture != null)
+                AssetDatabase.AddObjectToAsset(fontAsset.atlasTexture, fontAsset);
+            if (fontAsset.material != null)
+                AssetDatabase.AddObjectToAsset(fontAsset.material, fontAsset);
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log($"[VoidRunner] Đã tự tạo TMP font: {fontAssetPath}");

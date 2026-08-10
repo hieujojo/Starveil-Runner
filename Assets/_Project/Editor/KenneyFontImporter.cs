@@ -1,9 +1,7 @@
 #if UNITY_EDITOR
 using System.IO;
-using TMPro;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.TextCore.LowLevel;
 
 namespace VoidRunner.EditorTools
 {
@@ -41,10 +39,8 @@ namespace VoidRunner.EditorTools
             }
 
             // Sampling 128 + atlas 1024x1024 → nét chữ sắc hơn khi hiển thị lớn (title 110pt)
-            var fontAsset = TMP_FontAsset.CreateFontAsset(font, 128, 9, GlyphRenderMode.SDFAA, 1024, 1024);
-            AssetDatabase.CreateAsset(fontAsset, OutputAsset);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            // Dùng helper chung: tự lưu texture + material làm sub-asset (bài học m_AtlasTextures)
+            var fontAsset = UIBuilderHelpers.CreateFontAssetCore(font, OutputAsset);
 
             Debug.Log($"[VoidRunner] Đã tạo TMP font asset: {OutputAsset}");
             EditorUtility.DisplayDialog("Void Runner",
