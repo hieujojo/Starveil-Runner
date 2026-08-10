@@ -1,7 +1,11 @@
 {
     "name": "VoidRunner.Core",
     "rootNamespace": "VoidRunner",
-    "references": [],
+    "references": [
+        "Unity.TextMeshPro",
+        "Unity.InputSystem",
+        "Unity.Cinemachine"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
