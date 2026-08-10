@@ -1791,7 +1791,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "CH\u01A0I L\u1EA0I"
+  m_text: RETRY
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
   m_sharedMaterial: {fileID: -247634424959785223, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
@@ -2148,7 +2148,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.5, z: 100}
-  m_LocalScale: {x: 10, y: 1, z: 400}
+  m_LocalScale: {x: 10, y: 1, z: 6000}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -3040,7 +3040,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u0110I\u1EC2M: 0"
+  m_text: 'SCORE: 0'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
   m_sharedMaterial: {fileID: -247634424959785223, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
@@ -4260,6 +4260,8 @@ MonoBehaviour:
   laneWidth: 2
   laneChangeSpeed: 8
   laneCount: 3
+  bankAngle: 14
+  bankSmooth: 10
 --- !u!54 &1348608051
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5456,7 +5458,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "CAO NH\u1EA4T: 0"
+  m_text: 'BEST: 0'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
   m_sharedMaterial: {fileID: -247634424959785223, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
@@ -5661,13 +5663,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Core.World.VoidChase
   player: {fileID: 1348608049}
-  startDistance: 9
-  minDistance: 1.5
-  rampDuration: 60
+  baseDistance: 9
+  closeDistance: 5
   swallowDistance: 1.6
+  relaxWindow: 12
+  distanceLerpSpeed: 3
   lateralFollow: 4
-  startScale: 1
-  maxScale: 2.5
+  baseScale: 1
+  closeScale: 1.6
 --- !u!135 &2067106722
 SphereCollider:
   m_ObjectHideFlags: 0

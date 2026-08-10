@@ -176,10 +176,18 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "N\xE9 obstacle b\u1EB1ng A/D ho\u1EB7c m\u0169i t\xEAn tr\xE1i/ph\u1EA3i.\n\nNh\u1EB7t
-    coin \u0111\u1EC3 c\u1ED9ng \u0111i\u1EC3m (combo c\xE0ng cao c\xE0ng t\u1ED1t).\n\nPower-up:
-    Shield (mi\u1EC5n nhi\u1EC5m 3s), Magnet (h\xFAt coin), Slow-mo (ch\u1EADm th\u1EDDi
-    gian).\n\nCh\u1EA1y c\xE0ng xa, \u0111i\u1EC3m c\xE0ng cao!"
+  m_text: 'Dodge obstacles with A/D or arrow keys.
+
+
+    Collect coins to earn points
+    (higher combo = more points).
+
+
+    Power-ups: Shield (immune 3s), Magnet (attracts
+    coins), Slow-mo (slows time).
+
+
+    Run far to score big!'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
   m_sharedMaterial: {fileID: -247634424959785223, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
@@ -511,7 +519,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u0110I\u1EC2M CAO NH\u1EA4T: 0"
+  m_text: 'BEST SCORE: 0'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
   m_sharedMaterial: {fileID: -247634424959785223, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
@@ -741,7 +749,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -160}
-  m_SizeDelta: {x: 300, y: 66}
+  m_SizeDelta: {x: 340, y: 76}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1001143452
 MonoBehaviour:
@@ -863,7 +871,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\xC2m thanh: B\u1EACT"
+  m_text: 'SOUND: ON'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
   m_sharedMaterial: {fileID: -247634424959785223, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
@@ -890,8 +898,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -960,7 +968,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -36, y: -12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1303921618
 GameObject:
