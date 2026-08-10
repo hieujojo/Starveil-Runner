@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -9,7 +10,9 @@ using VoidRunner.Systems.VFX;
 namespace VoidRunner.EditorTools
 {
     /// <summary>
-    /// Tự gắn VFXManager vào scene Game (tìm GameObject có GameManager để đặt chung).
+    /// Tự gắn VFXManager vào scene Game (tìm GameObject có GameManager để đặt chung)
+    /// + tự gán font Kenney Future cho popup điểm. Idempotent: chạy lại an toàn
+    /// (chỉ bổ sung font nếu chưa gán, không tạo component trùng).
     /// Chạy: Tools → Void Runner → Setup VFX in Game Scene.
     /// Yêu cầu: scene Game đang mở.
     /// </summary>
@@ -46,14 +49,25 @@ namespace VoidRunner.EditorTools
                 return;
             }
 
-            if (host.GetComponent<VFXManager>() == null)
+            var vfx = host.GetComponent<VFXManager>();
+            if (vfx == null)
             {
-                host.AddComponent<VFXManager>();
+                vfx = host.AddComponent<VFXManager>();
+            }
+
+            // Tự gán font Kenney Future cho popup điểm (nếu asset đã được tạo)
+            var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/Art/Fonts/Kenney Future SDF.asset");
+            if (font != null)
+            {
+                var so = new SerializedObject(vfx);
+                so.FindProperty("popupFont").objectReferenceValue = font;
+                so.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(vfx);
             }
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorUtility.DisplayDialog("Void Runner",
-                $"Đã gắn VFXManager vào '{host.name}'.\n\nKhi chạy game, VFXManager tự:\n- tạo particle burst (coin vàng, power-up màu)\n- tạo Cinemachine Impulse + gắn ImpulseListener vào CinemachineCamera\n\nNhớ Ctrl+S lưu scene.",
+                $"Đã gắn VFXManager vào '{host.name}' (popup font: {(font != null ? "Kenney Future ✅" : "fallback TMP")}).\n\nKhi chạy game, VFXManager tự:\n- particle burst (coin vàng, power-up màu)\n- popup điểm \"+10\" khi nhặt coin (DOTween bounce)\n- vệt khói tối theo Void\n- Cinemachine Impulse + gắn ImpulseListener vào CinemachineCamera\n\nNhớ Ctrl+S lưu scene.",
                 "OK");
         }
     }
