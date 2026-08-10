@@ -71,6 +71,7 @@ namespace VoidRunner.Tests
         {
             int scoreBefore = _system.Score;
             GameEvents.RaiseCoinCollected(1);
+            yield return null; // UnityTest bắt buộc có yield (nhường frame cho engine)
             Assert.Greater(_system.Score, scoreBefore, "Nhặt coin phải tăng score.");
         }
 
