@@ -26,6 +26,7 @@ namespace VoidRunner.Core.World
         private readonly List<Tile> _activeTiles = new List<Tile>();
         private float _nextSpawnZ;
         private bool _initialized;
+        private float _lastDiagLog; // tạm — chẩn đoán không có vật cản/xu (2026-08-11)
 
         private void Awake()
         {
@@ -108,6 +109,13 @@ namespace VoidRunner.Core.World
             _activeTiles.Add(tile);
             obstacleManager?.TrySpawn(tile);
             pickupSpawner?.TrySpawn(tile);
+
+            // [TẠM] chẩn đoán — user báo không có vật cản/xu dù wiring đúng
+            if (Time.time - _lastDiagLog > 2f)
+            {
+                _lastDiagLog = Time.time;
+                Debug.Log($"[DiagSpawn] tile={_activeTiles.Count} obsMgr={(obstacleManager != null)} pickupMgr={(pickupSpawner != null)} nextZ={_nextSpawnZ:F1}");
+            }
         }
     }
 }

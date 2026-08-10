@@ -32,13 +32,26 @@ namespace VoidRunner.Core.World
             }
         }
 
+        private float _lastDiagLog; // tạm — chẩn đoán không có vật cản (2026-08-11)
+
         public void TrySpawn(Tile tile)
         {
+            // [TẠM] chẩn đoán — log trạng thái mỗi 2s
+            if (Time.time - _lastDiagLog > 2f)
+            {
+                _lastDiagLog = Time.time;
+                Debug.Log($"[DiagObstacle] types={(obstacleTypes == null ? 0 : obstacleTypes.Length)} chance={CurrentSpawnChance}");
+            }
+
             if (obstacleTypes == null || obstacleTypes.Length == 0) return;
             if (Random.value > CurrentSpawnChance) return;
 
             ObstacleData data = PickRandomType();
-            if (data == null || data.prefab == null) return;
+            if (data == null || data.prefab == null)
+            {
+                Debug.LogWarning($"[DiagObstacle] data rỗng hoặc prefab null (data={(data == null ? "null" : data.name)})");
+                return;
+            }
 
             // Chặn ngẫu nhiên 1..laneCount-1 lane → luôn còn ≥1 lane trống
             int blockedLanes = Random.Range(1, laneCount);
@@ -57,6 +70,7 @@ namespace VoidRunner.Core.World
 
         private void SpawnOnTile(ObstacleData data, Tile tile, float x)
         {
+            Debug.Log($"[DiagObstacle] ĐÃ TẠO {data.name} tại lane x={x}");
             GameObject obstacle = Instantiate(data.prefab, tile.transform);
             obstacle.transform.localPosition = new Vector3(x, 0f, Random.Range(0f, tile.Length * 0.6f));
 

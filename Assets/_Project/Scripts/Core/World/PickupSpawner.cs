@@ -37,10 +37,19 @@ namespace VoidRunner.Core.World
         [Tooltip("Bề rộng 1 lane (khớp ObstacleManager)")]
         [SerializeField] private float laneWidth = 2f;
 
+        private float _lastDiagLog; // tạm — chẩn đoán không có xu (2026-08-11)
+
         /// <summary>Gọi từ TileSpawner khi tile được spawn.</summary>
         public void TrySpawn(Tile tile)
         {
             if (tile == null) return;
+
+            // [TẠM] chẩn đoán — log trạng thái mỗi 2s
+            if (Time.time - _lastDiagLog > 2f)
+            {
+                _lastDiagLog = Time.time;
+                Debug.Log($"[DiagCoin] coinPrefab={(coinPrefab != null)} powerUps={(powerUpTypes == null ? 0 : powerUpTypes.Length)} coinChance={coinChance}");
+            }
 
             if (coinPrefab != null && Random.value <= coinChance)
             {
