@@ -47,16 +47,18 @@ namespace VoidRunner.EditorTools
         /// <summary>Đảm bảo tồn tại GameObject Global Volume (isGlobal) có profile với 3 override.</summary>
         private static GameObject EnsureGlobalVolume()
         {
-            // 1. Tìm volume có sẵn trong scene
+            // 1. Luôn đảm bảo profile ĐÚNG (tự sửa profile rỗng do bug cũ: components fileID 0)
+            var profile = LoadOrCreateProfile();
+
+            // 2. Tìm volume có sẵn trong scene — nếu có, chỉ cần gán lại profile cho chắc
             var existing = Object.FindAnyObjectByType<Volume>();
-            if (existing != null && existing.isGlobal && existing.sharedProfile != null)
+            if (existing != null && existing.isGlobal)
             {
-                Debug.Log($"[VoidRunner] Đã có Global Volume '{existing.gameObject.name}' — giữ nguyên.");
+                if (existing.sharedProfile != profile)
+                    existing.sharedProfile = profile;
+                Debug.Log($"[VoidRunner] Đã có Global Volume '{existing.gameObject.name}' — cập nhật profile.");
                 return existing.gameObject;
             }
-
-            // 2. Tạo hoặc load profile asset
-            var profile = LoadOrCreateProfile();
 
             // 3. Tạo GameObject Volume
             var go = new GameObject("Global Volume");
@@ -103,6 +105,9 @@ namespace VoidRunner.EditorTools
         /// </summary>
         private static void PersistOverrides(VolumeProfile profile)
         {
+            // Dọn các entry null còn sót (profile rỗng cũ ghi {fileID: 0})
+            profile.components.RemoveAll(x => x == null);
+
             foreach (var comp in profile.components)
             {
                 if (comp == null) continue;
