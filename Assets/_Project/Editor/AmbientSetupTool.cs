@@ -19,19 +19,19 @@ namespace VoidRunner.EditorTools
     {
         private const string MenuRoot = "Tools/Void Runner/";
 
-        // Model Space Kit phù hợp làm trụ/kiến trúc 2 bên đường (đã verify có trong kit)
+        // Model Space Kit — CHỌN model HẸP/CÂN ĐỐI (model to như corridor/structure rộng sẽ đè lên road)
         private static readonly string[] PreferredModels =
         {
-            "corridor_wall", "corridor", "chimney_detailed", "chimney",
-            "satelliteDish", "structure", "pipe_ringHigh", "monorail_trackSupport",
+            "chimney_detailed", "chimney",
+            "satelliteDish", "pipe_ringHigh", "monorail_trackSupport",
             "gate_simple", "supports_high", "rock_crystals", "craft_speederB",
         };
 
-        // Model Station Kit dự phòng (đã verify có trong kit)
+        // Model Station Kit — model hẹp, không chiếm ngang
         private static readonly string[] StationModels =
         {
-            "wall-pillar", "structure", "structure-panel", "pipe-ring",
-            "container-tall", "floor-panel", "stairs", "table",
+            "wall-pillar", "pipe-ring",
+            "container-tall", "stairs", "wall", "pipe-bend",
         };
 
         [MenuItem(MenuRoot + "Setup Ambient in Game Scene")]
@@ -59,11 +59,12 @@ namespace VoidRunner.EditorTools
             }
 
             // Gán field qua SerializedObject — ÉP GHI ĐÈ toàn bộ giá trị layout chuẩn
-            // (tránh scene giữ giá trị CŨ của bản tool trước → đồ đạc vẫn lung tung)
+            // (tránh scene giữ giá trị CŨ của bản tool trước → đồ đạc vẫn lung tung/đè đường)
             var so = new SerializedObject(scroller);
             var playerProp = so.FindProperty("player");
             var prefabList = so.FindProperty("propPrefabs");
-            SetField(so, "sideOffset", 6f);
+            SetField(so, "sideOffset", 11f);    // xa road (mép ±5) — prop rộng không đè lên
+            SetField(so, "targetHeight", 3.2f); // prop nhỏ gọn
             SetField(so, "spacing", 9f);
             SetField(so, "countPerSide", 10);
             SetField(so, "recycleDistance", 18f);

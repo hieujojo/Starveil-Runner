@@ -26,12 +26,12 @@ namespace VoidRunner.EditorTools
         {
             int changed = 0;
 
-            // 1) Camera: Solid Color tím đen thay vì skybox sáng
+            // 1) Camera: Solid Color tím tối (đủ tối để nổi neon, nhưng KHÔNG đen thui)
             var cam = FindAnyObjectByType<Camera>();
             if (cam != null)
             {
                 cam.clearFlags = CameraClearFlags.SolidColor;
-                cam.backgroundColor = new Color(0.02f, 0.012f, 0.05f, 1f); // tím đen sâu
+                cam.backgroundColor = new Color(0.06f, 0.035f, 0.12f, 1f); // tím tối nhìn được
                 cam.fieldOfView = 60f; // nhìn rộng hơn — road bớt hẹp
                 changed++;
             }
@@ -44,11 +44,11 @@ namespace VoidRunner.EditorTools
                 changed++;
             }
 
-            // 2) Directional Light: giảm cường độ (bớt chói)
+            // 2) Directional Light: vừa đủ — vật thể nhìn rõ nhưng không chói
             var light = FindAnyObjectByType<Light>();
             if (light != null && light.type == LightType.Directional)
             {
-                light.intensity = 0.4f;
+                light.intensity = 0.65f;
                 changed++;
             }
 

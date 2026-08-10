@@ -15,8 +15,11 @@ namespace VoidRunner.Core.World
         [Tooltip("Các mô hình FBX (Space Kit) — tool Setup Ambient tự gán.")]
         [SerializeField] private List<GameObject> propPrefabs = new List<GameObject>();
 
-        [Tooltip("Khoảng cách 2 bên so với tâm track (mép road ở ±5, prop đặt sát ±6).")]
-        [SerializeField] private float sideOffset = 6f;
+        [Tooltip("Khoảng cách 2 bên so với tâm track — phải lớn hơn nửa chiều rộng prop.")]
+        [SerializeField] private float sideOffset = 11f;
+
+        [Tooltip("Chiều cao chuẩn hóa của prop (đơn vị) — nhỏ = prop nhỏ, không đè lên road.")]
+        [SerializeField] private float targetHeight = 3.2f;
 
         [Tooltip("Khoảng cách giữa 2 prop liên tiếp trên cùng 1 bên.")]
         [SerializeField] private float spacing = 9f;
@@ -83,8 +86,8 @@ namespace VoidRunner.Core.World
                     prop.transform.rotation = Quaternion.Euler(0f, rotY, 0f);
 
                     // Scale ĐỒNG NHẤT theo kích thước thật của model (không văng lung tung:
-                    // chimney to thì nhỏ lại, craft nhỏ thì to lên — tất cả ~5 đơn vị)
-                    float baseScale = NormalizeScale(prop, 5f);
+                    // chimney to thì nhỏ lại, craft nhỏ thì to lên — tất cả ~targetHeight đơn vị)
+                    float baseScale = NormalizeScale(prop, targetHeight);
                     float scale = baseScale * (1f + (scaleVariation > 0f ? Random.Range(-scaleVariation, scaleVariation) : 0f));
                     prop.transform.localScale = Vector3.one * scale;
 
