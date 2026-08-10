@@ -5,6 +5,19 @@
 
 ---
 
+## 2026-08-11 — Tool Refactor "Đổi 0 text" — FindObjectsByType bỏ qua GameObject ẩn
+
+### Đã xong
+
+- User chạy `Refactor: Game Scene` → log `Đổi 0 text sang tiếng Anh` dù scene vẫn còn `CHƠI LẠI` / `ĐIỂM` / `CAO NHẤT`. Nguyên nhân: **`Object.FindObjectsByType<T>()` mặc định chỉ tìm GameObject ACTIVE** — còn `GameOverPanel` (chứa RetryButton/FinalScoreText/BestScoreText) đang **inactive** (`m_IsActive: 0`, tắt sẵn để ẩn) → toàn bộ text Việt bên trong nó bị bỏ qua → đổi 0.
+- **Fix:** `RewriteTexts` dùng `FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None)` — quét cả object ẩn. Ground 6000m đã chạy đúng (root active) — tool idempotent, chạy lại không hại.
+
+### Bài học — **QUY TẮC MỚI**
+
+- **`FindObjectsByType`/`FindAnyObjectByType` MẶC ĐỊNH KHÔNG quét GameObject inactive** — mọi UI tool sửa text dưới panel đang ẩn (GameOverPanel, HowToPlayPanel, popup...) phải dùng **`FindObjectsByType<T>(FindObjectsInactive.Include, FindObjectsSortMode.None)`**. Dấu hiệu: tool chạy OK nhưng "Đổi 0 text" hoặc không tác động tới panel ẩn.
+
+---
+
 ## 2026-08-11 — Fix 4 test PlayMode VoidChasePlayTests (lỗi test, không phải lỗi game)
 
 ### Đã xong

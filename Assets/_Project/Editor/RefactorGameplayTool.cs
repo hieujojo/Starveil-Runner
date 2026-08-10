@@ -137,7 +137,10 @@ namespace VoidRunner.EditorTools
         private static void RewriteTexts(Func<string, string> mapper)
         {
             int changed = 0;
-            TextMeshProUGUI[] all = UnityEngine.Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsSortMode.None);
+            // ⚠️ BẮT BUỘC FindObjectsInactive.Include — GameOverPanel / HowToPlayPanel đang ẩn
+            // (m_IsActive: 0) nên FindObjectsByType mặc định (Exclude) BỎ QUA → "Đổi 0 text" (bug 2026-08-11).
+            TextMeshProUGUI[] all = UnityEngine.Object.FindObjectsByType<TextMeshProUGUI>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (TextMeshProUGUI tmp in all)
             {
                 if (tmp == null) continue;
