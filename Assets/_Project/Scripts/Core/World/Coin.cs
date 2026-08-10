@@ -58,6 +58,7 @@ namespace VoidRunner.Core.World
         private void Collect()
         {
             GameEvents.RaiseCoinCollected(1);
+            GameEvents.RaiseCoinCollectedAt(transform.position);
             Destroy(gameObject);
         }
     }

@@ -1,19 +1,24 @@
+using DG.Tweening;
+using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
 using VoidRunner.Core;
 using VoidRunner.Core.Player;
+using VoidRunner.Core.World;
 using VoidRunner.Data;
+using VoidRunner.Systems.Score;
 
 namespace VoidRunner.Systems.VFX
 {
     /// <summary>
     /// Hiệu ứng hình ảnh (VFX) — event-driven, không coupling:
-    /// - Nhặt coin → burst hạt vàng tại player
+    /// - Nhặt coin → burst hạt vàng tại vị trí coin + popup điểm "+10" bay lên
     /// - Ăn power-up → burst hạt màu theo loại (Shield=xanh, Magnet=đỏ, SlowMo=tím)
     /// - Va chạm obstacle → screen shake (Cinemachine Impulse)
+    /// - Void luôn có vệt khói tối (TrailRenderer tạo bằng code)
     /// Particle được tạo 100% bằng code (không cần prefab/material asset) — chỉ cần
     /// gắn component này vào scene là chạy. Không GC spike: burst dùng Emit() có giới hạn,
-    /// không Instantiate/Destroy giữa chừng.
+    /// popup dùng object pool, không Instantiate/Destroy giữa chừng.
     /// </summary>
     public class VFXManager : MonoBehaviour
     {
@@ -35,10 +40,33 @@ namespace VoidRunner.Systems.VFX
         [SerializeField] private float shakeForce = 3f;
         [SerializeField] private float shakeDuration = 0.18f;
 
+        [Header("Score popup")]
+        [Tooltip("Font cho popup điểm — tool Setup VFX tự gán Kenney Future.")]
+        [SerializeField] private TMP_FontAsset popupFont;
+        [Tooltip("Số điểm hiển thị mỗi popup (nên khớp ScoreSystem.coinScore = 10).")]
+        [SerializeField] private int popupScore = 10;
+        [SerializeField] private int popupPoolSize = 8;
+        [SerializeField] private float popupFloatDistance = 70f;
+        [SerializeField] private float popupDuration = 0.7f;
+        [SerializeField] private Color popupColor = new Color(1f, 0.85f, 0.2f, 1f);
+
+        [Header("Void trail")]
+        [SerializeField] private float trailTime = 0.6f;
+        [SerializeField] private float trailStartWidth = 1.4f;
+        [SerializeField] private Color trailColor = new Color(0.05f, 0.05f, 0.1f, 0.55f);
+
         private Transform _player;
         private ParticleSystem _coinBurst;
         private ParticleSystem _powerUpBurst;
         private CinemachineImpulseSource _impulseSource;
+
+        private Canvas _canvas;
+        private TextMeshProUGUI[] _popups;
+        private int _popupIndex;
+        private TrailRenderer _voidTrail;
+        private Transform _voidTransform;
+        private Camera _cam;
+        private ScoreSystem _scoreSystem;
 
         private void Awake()
         {
@@ -52,16 +80,18 @@ namespace VoidRunner.Systems.VFX
 
         private void OnEnable()
         {
-            GameEvents.OnCoinCollected += HandleCoinCollected;
+            GameEvents.OnCoinCollectedAt += HandleCoinCollectedAt;
             GameEvents.OnPowerUpActivated += HandlePowerUpActivated;
             GameEvents.OnObstacleHit += HandleObstacleHit;
+            GameEvents.OnRestart += HandleRestart;
         }
 
         private void OnDisable()
         {
-            GameEvents.OnCoinCollected -= HandleCoinCollected;
+            GameEvents.OnCoinCollectedAt -= HandleCoinCollectedAt;
             GameEvents.OnPowerUpActivated -= HandlePowerUpActivated;
             GameEvents.OnObstacleHit -= HandleObstacleHit;
+            GameEvents.OnRestart -= HandleRestart;
 
             if (Instance == this) Instance = null;
         }
@@ -71,6 +101,9 @@ namespace VoidRunner.Systems.VFX
             var pc = FindAnyObjectByType<PlayerController>();
             if (pc != null) _player = pc.transform;
 
+            _cam = Camera.main;
+            _scoreSystem = FindAnyObjectByType<ScoreSystem>(); // chỉ để đọc Multiplier cho popup
+
             // Burst system dùng chung một material mềm (tạo runtime, không cần asset)
             Material softMat = CreateSoftParticleMaterial();
 
@@ -78,15 +111,33 @@ namespace VoidRunner.Systems.VFX
             _powerUpBurst = CreateBurstSystem("PowerUpBurst", powerUpBurstCount, powerUpBurstSpeed, Color.white, softMat);
 
             SetupScreenShake();
+            SetupPopups();
+            SetupVoidTrail();
+        }
+
+        private void Update()
+        {
+            // Vệt khói tự nở rộng theo kích thước Void (scale tăng dần theo độ khó)
+            if (_voidTrail != null && _voidTransform != null)
+            {
+                _voidTrail.startWidth = trailStartWidth * _voidTransform.localScale.x;
+            }
         }
 
         // ---------- Handlers ----------
 
-        private void HandleCoinCollected(int _)
+        private void HandleCoinCollectedAt(Vector3 worldPos)
         {
-            if (_player == null || _coinBurst == null) return;
-            _coinBurst.transform.position = _player.position + Vector3.up * 0.5f;
-            _coinBurst.Emit(coinBurstCount);
+            // Burst và popup độc lập — cái này lỗi không kéo cái kia
+            if (_coinBurst != null)
+            {
+                _coinBurst.transform.position = worldPos;
+                _coinBurst.Emit(coinBurstCount);
+            }
+
+            // Điểm popup nhân theo combo (khớp ScoreSystem: coinScore × multiplier)
+            int multiplier = _scoreSystem != null ? _scoreSystem.Multiplier : 1;
+            ShowPopup(worldPos, $"+{popupScore * multiplier}");
         }
 
         private void HandlePowerUpActivated(PowerUpType type)
@@ -111,6 +162,12 @@ namespace VoidRunner.Systems.VFX
         {
             if (_impulseSource == null) return;
             _impulseSource.GenerateImpulseWithVelocity(new Vector3(0.4f, 0.15f, 0f) * shakeForce);
+        }
+
+        private void HandleRestart()
+        {
+            // Void teleport về vị trí ban đầu khi restart — xóa vệt cũ tránh kéo dài xuyên map
+            if (_voidTrail != null) _voidTrail.Clear();
         }
 
         // ---------- Setup ----------
@@ -155,6 +212,99 @@ namespace VoidRunner.Systems.VFX
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
 
             return ps;
+        }
+
+        /// <summary>Tạo pool popup điểm (TMP text) nằm trên Canvas — không Instantiate/Destroy giữa chừng.</summary>
+        private void SetupPopups()
+        {
+            _canvas = FindAnyObjectByType<Canvas>();
+            if (_canvas == null) return;
+
+            if (popupFont == null)
+            {
+                // Fallback: dùng font của text TMP đầu tiên trong scene (thường là Kenney Future từ HUD)
+                var anyTmp = FindAnyObjectByType<TextMeshProUGUI>();
+                popupFont = anyTmp != null ? anyTmp.font : TMP_Settings.defaultFontAsset;
+                if (popupFont == null)
+                {
+                    Debug.LogWarning("VFXManager: không có font cho popup điểm — text sẽ không hiện. Chạy lại tool 'Setup VFX in Game Scene' để tự gán Kenney Future.");
+                }
+            }
+
+            _popups = new TextMeshProUGUI[popupPoolSize];
+            for (int i = 0; i < popupPoolSize; i++)
+            {
+                var go = new GameObject($"ScorePopup_{i}", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+                go.transform.SetParent(_canvas.transform, false);
+                go.SetActive(false);
+
+                var tmp = go.GetComponent<TextMeshProUGUI>();
+                tmp.font = popupFont;
+                tmp.fontSize = 46;
+                tmp.fontStyle = FontStyles.Bold;
+                tmp.color = popupColor;
+                tmp.alignment = TextAlignmentOptions.Center;
+                tmp.raycastTarget = false;
+                tmp.textWrappingMode = TextWrappingModes.NoWrap;
+                _popups[i] = tmp;
+            }
+        }
+
+        /// <summary>Hiện popup "+10" tại vị trí coin trên màn hình — bay lên rồi mờ dần (DOTween, pool).</summary>
+        private void ShowPopup(Vector3 worldPos, string text)
+        {
+            if (_popups == null || _popups.Length == 0 || _canvas == null) return;
+            if (_cam == null) return;
+
+            var tmp = _popups[_popupIndex];
+            _popupIndex = (_popupIndex + 1) % _popups.Length;
+
+            tmp.gameObject.SetActive(true);
+            tmp.text = text;
+            tmp.alpha = 1f;
+            tmp.rectTransform.localScale = Vector3.one;
+
+            // World → screen: popup hiện đúng chỗ coin bị nhặt (góc trên vì coin nằm phía trước)
+            Vector3 screen = _cam.WorldToScreenPoint(worldPos + Vector3.up * 0.5f);
+            tmp.rectTransform.position = screen;
+
+            // Kill tween cũ nếu popup này đang được tái sử dụng
+            DOTween.Kill(tmp);
+            DOTween.Kill(tmp.rectTransform);
+
+            // Bay lên + bounce scale + mờ dần, xong tắt lại để dùng pool
+            var seq = DOTween.Sequence();
+            seq.Append(tmp.rectTransform.DOMove(screen + Vector3.up * popupFloatDistance, popupDuration)
+                .SetEase(Ease.OutCubic));
+            seq.Join(tmp.rectTransform.DOScale(1.15f, 0.08f).SetEase(Ease.OutBack));
+            seq.Join(tmp.DOFade(0f, popupDuration).SetDelay(popupDuration * 0.5f));
+            seq.OnComplete(() => tmp.gameObject.SetActive(false));
+        }
+
+        /// <summary>Tạo vệt khói tối cho Void — TrailRenderer tạo bằng code, nở rộng theo scale Void.</summary>
+        private void SetupVoidTrail()
+        {
+            var voidChase = FindAnyObjectByType<VoidChase>();
+            if (voidChase == null) return;
+
+            _voidTransform = voidChase.transform;
+            if (_voidTransform.GetComponent<TrailRenderer>() == null)
+            {
+                _voidTransform.gameObject.AddComponent<TrailRenderer>();
+            }
+
+            _voidTrail = _voidTransform.GetComponent<TrailRenderer>();
+            _voidTrail.time = trailTime;
+            _voidTrail.startWidth = trailStartWidth * _voidTransform.localScale.x;
+            _voidTrail.endWidth = 0.05f;
+            _voidTrail.minVertexDistance = 0.2f;
+            _voidTrail.numCornerVertices = 4;
+            _voidTrail.numCapVertices = 4;
+            _voidTrail.startColor = trailColor;
+            _voidTrail.endColor = new Color(trailColor.r, trailColor.g, trailColor.b, 0f);
+            // Dùng chung material mềm (Particles/Unlit + texture radial) — đã hoạt động với burst;
+            // URP/Unlit mặc định KHÔNG sample vertex color → trail sẽ hiện trắng, nên không dùng.
+            _voidTrail.material = CreateSoftParticleMaterial();
         }
 
         /// <summary>Texture tròn mềm (radial alpha) + material Unlit — không cần asset ngoài.</summary>

@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using VoidRunner.Data;
 
 namespace VoidRunner.Core
@@ -14,6 +15,7 @@ namespace VoidRunner.Core
         public static event Action OnRestart;
         public static event Action<int> OnLaneChanged;
         public static event Action<int> OnCoinCollected;
+        public static event Action<Vector3> OnCoinCollectedAt;
         public static event Action OnObstacleHit;
         public static event Action<PowerUpType> OnPowerUpActivated;
 
@@ -22,6 +24,7 @@ namespace VoidRunner.Core
         public static void RaiseRestart() => OnRestart?.Invoke();
         public static void RaiseLaneChanged(int lane) => OnLaneChanged?.Invoke(lane);
         public static void RaiseCoinCollected(int coins) => OnCoinCollected?.Invoke(coins);
+        public static void RaiseCoinCollectedAt(Vector3 worldPos) => OnCoinCollectedAt?.Invoke(worldPos);
         public static void RaiseObstacleHit() => OnObstacleHit?.Invoke();
         public static void RaisePowerUpActivated(PowerUpType type) => OnPowerUpActivated?.Invoke(type);
     }
