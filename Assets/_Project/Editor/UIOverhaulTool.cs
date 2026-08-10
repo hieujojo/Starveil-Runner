@@ -77,12 +77,23 @@ namespace VoidRunner.EditorTools
                 var canvas = root.GetComponentInChildren<Canvas>(true);
                 if (canvas == null) continue;
 
-                // --- ScorePanel: nền tím đen ---
+                // --- ScorePanel: nền tím đen, đưa lên GIỮA-ĐỈNH màn hình + vẽ trên cùng ---
+                // (fix 2026-08-11: trước đây ở góc trái bị các element khác che → người chơi không thấy điểm)
                 var scorePanel = FindTransform(canvas.transform, "ScorePanel");
-                if (scorePanel != null && TryGetImage(scorePanel, out var spImg))
+                if (scorePanel != null)
                 {
-                    spImg.color = PanelBg;
-                    n++;
+                    scorePanel.SetAsLastSibling(); // vẽ trên cùng — không element nào che được
+                    var prt = scorePanel.GetComponent<RectTransform>();
+                    prt.anchorMin = new Vector2(0.5f, 1f);
+                    prt.anchorMax = new Vector2(0.5f, 1f);
+                    prt.pivot = new Vector2(0.5f, 0.5f);
+                    prt.anchoredPosition = new Vector2(0f, -45f);
+                    prt.sizeDelta = new Vector2(300f, 90f);
+                    if (TryGetImage(scorePanel, out var spImg))
+                    {
+                        spImg.color = PanelBg;
+                        n++;
+                    }
                 }
 
                 // --- ScoreText: căn giữa + vàng glow + viền tím ---

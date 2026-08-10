@@ -63,10 +63,10 @@ namespace VoidRunner.EditorTools
             var so = new SerializedObject(scroller);
             var playerProp = so.FindProperty("player");
             var prefabList = so.FindProperty("propPrefabs");
-            SetField(so, "sideOffset", 11f);    // xa road (mép ±5) — prop rộng không đè lên
-            SetField(so, "targetHeight", 3.2f); // prop nhỏ gọn
-            SetField(so, "spacing", 9f);
-            SetField(so, "countPerSide", 10);
+            SetField(so, "sideOffset", 7f);     // GẦN road (mép ±5) — FOV 68 thấy được ±9; 7 đủ xa để không đè
+            SetField(so, "targetHeight", 4.5f); // prop to vừa, nổi rõ trên nền tối
+            SetField(so, "spacing", 7.5f);      // dày hơn → cảm giác chuyển động rõ
+            SetField(so, "countPerSide", 14);   // nhiều prop mỗi bên
             SetField(so, "recycleDistance", 18f);
             SetField(so, "jitter", 0.15f);
             SetField(so, "maxRotY", 20f);

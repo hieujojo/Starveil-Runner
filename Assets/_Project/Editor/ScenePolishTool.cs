@@ -31,8 +31,8 @@ namespace VoidRunner.EditorTools
             if (cam != null)
             {
                 cam.clearFlags = CameraClearFlags.SolidColor;
-                cam.backgroundColor = new Color(0.06f, 0.035f, 0.12f, 1f); // tím tối nhìn được
-                cam.fieldOfView = 60f; // nhìn rộng hơn — road bớt hẹp
+                cam.backgroundColor = new Color(0.1f, 0.06f, 0.2f, 1f); // tím hư không — đủ sáng để thấy props 2 bên
+                cam.fieldOfView = 68f; // nhìn rộng — thấy props 2 bên (sideOffset 7 nằm trong ±9)
                 changed++;
             }
 
@@ -40,7 +40,7 @@ namespace VoidRunner.EditorTools
             var vcam = FindAnyObjectByType<CinemachineCamera>();
             if (vcam != null)
             {
-                vcam.Lens.FieldOfView = 60f;
+                vcam.Lens.FieldOfView = 68f;
                 changed++;
             }
 
@@ -48,7 +48,7 @@ namespace VoidRunner.EditorTools
             var light = FindAnyObjectByType<Light>();
             if (light != null && light.type == LightType.Directional)
             {
-                light.intensity = 0.65f;
+                light.intensity = 0.8f; // đủ sáng để props 2 bên nhìn rõ — không chói vì đã bỏ skybox
                 changed++;
             }
 
@@ -77,9 +77,9 @@ namespace VoidRunner.EditorTools
             }
 
             EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
-            Debug.Log($"[VoidRunner] Polish scene xong ({changed} mục chỉnh): nền tím đen, FOV 60, light 0.4, Bloom tối thiểu.");
+            Debug.Log($"[VoidRunner] Polish scene xong ({changed} mục chỉnh): nền tím hư không, FOV 68, light 0.8, Bloom tối thiểu.");
             EditorUtility.DisplayDialog("Void Runner — Polish",
-                $"Đã polish scene ({changed} mục):\n• Nền hư không tím đen (bỏ skybox chói)\n• FOV 60 — đường nhìn rộng\n• Ánh sáng dịu 0.4 (tối)\n• Bloom tối thiểu 0.12 — chỉ coin/player glow\n\nNhớ Ctrl+S lưu scene!", "OK");
+                $"Đã polish scene ({changed} mục):\n• Nền hư không tím (đủ sáng thấy props 2 bên)\n• FOV 68 — đường nhìn rộng, thấy 2 bên\n• Ánh sáng 0.8 — vật thể rõ\n• Bloom tối thiểu 0.12 — chỉ coin/player glow\n\nNhớ Ctrl+S lưu scene!", "OK");
         }
 
         [MenuItem(MenuRoot + "Polish Scene (Camera + Sky + Light)", true)]
