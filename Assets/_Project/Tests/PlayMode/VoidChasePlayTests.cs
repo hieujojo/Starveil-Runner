@@ -46,10 +46,15 @@ namespace VoidRunner.Tests
             SetPrivateField(_void, "distanceLerpSpeed", 50f);
             SetPrivateField(_void, "relaxWindow", 0.3f);
 
-            // GameManager để có Instance + State=Playing — disable để Start không chạy
+            // GameManager để có Instance + State=Playing — disable để Start không chạy (tránh StartRun noise).
+            // ⚠️ `enabled = false` kích hoạt OnDisable NGAY LẬP TỨC → GameManager.OnDisable set Instance = null
+            // → Void gate theo Instance sẽ bị chặn → phải khôi phục Instance + State bằng reflection sau khi disable.
             _gmGo = new GameObject("TestGameManager");
             GameManager gm = _gmGo.AddComponent<GameManager>();
             gm.enabled = false;
+            FieldInfo instanceField = typeof(GameManager).GetField("<Instance>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            instanceField.SetValue(null, gm);
             PropertyInfo stateProp = typeof(GameManager).GetProperty("State");
             stateProp.GetSetMethod(true).Invoke(gm, new object[] { GameState.Playing });
 

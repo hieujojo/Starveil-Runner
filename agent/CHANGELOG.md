@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-08-11 — Fix 4 test PlayMode VoidChasePlayTests (lỗi test, không phải lỗi game)
+
+### Đã xong
+
+- **4/5 test `VoidChasePlayTests` đỏ** (Stage0 xanh): `FirstHit_MovesVoidCloser`, `CleanRun_AfterRelaxWindow`, `SecondHit_WithinWindow`, `Hit_AfterRelaxed`. Nguyên nhân: trong `SetUp` test dùng `gm.enabled = false` để chặn `GameManager.Start` — nhưng **`enabled = false` kích hoạt `OnDisable()` NGAY LẬP TỨC** → `GameManager.OnDisable()` có `if (Instance == this) Instance = null` → `Instance` bị null → `VoidChase.HandleObstacleHit`/`Update` gate theo `GameManager.Instance` → return sớm → Void không bao giờ tiến sát → 4 test cần "đụng" đều fail (Stage0 pass vì không cần Instance).
+- **Fix:** sau khi `gm.enabled = false`, khôi phục `GameManager.Instance` (backing field `<Instance>k__BackingField` của auto-property, reflection `BindingFlags.NonPublic | Static`) + `State = Playing` (qua `GetSetMethod(true)`) — test môi trường đúng, Start vẫn không chạy.
+
+### Bài học — **QUY TẮC MỚI**
+
+- **`MonoBehaviour.enabled = false` TRONG TEST gọi `OnDisable()` đồng bộ** — nếu singleton có `OnDisable` set `Instance = null` (đúng chuẩn cho production), test sẽ mất Instance ngay. Muốn "có Instance nhưng Start không chạy": disable xong phải **khôi phục Instance + State bằng reflection** (hoặc không disable mà dựng đủ tham chiếu cho Start — phức tạp hơn).
+- **Test cơ chế void phải cung cấp `GameManager.Instance.State == Playing`** — nếu gate state mà không có Instance, test "pass giả" cho kịch bản đứng yên nhưng fail cho kịch bản cần Update chạy.
+
+---
+
 ## 2026-08-11 — THỰC THI GIAI ĐOẠN 2.5 — REFACTOR GAMEPLAY (user đã duyệt plan)
 
 > User duyệt toàn bộ plan docs → code theo đúng R0.1–R0.8. 7 task đã code + commit + push.
