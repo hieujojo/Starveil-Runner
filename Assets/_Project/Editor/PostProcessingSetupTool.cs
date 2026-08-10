@@ -11,6 +11,8 @@ namespace VoidRunner.EditorTools
     /// G3 - Post-processing: tự dựng Global Volume (Bloom, Vignette, Color Adjustments)
     /// + bật renderPostProcessing trên camera của scene đang mở.
     /// Idempotent — chạy lại an toàn.
+    /// Lưu ý: các override phải AddObjectToAsset làm sub-asset (bài học m_AtlasTextures —
+    /// nếu không profile ghi `components: {fileID: 0}` → mở lại Unity là post-processing không có tác dụng).
     /// </summary>
     public static class PostProcessingSetupTool
     {
@@ -73,6 +75,8 @@ namespace VoidRunner.EditorTools
             if (existing != null)
             {
                 EnsureOverrides(existing);
+                PersistOverrides(existing);
+                AssetDatabase.SaveAssets();
                 Debug.Log($"[VoidRunner] Profile '{ProfilePath}' đã có — đảm bảo đủ override.");
                 return existing;
             }
@@ -87,9 +91,26 @@ namespace VoidRunner.EditorTools
             var profile = ScriptableObject.CreateInstance<VolumeProfile>();
             EnsureOverrides(profile);
             AssetDatabase.CreateAsset(profile, ProfilePath);
+            PersistOverrides(profile);
             AssetDatabase.SaveAssets();
             Debug.Log($"[VoidRunner] Đã tạo profile '{ProfilePath}' (Bloom + Vignette + Color Adjustments).");
             return profile;
+        }
+
+        /// <summary>
+        /// Lưu mọi VolumeComponent làm sub-asset của profile — BẮT BUỘC, nếu không
+        /// các override chỉ tồn tại trong memory và file .asset ghi `{fileID: 0}`.
+        /// </summary>
+        private static void PersistOverrides(VolumeProfile profile)
+        {
+            foreach (var comp in profile.components)
+            {
+                if (comp == null) continue;
+                // AddObjectToAsset trên component đã là sub-asset sẽ cảnh báo — kiểm tra trước
+                if (AssetDatabase.GetAssetPath(comp) == AssetDatabase.GetAssetPath(profile))
+                    continue;
+                AssetDatabase.AddObjectToAsset(comp, profile);
+            }
         }
 
         /// <summary>Đảm bảo profile có đủ 3 override — nếu thiếu thì thêm lại (idempotent).</summary>
