@@ -77,9 +77,14 @@ namespace VoidRunner.UI
 
         private void RefreshBestScore()
         {
-            if (bestScoreText != null)
+            if (bestScoreText == null) return;
+
+            // R0.6: best score chỉ hiển thị khi có điểm thật (> 0) — lần đầu chơi = 0 là vô nghĩa
+            bool hasBest = SaveSystem.BestScore > 0;
+            bestScoreText.gameObject.SetActive(hasBest);
+            if (hasBest)
             {
-                bestScoreText.text = $"ĐIỂM CAO NHẤT: {SaveSystem.BestScore:N0}";
+                bestScoreText.text = $"BEST SCORE: {SaveSystem.BestScore:N0}";
             }
         }
 
@@ -87,7 +92,7 @@ namespace VoidRunner.UI
         {
             if (soundButtonText != null)
             {
-                soundButtonText.text = SaveSystem.Volume > 0.01f ? "Âm thanh: BẬT" : "Âm thanh: TẮT";
+                soundButtonText.text = SaveSystem.Volume > 0.01f ? "SOUND: ON" : "SOUND: OFF";
             }
         }
     }

@@ -57,6 +57,13 @@ namespace VoidRunner.UI
             if (retryButton != null) retryButton.onClick.AddListener(RestartGame);
             if (menuButton != null) menuButton.onClick.AddListener(GoToMenu);
 
+            // Chuẩn bị CanvasGroup cho fade TRƯỚC — panel phải luôn hiện được dù ScoreSystem lỗi
+            _panelGroup = gameOverPanel != null ? gameOverPanel.GetComponent<CanvasGroup>() : null;
+            if (gameOverPanel != null && _panelGroup == null)
+            {
+                _panelGroup = gameOverPanel.AddComponent<CanvasGroup>();
+            }
+
             _scoreSystem = FindAnyObjectByType<ScoreSystem>();
             if (_scoreSystem == null)
             {
@@ -67,12 +74,6 @@ namespace VoidRunner.UI
             _scoreSystem.OnScoreChanged += HandleScoreChanged;
             _scoreSystem.OnComboChanged += HandleComboChanged;
             HandleComboChanged(_scoreSystem.Multiplier); // trạng thái combo ban đầu (ẩn x1)
-
-            _panelGroup = gameOverPanel != null ? gameOverPanel.GetComponent<CanvasGroup>() : null;
-            if (gameOverPanel != null && _panelGroup == null)
-            {
-                _panelGroup = gameOverPanel.AddComponent<CanvasGroup>();
-            }
         }
 
         private void HandleScoreChanged(int score)
@@ -89,12 +90,15 @@ namespace VoidRunner.UI
 
         private void ShowGameOver()
         {
-            if (gameOverPanel == null || _scoreSystem == null) return;
+            // R3-4: panel BẮT BUỘC hiện khi game kết thúc — chỉ early-return khi panel không tồn tại
+            if (gameOverPanel == null) return;
 
-            SaveSystem.BestScore = _scoreSystem.Score;
+            // Lưu best score độc lập với ScoreSystem (player đã chơi là phải ghi nhận)
+            if (_scoreSystem != null) SaveSystem.BestScore = _scoreSystem.Score;
 
-            if (finalScoreText != null) finalScoreText.text = $"ĐIỂM: {_scoreSystem.Score:N0}";
-            if (bestScoreText != null) bestScoreText.text = $"CAO NHẤT: {SaveSystem.BestScore:N0}";
+            // R0.5: toàn bộ UI gameplay = tiếng Anh
+            if (_scoreSystem != null && finalScoreText != null) finalScoreText.text = $"SCORE: {_scoreSystem.Score:N0}";
+            if (bestScoreText != null) bestScoreText.text = $"BEST: {SaveSystem.BestScore:N0}";
 
             gameOverPanel.SetActive(true);
             if (_panelGroup != null)
