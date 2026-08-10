@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-08-11 — Vòng 2 gameplay feel: Void, lane marker, props, score bị che
+
+### Đã xong
+
+- **VoidChase.cs — bỏ NavMeshAgent hoàn toàn** (bug nghiêm trọng: track VÔ TẬN do tile recycle, NavMesh bake chỉ phủ vùng cố định → player chạy xa là NavMesh hết vùng, Void đứng yên → người chơi KHÔNG BAO GIỜ thấy kẻ thù). Cách mới: Void bám theo player trực tiếp, giữ sau lưng 9m → co dần tới 1.5m trong 60s + `swallowDistance` 1.6m safety net (khoảng cách < ngưỡng → RaiseGameOver — chắc chắn Void nuốt được player cuối game). Bỏ `using UnityEngine.AI`, bỏ `[RequireComponent(NavMeshAgent)]`.
+- **Tile.cs — fix scale z=0** (tile prefab scale z=0 → khối cube dẹt vô hình → chỉ còn Ground tĩnh → MẤT CẢM GIÁC CHUYỂN ĐỘNG). Awake ép `localScale (10, 0.1, length)` + thêm **LaneMarker neon** (2 vạch cyan 2 mép + vạch đứt giữa — `CreatePrimitive`, bỏ collider, shared material static). Deactivate chỉ destroy obstacle/pickup con, GIỮ LaneMarker.
+- **AmbientSetupTool**: sideOffset 11 → **7** (FOV 68 thấy ±9 — 11 nằm ngoài tầm nhìn!), targetHeight 3.2 → 4.5, spacing 9 → 7.5, countPerSide 10 → 14.
+- **ScenePolishTool**: nền `(0.1, 0.06, 0.2)` (sáng hơn, hết đen thui), FOV 60 → **68**, light 0.65 → **0.8**.
+- **UIOverhaulTool**: ScorePanel đưa lên **giữa-đỉnh màn hình** (anchor 0.5,1, y=-45, 300×90) + `SetAsLastSibling` — vẽ trên cùng, KHÔNG element nào che được điểm số nữa.
+- **GameplayFixTool.cs (mới)**: (1) xóa NavMeshAgent THỪA trên Void (script mới không dùng) + đặt Void đúng sau lưng player (z-9, ngay sau camera = nhìn thấy) + ép cấu hình qua SerializedObject; (2) xóa AudioListener THỪA trên Main Camera (cả MainMenu + Game — giữ 1 listener duy nhất).
+
+### Bài học — **QUY TẮC CỨNG mới**
+
+- **Endless runner KHÔNG được dùng NavMeshAgent cho kẻ thù đuổi theo** — track vô tận (tile recycle) không bao giờ có NavMesh bake phủ hết; kẻ thù phải đuổi theo player TRỰC TIẾP (giữ khoảng cách / theo tốc độ). Nếu thấy "kẻ thù biến mất sau vài chục giây" → nghĩ ngay NavMesh.
+- **Tile prefab scale z=0 là bẫy vô hình** — cube scale 0 chiều nào đó không render (hoặc render méo). Khi "cảm giác đứng yên / đường không chuyển động", kiểm tra scale của tile + có vạch kẻ đường (lane marker) không — vạch neon trượt theo tile là yếu tố quan trọng nhất tạo cảm giác tốc độ.
+- **props ngoài tầm FOV = vô hình** — sideOffset phải tính theo FOV thật: FOV 68 thấy ±~9 ở cự ly camera→player; đặt prop xa hơn = không bao giờ thấy.
+- **UI bị che thường do sibling order** — element vẽ SAU (SetAsLastSibling) luôn nằm trên; khi element bị che không rõ nguyên nhân, đừng chỉ sửa vị trí — ép lên vẽ cuối cùng.
+- **Cơ chế chết kiểu "kẻ thù nuốt" phải có safety net** — nếu chỉ dựa collider overlap, việc đổi lane/bám ngang có thể khiến không bao giờ chạm; thêm kiểm tra khoảng cách trực tiếp (< ngưỡng → GameOver).
+
+---
+
 ## 2026-08-11 — 2 lỗi compile gây safe mode (CameraFollowFixTool)
 
 ### Đã xong

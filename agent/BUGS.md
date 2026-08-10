@@ -50,10 +50,32 @@
 
 ---
 
-## 🔜 Kế hoạch fix vòng tiếp theo
+## ✅ Vòng 1 — ĐÃ FIX (UIOverhaulTool + CameraFollowFixTool)
 
-1. Viết tool **`UIOverhaulTool`** (idempotent, chạy lại an toàn) ép chuẩn:
-   - **Game**: ScoreText căn giữa + vàng glow + viền tím · ScorePanel/GameOverPanel tông tím đen · Combo cam · nút tím/cyan
-   - **MainMenu**: xóa TitleGlow trùng (hoặc biến thành lớp glow tím phía sau) · nền tím đen · nút tông đồng bộ · BestScoreText đưa lên an toàn
-2. Chạy tool → Ctrl+S → **user chụp ảnh lại** → đối chiếu bug còn sót.
-3. Xác minh "điểm sáng trắng" (G6) — giảm emission coin/Void nếu cần.
+| # | Lỗi | Fix | Trạng thái |
+|---|---|---|---|
+| G1 | ScoreText lệch x=42 | UIOverhaulTool căn giữa | 🔧 chờ user chạy |
+| G2 | ScoreText trắng | UIOverhaulTool vàng glow + viền tím | 🔧 chờ user chạy |
+| G3–G5 | Tông xanh dương lệch | UIOverhaulTool tông tím/cyan | 🔧 chờ user chạy |
+| M1 | Title trùng 2 lớp | UIOverhaulTool: TitleGlow cyan mờ 35% | 🔧 chờ user chạy |
+| M2–M4 | Nền/nút xanh, best score thấp | UIOverhaulTool tông tím + y=-230 | 🔧 chờ user chạy |
+| **G7** | **🔴 Camera KHÔNG chạy theo bóng** — CinemachineCamera THIẾU `CinemachineFollow` (chỉ có RotationComposer = chỉ xoay nhìn, không di chuyển) → bóng chạy xa biến mất khỏi màn hình | `CameraFollowFixTool` thêm body component FollowOffset (0,7,-10) damping 0.5 | 🔧 chờ user chạy |
+| **G8** | **2 AudioListener** trong MainMenu — AudioManager (đúng) + **Main Camera THỪA 1 cái** | `GameplayFixTool` xóa listener trên Main Camera (cả 2 scene) | 🔧 chờ user chạy |
+
+## ✅ Vòng 2 — ĐÃ FIX (2026-08-11 — gameplay feel)
+
+> Phát hiện khi user test thật: Void không xuất hiện, điểm số bị che, 2 bên trống → cảm giác đứng yên.
+
+| # | Lỗi | Nguyên nhân gốc | Fix | Trạng thái |
+|---|---|---|---|---|
+| V2-1 | **🔴 KHÔNG thấy kẻ thù Void đuổi theo** | VoidChase dùng **NavMeshAgent** — track VÔ TẬN (tile recycle) → NavMesh bake chỉ phủ vùng cố định → player chạy xa là **NavMesh hết vùng, Void đứng yên** tụt sau màn hình vĩnh viễn | VoidChase bỏ NavMeshAgent → đuổi trực tiếp: giữ sau lưng player 9m co dần tới **1.5m** (Void áp sát + nuốt player cuối game) + safety net `swallowDistance 1.6` | 🔧 chờ user chạy tool + test |
+| V2-2 | **Tile vô hình → mất cảm giác chuyển động** | Tile prefab scale **z=0** → khối cube dẹt không render → chỉ còn Ground tĩnh → nhìn như đứng yên | Tile.cs `Awake` ép `scale z=length` + thêm **LaneMarker neon** (2 vạch mép + vạch đứt giữa) trượt theo tile khi recycle | 🔧 chờ test |
+| V2-3 | **2 bên đường trống trải** | props `sideOffset 11` nằm NGOÀI tầm camera (FOV 60 thấy ±8) → không bao giờ thấy props | sideOffset **7** + targetHeight **4.5** + countPerSide **14** + spacing 7.5 + FOV **68** + nền sáng `(0.1,0.06,0.2)` + light **0.8** | 🔧 chờ user chạy tool |
+| V2-4 | **Điểm số bị che** | ScorePanel góc trái nằm DƯỚI các element khác (sibling order) + bị che bởi panel | ScorePanel đưa lên **giữa-đỉnh** (anchor 0.5,1) + `SetAsLastSibling` (vẽ trên cùng — không gì che được) | 🔧 chờ user chạy tool |
+
+## 🔜 Kế hoạch fix vòng 3 (theo thứ tự ưu tiên — từng cái một)
+
+1. **User chạy 4 tool** (Game scene): `Fix Void Chase` → `Setup Ambient` → `Polish Scene` → `Overhaul UI`; MainMenu: `Overhaul UI` + `Fix Audio Listener` → Ctrl+S cả 2
+2. **Test từ MainMenu**: ▶ Play → bấm PLAY → Game scene → chạy/né/thu coin → Void đuổi theo → chết → Game Over → CHƠI LẠI/MENU
+3. Xác minh "điểm sáng trắng" (G6) — giảm emission coin/Void nếu cần
+4. Test gameplay toàn diện (Menu → chơi → chết → retry) → mới deploy
