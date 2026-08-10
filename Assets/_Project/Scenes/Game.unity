@@ -495,6 +495,15 @@ MonoBehaviour:
   slowMoColor: {r: 0.7, g: 0.4, b: 1, a: 1}
   shakeForce: 3
   shakeDuration: 0.18
+  popupFont: {fileID: 11400000, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
+  popupScore: 10
+  popupPoolSize: 8
+  popupFloatDistance: 70
+  popupDuration: 0.7
+  popupColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  trailTime: 0.6
+  trailStartWidth: 1.4
+  trailColor: {r: 0.05, g: 0.05, b: 0.1, a: 0.55}
 --- !u!1 &289557079
 GameObject:
   m_ObjectHideFlags: 0
@@ -2160,7 +2169,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1488820669}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
