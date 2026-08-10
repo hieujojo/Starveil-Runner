@@ -45,9 +45,9 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 |---|---|---|---|---|
 | 12 | UI Kenney (Blue + font) | `Editor/MainMenuUIBuilder.cs` + `Editor/HUDUIBuilder.cs` | Tự dựng menu + HUD: sprite `panel_glass`, button Blue `button_rectangle_gloss/flat`, font `Kenney Future SDF` (sampling 128); tự gán field qua `SerializedObject` | 1608 PNG đã convert Sprite; tool chạy 1 nút |
 | 13 | Game HUD + Game Over | `UI/UIManager.cs` | ScorePanel + coin icon + score + combo (ẩn khi ×1); Game Over: title + điểm + cao nhất + **nút CHƠI LẠI / MENU** | Panel fade DOTween; nút CHƠI LẠI gọi `GameManager.Restart()`, MENU load scene MainMenu |
-| 14 | VFX | `Systems/VFX/VFXManager.cs` + `Editor/VFXSetupTool.cs` | **Particle**: coin burst (14 hạt vàng tại player) + power-up burst (22 hạt màu theo loại: Shield=xanh, Magnet=đỏ, SlowMo=tím) — tạo 100% bằng code, không prefab; **Screen shake** khi đâm obstacle (Cinemachine Impulse, tự gắn listener vào camera) | Sự kiện `GameEvents` — zero coupling; `Emit()` one-shot giới hạn → không GC spike |
-| 15 | Post-processing | *(chưa làm)* | Bloom, Vignette, Color Grading (Global Volume) | ⏳ Sau VFX |
-| 16 | Trail theo Void | *(chưa làm)* | Vệt khói tối phía sau void | ⏳ Kèm Post-processing |
+| 14 | VFX | `Systems/VFX/VFXManager.cs` + `Editor/VFXSetupTool.cs` | **Particle**: coin burst tại vị trí coin + power-up burst (màu theo loại) — tạo 100% bằng code; **Popup điểm** "+10" nhân combo (DOTween bounce bay lên, pool 8 text, font Kenney Future) khi nhặt coin; **Screen shake** khi đâm obstacle (Cinemachine Impulse); **Vệt khói tối** theo Void (TrailRenderer code, nở rộng theo scale, clear khi restart) | Sự kiện `GameEvents` (thêm `OnCoinCollectedAt(Vector3)` mang vị trí) — zero coupling; pool + `Emit()` → không GC spike |
+| 15 | VFX trail Void + popup | *(gộp vào 14)* | ✅ Đã làm xong | — |
+| 16 | Post-processing | *(chưa làm)* | Bloom, Vignette, Color Grading (Global Volume) | ⏳ Bước kế tiếp |
 | 16 | WebGL + deploy | *(chưa làm)* | Build Brotli → itch.io + Unity Play + README | ⏳ Cuối cùng |
 
 ---
@@ -64,7 +64,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 ## 📌 Trạng thái hiện tại
 
 - ✅ G1 + G2 hoàn tất (commit theo convention, đã push)
-- ✅ G3: **UI Kenney (menu + HUD)** + **VFX** (particle coin/powerup + screen shake) hoàn tất
-- ⏭️ Tiếp theo: **Trail Void + Post-processing** → Material/Lighting → WebGL build → upload
+- ✅ G3: **UI Kenney (menu + HUD)** + **VFX** (particle + popup điểm + screen shake + trail Void) hoàn tất
+- ⏭️ Tiếp theo: **Post-processing** → Material/Lighting → WebGL build → upload
 
 *Chi tiết lỗi đã sửa + bài học: xem [`CHANGELOG.md`](CHANGELOG.md). Kế hoạch đầy đủ: [`void-runner-plan.md`](void-runner-plan.md).*

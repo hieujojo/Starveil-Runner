@@ -31,14 +31,24 @@
 
 ### Đã xong
 
-- `Systems/VFX/VFXManager.cs`: singleton — **2 particle burst tạo 100% bằng code** (không prefab/material asset): coin (14 hạt vàng, speed 5) + power-up (22 hạt, màu theo loại Shield=xanh/Magnet=đỏ/SlowMo=tím); texture tròn mềm tạo runtime bằng `Texture2D` radial alpha + shader `Universal Render Pipeline/Particles/Unlit` (fallback `Sprites/Default`); **screen shake** qua `CinemachineImpulseSource.GenerateImpulseWithVelocity` + tự `AddComponent<CinemachineImpulseListener>` vào `CinemachineCamera`; lắng nghe `GameEvents` (OnCoinCollected/OnPowerUpActivated/OnObstacleHit) — zero coupling; singleton reset `Instance` trong OnDisable.
-- `Editor/VFXSetupTool.cs`: menu `Tools/Void Runner/Setup VFX in Game Scene` — tự tìm GameObject chứa GameManager → gắn VFXManager; chạy 1 nút.
+- `Systems/VFX/VFXManager.cs`: singleton — **2 particle burst tạo 100% bằng code** (không prefab/material asset): coin (14 hạt vàng, speed 5) + power-up (22 hạt, màu theo loại Shield=xanh/Magnet=đỏ/SlowMo=tím); texture tròn mềm tạo runtime bằng `Texture2D` radial alpha + shader `Universal Render Pipeline/Particles/Unlit` (fallback `Sprites/Default`); **screen shake** qua `CinemachineImpulseSource.GenerateImpulseWithVelocity` + tự `AddComponent<CinemachineImpulseListener>` vào `CinemachineCamera`; lắng nghe `GameEvents` (OnCoinCollectedAt/OnPowerUpActivated/OnObstacleHit/OnRestart) — zero coupling; singleton reset `Instance` trong OnDisable.
+- `Editor/VFXSetupTool.cs`: menu `Tools/Void Runner/Setup VFX in Game Scene` — tự tìm GameObject chứa GameManager → gắn VFXManager; chạy 1 nút. **(v2: idempotent + tự gán font Kenney Future cho popup)**
 - Đã chạy tool: VFXManager gắn vào scene Game (commit scene).
+
+### VFX bổ sung (cùng ngày)
+
+- **Score popup**: nhặt coin → text "+N" (nhân combo multiplier ×2–×5, đọc `ScoreSystem.Multiplier`) bay lên + bounce + mờ dần bằng DOTween Sequence; **object pool 8 text TMP** tạo bằng code trên Canvas (không Instantiate/Destroy giữa chừng); **kill tween cũ khi tái dùng pool** (DOTween.Kill cả target Graphic + RectTransform).
+- **Vệt khói theo Void**: tìm `VoidChase` → `AddComponent<TrailRenderer>` bằng code; `startWidth` cập nhật mỗi frame theo `localScale.x` (Void nở dần); **`Clear()` khi OnRestart** (void teleport về đầu map — không kéo vệt dài xuyên map); material dùng chung `CreateSoftParticleMaterial()` (Particles/Unlit sample vertex color — URP/Unlit mặc định KHÔNG sample vertex color → trail sẽ hiện trắng, tránh dùng).
+- `GameEvents` thêm `OnCoinCollectedAt(Vector3)` — mang **vị trí coin** cho VFX (burst + popup đúng chỗ); giữ nguyên `OnCoinCollected(int)` cho ScoreSystem (không phá).
 
 ### Bài học / lưu ý
 
 - **`Unity.Cinemachine` (Cinemachine 3)** — namespace KHÔNG còn là `Cinemachine`; `CinemachineImpulseListener` là extension gắn trực tiếp lên GameObject có `CinemachineCamera`, `CinemachineImpulseSource` là MonoBehaviour gắn lên bất kỳ GO. API: `GenerateImpulseWithVelocity(Vector3)`.
 - **`ParticleSystem.Emit()` bypass emission module** — `SetBursts/rateOverTime/duration` là dead config khi dùng `Emit()` trực tiếp → bỏ, đỡ rối.
+- **`Camera.main` mỗi lần gọi là `FindGameObjectWithTag`** — cache `_cam` trong Start (Magnet hút nhiều coin cùng lúc → tránh gọi liên tục).
+- **Popup pool phải kill tween cũ trước khi tái sử dụng** — nếu không, text có thể giữ alpha/scale cũ hoặc OnComplete cũ tắt nhầm popup.
+- **Popup điểm nên nhân theo combo** — ScoreSystem cộng `coinScore × Multiplier`; popup cứng "+10" sẽ sai khi combo ×2–×5 → đọc `ScoreSystem.Multiplier`.
+- **TrailRenderer + URP/Unlit hiện TRẮNG** vì shader không sample vertex color — phải dùng `Particles/Unlit` (hoặc shader có vertex color) khi tô màu bằng startColor/endColor.
 - **Safe mode KHÔNG xóa log cũ** — khi mở lại Unity, Console có thể vẫn hiện lỗi của phiên trước (timestamp cũ). Cách kiểm tra thật: grep `error CS` trong `Editor.log`, nếu = 0 và có dòng compile chạy → an toàn. (Đã gặp: user tưởng còn lỗi nhưng log đã sạch.)
 - **`MissingReferenceException: m_AtlasTextures of TMP_FontAsset doesn't exist anymore`** — xuất hiện khi tool Editor xóa/tạo lại font TMP mà text cũ còn tham chiếu; cảnh báo 1 lần, không nghiêm trọng, biến mất sau khi dựng lại UI.
 - **.meta của script mới sinh khi Unity import** — commit code trước, chờ Unity sinh .meta, commit .meta sau (đúng quy trình đã ghi từ G2).
