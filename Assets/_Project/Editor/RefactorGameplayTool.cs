@@ -71,8 +71,59 @@ namespace VoidRunner.EditorTools
                 return null;
             });
 
+            // 3. HUD layout (fix 2026-08-11 — user test): điểm tràn khung + combo dạt góc trái
+            FixHudLayout();
+
             EditorSceneManager.SaveScene(scene);
             Debug.Log("[Refactor] Game scene xong — nhớ Ctrl+S.");
+        }
+
+        private static void FixHudLayout()
+        {
+            // ScorePanel: rộng hơn (300 → 360) để chứa số điểm 6 chữ số không tràn
+            RectTransform panel = FindRectTransform("ScorePanel");
+            if (panel != null) panel.sizeDelta = new Vector2(360f, 90f);
+
+            // ScoreText: font 58 → 40 (hết vỡ khung chứa điểm)
+            TextMeshProUGUI score = FindText("ScoreText");
+            if (score != null)
+            {
+                score.fontSize = 40f;
+                score.fontSizeMin = 18f;
+                score.alignment = TextAlignmentOptions.Center;
+            }
+
+            // ComboText "x2": từ góc trái (0,1)@(34,-150) → xuống DƯỚI panel điểm, căn giữa màn hình
+            RectTransform combo = FindRectTransform("ComboText");
+            if (combo != null)
+            {
+                combo.anchorMin = new Vector2(0.5f, 1f);
+                combo.anchorMax = new Vector2(0.5f, 1f);
+                combo.anchoredPosition = new Vector2(0f, -110f);
+                combo.sizeDelta = new Vector2(220f, 50f);
+            }
+            TextMeshProUGUI comboText = FindText("ComboText");
+            if (comboText != null) comboText.fontSize = 36f;
+
+            Debug.Log("[Refactor] HUD: ScorePanel 360x90, ScoreText 40, ComboText dưới điểm (0,-110).");
+        }
+
+        private static RectTransform FindRectTransform(string name)
+        {
+            foreach (RectTransform rt in UnityEngine.Object.FindObjectsByType<RectTransform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (rt.name == name) return rt;
+            }
+            return null;
+        }
+
+        private static TextMeshProUGUI FindText(string name)
+        {
+            foreach (TextMeshProUGUI t in UnityEngine.Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (t.name == name) return t;
+            }
+            return null;
         }
 
         private static void FixMainMenuScene()
