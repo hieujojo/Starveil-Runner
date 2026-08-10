@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-10 — G3: Post-processing (Bloom + Vignette + Color Adjustments)
+
+### Đã xong
+
+- `Editor/PostProcessingSetupTool.cs`: menu `Tools/Void Runner/Setup Post-Processing in Open Scene` — tự dựng **Global Volume** (isGlobal) + tạo/load profile `Assets/_Project/Settings/PostProcessing/VoidRunnerProfile.asset` với 3 override: **Bloom** (intensity 0.35, threshold 0.8, tint xanh), **Vignette** (0.25, tối xanh đen), **Color Adjustments** (contrast +8, saturation +6, filter lạnh); tự bật `renderPostProcessing = true` + gán `volumeTrigger`/`volumeLayerMask` trên Main Camera; idempotent (profile có rồi thì chỉ `EnsureOverrides` đảm bảo đủ 3 override); `Undo.RegisterCreatedObjectUndo` cho GameObject mới.
+- API đã xác minh trực tiếp từ URP 17.4: `VolumeProfile.Add<T>(bool overrides)` + `TryGet<T>` + `Volume.isGlobal/sharedProfile` + `UniversalAdditionalCameraData.renderPostProcessing/volumeTrigger/volumeLayerMask` (namespace `UnityEngine.Rendering.Universal`).
+
+### Bài học — **TÁI PHẠM 2 lỗi đã ghi** (đã fix, ghi đậm để không lặp nữa)
+
+- **`Object.FindFirstObjectByType` obsolete (CS0618) — TÁI PHẠM lần 2!** Đã ghi ở G1 và G3 Editor Tools nhưng vẫn dùng lại khi viết tool mới. Quy tắc tuyệt đối: **mọi script Unity 6 mới chỉ dùng `FindAnyObjectByType`** — tự kiểm tra trước khi commit.
+- **`SceneManager` không resolve khi chỉ có `using UnityEditor.SceneManagement;` (CS0103)** — `SceneManager` thuộc `UnityEngine.SceneManagement`, còn `UnityEditor.SceneManagement` chỉ có `EditorSceneManager` (MarkSceneDirty/OpenScene...). Fix: **dùng fully-qualified `UnityEngine.SceneManagement.SceneManager.GetActiveScene()`** — KHÔNG thêm `using UnityEngine.SceneManagement;` cạnh `using UnityEditor.SceneManagement;` vì cả 2 đều có class `SceneManager` → lỗi ambiguous CS0104.
+- **Hệ quả của compile error trong Editor tool: menu `Tools/Void Runner` không hiện mục mới** — Unity giữ menu cũ nhưng KHÔNG load được menu item của assembly lỗi. Dấu hiệu: menu thiếu mục + status bar/Console có `error CS`. Sau khi fix, phải chờ Unity compile lại (menu item xuất hiện sau ~1-2 giây khi click Tools).
+- **Tham số không dùng trong method (dead parameter)** — `EnsureGlobalVolume(string sceneName)` không dùng `sceneName` → bỏ tham số cho sạch (reviewer bắt được).
+
+---
+
 ## 2026-08-09 — G3: Editor Tools (UI Kenney + font)
 
 ### Đã xong
