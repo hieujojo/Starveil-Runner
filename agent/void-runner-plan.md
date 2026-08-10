@@ -173,7 +173,8 @@ Assets/
 
 - [x] **UI Kenney (Blue + font Kenney Future)**: 2 gói `kenney_ui-pack` + `kenney_ui-pack-space-expansion` (1608 PNG, CC0) → đã convert Sprite bằng Editor tool (`Tools/Void Runner/Convert Kenney UI PNG to Sprites`) — UI MainMenu tông Blue, font game-y `Kenney Future SDF` (sampling 128), tự dựng bằng `Editor/MainMenuUIBuilder.cs` — ✅ hoàn tất (scene đã lưu + commit)
 - [x] **Game HUD + Game Over panel đẹp**: `Editor/HUDUIBuilder.cs` (dựng ScorePanel + coin icon + combo + panel GAME OVER + nút CHƠI LẠI/MENU, tự gán field UIManager); `UI/UIManager.cs` thêm RetryButton/MenuButton (Restart qua GameManager, Menu load scene MainMenu) — ✅ hoàn tất (scene đã lưu + commit)
-- [ ] VFX: Particle khi collect coin/power-up; trail theo Void; **screen shake** khi va chạm (Cinemachine Impulse); DOTween popup bounce khi score tăng — ⏳ đang làm
+- [x] VFX: Particle khi collect coin/power-up + **screen shake** khi va chạm (Cinemachine Impulse) — ✅ xong (`VFXManager` tạo particle bằng code, không prefab; screen shake qua Impulse; tool `Setup VFX in Game Scene`)
+- [ ] VFX: trail theo Void + DOTween popup bounce khi score tăng — ⏳ còn lại (làm cùng Post-processing)
 - [ ] URP Post-processing: **Bloom, Vignette, Color Grading** (Global Volume)
 - [ ] Material PBR tối giản đồng bộ (tông "hư không": tím/đen phát sáng); lighting + skybox nhất quán
 - [ ] Tuning: độ khó fair; Unity Profiler đảm bảo **60 FPS**; test nhiều độ phân giải

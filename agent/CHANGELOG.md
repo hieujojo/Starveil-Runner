@@ -27,6 +27,24 @@
 
 ---
 
+## 2026-08-09 — G3: VFX (particle + screen shake)
+
+### Đã xong
+
+- `Systems/VFX/VFXManager.cs`: singleton — **2 particle burst tạo 100% bằng code** (không prefab/material asset): coin (14 hạt vàng, speed 5) + power-up (22 hạt, màu theo loại Shield=xanh/Magnet=đỏ/SlowMo=tím); texture tròn mềm tạo runtime bằng `Texture2D` radial alpha + shader `Universal Render Pipeline/Particles/Unlit` (fallback `Sprites/Default`); **screen shake** qua `CinemachineImpulseSource.GenerateImpulseWithVelocity` + tự `AddComponent<CinemachineImpulseListener>` vào `CinemachineCamera`; lắng nghe `GameEvents` (OnCoinCollected/OnPowerUpActivated/OnObstacleHit) — zero coupling; singleton reset `Instance` trong OnDisable.
+- `Editor/VFXSetupTool.cs`: menu `Tools/Void Runner/Setup VFX in Game Scene` — tự tìm GameObject chứa GameManager → gắn VFXManager; chạy 1 nút.
+- Đã chạy tool: VFXManager gắn vào scene Game (commit scene).
+
+### Bài học / lưu ý
+
+- **`Unity.Cinemachine` (Cinemachine 3)** — namespace KHÔNG còn là `Cinemachine`; `CinemachineImpulseListener` là extension gắn trực tiếp lên GameObject có `CinemachineCamera`, `CinemachineImpulseSource` là MonoBehaviour gắn lên bất kỳ GO. API: `GenerateImpulseWithVelocity(Vector3)`.
+- **`ParticleSystem.Emit()` bypass emission module** — `SetBursts/rateOverTime/duration` là dead config khi dùng `Emit()` trực tiếp → bỏ, đỡ rối.
+- **Safe mode KHÔNG xóa log cũ** — khi mở lại Unity, Console có thể vẫn hiện lỗi của phiên trước (timestamp cũ). Cách kiểm tra thật: grep `error CS` trong `Editor.log`, nếu = 0 và có dòng compile chạy → an toàn. (Đã gặp: user tưởng còn lỗi nhưng log đã sạch.)
+- **`MissingReferenceException: m_AtlasTextures of TMP_FontAsset doesn't exist anymore`** — xuất hiện khi tool Editor xóa/tạo lại font TMP mà text cũ còn tham chiếu; cảnh báo 1 lần, không nghiêm trọng, biến mất sau khi dựng lại UI.
+- **.meta của script mới sinh khi Unity import** — commit code trước, chờ Unity sinh .meta, commit .meta sau (đúng quy trình đã ghi từ G2).
+
+---
+
 ## 2026-08-09 — G2: MainMenuManager + scene MainMenu
 
 ### Đã xong
