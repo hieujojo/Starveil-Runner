@@ -48,43 +48,37 @@ namespace VoidRunner.EditorTools
             var light = FindAnyObjectByType<Light>();
             if (light != null && light.type == LightType.Directional)
             {
-                light.intensity = 0.65f;
+                light.intensity = 0.4f;
                 changed++;
             }
 
-            // 3) Bloom: threshold 1.0 + intensity 0.22 (không thổi FBX/skybox nữa)
+            // 3) Bloom: threshold 1.15 + intensity 0.12 (tối thiểu — chỉ glow vật cực sáng như coin/player)
+            // Dùng TryGet<T> (API runtime) — SerializedObject KHÔNG sửa được sub-asset VolumeComponent.
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(ProfilePath);
             if (profile != null)
             {
-                var so = new SerializedObject(profile);
-                var components = so.FindProperty("components");
-                if (components != null)
+                if (profile.TryGet<Bloom>(out var bloom))
                 {
-                    for (int i = 0; i < components.arraySize; i++)
-                    {
-                        var comp = components.GetArrayElementAtIndex(i);
-                        var script = comp.FindPropertyRelative("m_Script");
-                        if (script == null || script.objectReferenceValue == null) continue;
-                        string typeName = script.objectReferenceValue.name;
-
-                        if (typeName == "Bloom")
-                        {
-                            var threshold = comp.FindPropertyRelative("threshold.m_Value");
-                            if (threshold != null) { threshold.floatValue = 1.0f; }
-                            var intensity = comp.FindPropertyRelative("intensity.m_Value");
-                            if (intensity != null) { intensity.floatValue = 0.22f; }
-                            changed++;
-                        }
-                    }
+                    bloom.threshold.Override(1.15f);
+                    bloom.intensity.Override(0.12f);
+                    bloom.scatter.Override(0.3f);
+                    bloom.tint.value = Color.white;
+                    changed++;
                 }
-                so.ApplyModifiedPropertiesWithoutUndo();
+                if (profile.TryGet<ColorAdjustments>(out var colorAdj))
+                {
+                    colorAdj.contrast.Override(12f);
+                    colorAdj.saturation.Override(5f);
+                    changed++;
+                }
+                EditorUtility.SetDirty(profile);
                 AssetDatabase.SaveAssets();
             }
 
             EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
-            Debug.Log($"[VoidRunner] Polish scene xong ({changed} mục chỉnh): nền tím đen, FOV 60, light 0.65, Bloom nhẹ.");
+            Debug.Log($"[VoidRunner] Polish scene xong ({changed} mục chỉnh): nền tím đen, FOV 60, light 0.4, Bloom tối thiểu.");
             EditorUtility.DisplayDialog("Void Runner — Polish",
-                $"Đã polish scene ({changed} mục):\n• Nền hư không tím đen (bỏ skybox chói)\n• FOV 60 — đường nhìn rộng\n• Ánh sáng dịu 0.65\n• Bloom nhẹ — không thổi FBX\n\nNhớ Ctrl+S lưu scene!", "OK");
+                $"Đã polish scene ({changed} mục):\n• Nền hư không tím đen (bỏ skybox chói)\n• FOV 60 — đường nhìn rộng\n• Ánh sáng dịu 0.4 (tối)\n• Bloom tối thiểu 0.12 — chỉ coin/player glow\n\nNhớ Ctrl+S lưu scene!", "OK");
         }
 
         [MenuItem(MenuRoot + "Polish Scene (Camera + Sky + Light)", true)]

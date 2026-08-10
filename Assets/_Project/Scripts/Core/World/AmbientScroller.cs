@@ -28,10 +28,13 @@ namespace VoidRunner.Core.World
         [SerializeField] private float recycleDistance = 18f;
 
         [Tooltip("Tỉ lệ prop được đặt lệch vị trí ngẫu nhiên (0 = đều tăm tắp).")]
-        [SerializeField, Range(0f, 1f)] private float jitter = 0.4f;
+        [SerializeField, Range(0f, 1f)] private float jitter = 0.15f;
+
+        [Tooltip("Độ lệch xoay Y ngẫu nhiên tối đa (độ) — nhỏ để prop đứng ngay ngắn.")]
+        [SerializeField, Range(0f, 90f)] private float maxRotY = 20f;
 
         [Tooltip("Scale ngẫu nhiên của prop (0 = đồng đều).")]
-        [SerializeField, Range(0f, 1f)] private float scaleVariation = 0.3f;
+        [SerializeField, Range(0f, 1f)] private float scaleVariation = 0.1f;
 
         [Header("Tham chiếu (tự gán)")]
         [SerializeField] private Transform player;
@@ -71,13 +74,18 @@ namespace VoidRunner.Core.World
 
                     float z = startZ + i * spacing;
                     float jitterZ = jitter > 0f ? Random.Range(-spacing * jitter, spacing * jitter) : 0f;
-                    float rotY = Random.Range(0f, 360f);
-                    float scale = 1f + (scaleVariation > 0f ? Random.Range(-scaleVariation, scaleVariation) : 0f);
+                    // Xoay nhẹ quanh Y (model hướng về trước) — không xoay lung tung 360°
+                    float rotY = Random.Range(-maxRotY, maxRotY);
 
                     GameObject prop = Instantiate(prefab, transform);
                     prop.name = $"{prefab.name} ({(side == 0 ? "L" : "R")}{i})";
                     prop.transform.position = new Vector3(x, 0f, z + jitterZ);
                     prop.transform.rotation = Quaternion.Euler(0f, rotY, 0f);
+
+                    // Scale ĐỒNG NHẤT theo kích thước thật của model (không văng lung tung:
+                    // chimney to thì nhỏ lại, craft nhỏ thì to lên — tất cả ~5 đơn vị)
+                    float baseScale = NormalizeScale(prop, 5f);
+                    float scale = baseScale * (1f + (scaleVariation > 0f ? Random.Range(-scaleVariation, scaleVariation) : 0f));
                     prop.transform.localScale = Vector3.one * scale;
 
                     // FBX Kenney có material trắng sáng → đổi sang material tối tím để không chói mắt
@@ -87,6 +95,32 @@ namespace VoidRunner.Core.World
                     _props.Add(prop.transform);
                 }
             }
+        }
+
+        /// <summary>
+        /// Tính scale để model có chiều cao gần targetHeight (đồng nhất kích thước giữa các prop
+        /// — tránh "văng lung tung" do FBX Kenney có kích thước rất khác nhau).
+        /// </summary>
+        private float NormalizeScale(GameObject prop, float targetHeight)
+        {
+            Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
+            bool hasBounds = false;
+            foreach (var renderer in prop.GetComponentsInChildren<Renderer>())
+            {
+                if (hasBounds)
+                {
+                    bounds.Encapsulate(renderer.bounds);
+                }
+                else
+                {
+                    bounds = renderer.bounds;
+                    hasBounds = true;
+                }
+            }
+
+            if (!hasBounds) return 1f;
+            float height = bounds.size.y;
+            return height > 0.001f ? targetHeight / height : 1f;
         }
 
         /// <summary>Đổi toàn bộ renderer của prop sang material tối tím (URP Lit, không phát sáng).</summary>
