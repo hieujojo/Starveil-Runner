@@ -66,7 +66,7 @@
 - **Popup điểm nên nhân theo combo** — ScoreSystem cộng `coinScore × Multiplier`; popup cứng "+10" sẽ sai khi combo ×2–×5 → đọc `ScoreSystem.Multiplier`.
 - **TrailRenderer + URP/Unlit hiện TRẮNG** vì shader không sample vertex color — phải dùng `Particles/Unlit` (hoặc shader có vertex color) khi tô màu bằng startColor/endColor.
 - **Safe mode KHÔNG xóa log cũ** — khi mở lại Unity, Console có thể vẫn hiện lỗi của phiên trước (timestamp cũ). Cách kiểm tra thật: grep `error CS` trong `Editor.log`, nếu = 0 và có dòng compile chạy → an toàn. (Đã gặp: user tưởng còn lỗi nhưng log đã sạch.)
-- **`MissingReferenceException: m_AtlasTextures of TMP_FontAsset doesn't exist anymore`** — xuất hiện khi tool Editor xóa/tạo lại font TMP mà text cũ còn tham chiếu; cảnh báo 1 lần, không nghiêm trọng, biến mất sau khi dựng lại UI.
+- **`UnassignedReferenceException: m_AtlasTextures of TMP_FontAsset has not been assigned` — KHÔNG vô hại, là lỗi THẬT (đã sửa hiểu lầm cũ!)** — nguyên nhân: `TMP_FontAsset.CreateFontAsset()` tạo texture + material **trong memory**, nhưng tool chỉ gọi `AssetDatabase.CreateAsset(fontAsset)` → **thiếu `AddObjectToAsset`** → file `.asset` ghi `m_AtlasTextures: {fileID: 0}` + `m_Material: {fileID: 0}`. Cùng phiên Unity: texture còn trong memory → UI vẫn đẹp; **mở lại Unity: load từ disk → font rỗng** → text không hiện chữ + exception. Fix: sau `CreateAsset` phải `AssetDatabase.AddObjectToAsset(fontAsset.atlasTexture, fontAsset)` + `AddObjectToAsset(fontAsset.material, fontAsset)` rồi mới `SaveAssets`. Kiểm tra font trên đĩa: grep `m_AtlasTextures:` phải có fileID khác 0.
 - **.meta của script mới sinh khi Unity import** — commit code trước, chờ Unity sinh .meta, commit .meta sau (đúng quy trình đã ghi từ G2).
 
 ---
