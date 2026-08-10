@@ -5,6 +5,38 @@
 
 ---
 
+## 2026-08-11 — QUYẾT ĐỊNH REFACTOR GAMEPLAY (user review toàn diện — CHƯA code)
+
+> User test thật và báo 8 vấn đề → tạm dừng deploy, chuyển hướng refactor cơ chế cốt lõi.
+> **Chưa fix gì trong vòng này — chỉ cập nhật docs + chờ user duyệt plan.**
+
+### Yêu cầu user (8 điểm)
+
+1. **Player không hợp lý**: game tên "Void Runner" nhưng nhân vật chính là trái banh xanh → đổi player thành chủ thể phù hợp (tàu/drone/phi hành gia — chờ chốt)
+2. **Đường chạy hết**: track KHÔNG vô tận (Ground tĩnh 400m hoặc tile recycle lỗi) → phải vô tận thật
+3. **Void đuổi kiểu cũ sai**: banh tím tự tăng tốc chậm → chạm player ở mức điểm cố định. User muốn cơ chế **Subway Surfers/Temple Run**: đụng obstacle lần 1 → Void TIẾN SÁT; không chạm 10–15s → Void NỚI LẠI; chạm 2 lần trong cửa sổ → Game Over. Void KHÔNG tự tăng tốc
+4. **KHÔNG thấy màn hình kết thúc game** → điều tra + fix Game Over panel luôn hiện
+5. **Tiếng Việt/Anh lộn xộn** → toàn bộ text gameplay + menu = TIẾNG ANH
+6. **Nút âm thanh**: text thụt vào viền, quá chật → fix layout/padding
+7. **Best score hiển thị = 0 ngay từ đầu (vô nghĩa)** → chỉ hiện khi BestScore > 0
+8. *(đi kèm)* Test toàn diện sau khi fix → mới deploy
+
+### Đã làm (docs only)
+
+- Tạo `agent/RULES.md` — trích xuất toàn bộ quy tắc từ CHANGELOG + BUGS (bug chồng bug, kể cả rule định hướng game mới R0.1–R0.8)
+- `agent/BUGS.md` — thêm vòng 3 (8 vấn đề + phân tích + hướng fix đề xuất)
+- `agent/void-runner-plan.md` — thêm **Giai đoạn 2.5 REFACTOR GAMEPLAY** (chờ duyệt)
+- `agent/FEATURES.md` + `agent/TESTING.md` — cập nhật cơ chế mới + test checklist
+- `README.md` — mô tả gameplay mới
+
+### Bài học (mới)
+
+- **Review toàn diện của user > milestone plan**: user chơi thật và phát hiện vấn đề thiết kế cốt lõi (player, cơ chế chết) mà plan không lường trước — luôn test với góc nhìn "người chơi" trước khi tuyên bố hoàn thành giai đoạn.
+- **Cơ chế chết "tự tăng tốc kẻ thù theo thời gian" dễ gây chết ở mức điểm cố định** — cơ chế phản ánh skill (đụng lỗi → hậu quả) tạo căng thẳng công bằng hơn (Subway Surfers không phải Temple Run ngẫu nhiên).
+- **Docs là giao diện trao đổi với user**: user đọc .md để duyệt — trước refactor lớn phải cập nhật đầy đủ docs trước, không code vội.
+
+---
+
 ## 2026-08-11 — Vòng 2 gameplay feel: Void, lane marker, props, score bị che
 
 ### Đã xong

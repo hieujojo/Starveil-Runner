@@ -1,6 +1,6 @@
-# 🔮 Void Runner — Endless Runner 3-Lane với AI Chase
+# 🔮 Void Runner — Endless Runner 3-Lane với Cơ Chế "Void Tiến Sát"
 
-> **Void Runner** là một endless runner 3-lane được phát triển bằng **Unity 6 + URP**, nơi bạn điều khiển quả bóng lao về phía trước trong khi **"Hư Không" (The Void)** — một khối bóng tối điều khiển bằng AI pathfinding — đuổi theo không ngừng. Né chướng ngại vật, gom coin, nhặt power-up và sống sót càng lâu càng tốt.
+> **Void Runner** là một endless runner 3-lane được phát triển bằng **Unity 6 + URP**: điều khiển nhân vật lao về phía trước trên đường vô tận trong khi **"Hư Không" (The Void)** đuổi theo phía sau. Cơ chế đặc trưng kiểu **Subway Surfers / Temple Run**: đụng chướng ngại vật → Void **tiến sát** hơn; né sạch 10–15 giây → Void **nới ra**; đụng 2 lần trong cửa sổ đó → bị nuốt chửng = Game Over. Thu coin, nhặt power-up và sống sót càng lâu càng tốt.
 
 [![Unity](https://img.shields.io/badge/Unity-6.x-222222?logo=unity&logoColor=white)](https://unity.com)
 [![C#](https://img.shields.io/badge/C%23-.NET-239120?logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
@@ -10,11 +10,11 @@
 
 ## 🎮 Gameplay
 
-- **3 lane**: chuyển lane trái/phải (`A`/`D` hoặc mũi tên) để né chướng ngại vật
-- **The Void đuổi theo**: AI điều khiển qua **NavMesh** — càng chạy lâu, Void càng **to và nhanh**. Bị nuốt chửng = Game Over
-- **Chướng ngại vật**: Ramp cố định, Pillar cần né, DynamicBox di động (obstacle được gắn ngẫu nhiên, luôn chừa ít nhất 1 lane an toàn)
-- **Coin & Power-up**: gom coin tăng điểm, nhặt power-up (Shield / Magnet / Slow-mo) — *đang phát triển*
-- **Độ khó tăng dần**: tốc độ tăng theo thời gian, combo multiplier cho người chơi giỏi — *đang phát triển*
+- **3 lane vô tận**: chuyển lane trái/phải (`A`/`D` hoặc mũi tên) để né chướng ngại vật
+- **The Void đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Void **tiến sát**; né sạch 10–15s → Void **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Void nuốt chửng = **Game Over**
+- **Chướng ngại vật**: Ramp cố định, Pillar cần né, DynamicBox di động (được gắn ngẫu nhiên, luôn chừa ≥1 lane an toàn)
+- **Coin & Power-up**: gom coin tăng điểm, nhặt power-up (Shield / Magnet / Slow-mo)
+- **Độ khó công bằng**: tốc độ nền tăng dần + combo multiplier — cái chết do **lỗi của bạn**, không phải ngẫu nhiên
 
 ---
 
@@ -22,7 +22,7 @@
 
 | Tính năng | Kỹ thuật | Trạng thái |
 |---|---|---|
-| **The Void đuổi theo người chơi** | AI / **NavMesh pathfinding** (`NavMeshSurface` + `NavMeshAgent`) | ✅ |
+| **The Void đuổi theo — cơ chế tiến sát khi player lỗi** | Chase trực tiếp + cửa sổ 10–15s (đụng 2 lần → Game Over) | 🚧 Refactor (chờ duyệt) |
 | Track sinh vô tận | **Object Pool** (`ObjectPool<T>`) — không Instantiate/Destroy giữa chừng | ✅ |
 | Obstacle cấu hình được | **ScriptableObject** (`ObstacleData`) + gắn ngẫu nhiên theo weight | ✅ |
 | Giao tiếp hệ thống | **C# Event-driven** (`GameEvents`) — decoupled, không coupling trực tiếp | ✅ |
@@ -46,6 +46,8 @@
 | `A` / `←` | Chuyển lane trái |
 | `D` / `→` | Chuyển lane phải |
 | `R` | Restart (khi Game Over) |
+
+> 🌐 **Ngôn ngữ UI:** toàn bộ text in-game (SCORE, COMBO, GAME OVER, RETRY...) dùng **tiếng Anh**.
 
 ---
 
@@ -92,8 +94,9 @@ Assets/_Project/
 | Giai đoạn | Nội dung | Trạng thái |
 |---|---|---|
 | **G0** | Setup: Clean Architecture, Cinemachine, DOTween | ✅ Hoàn thành |
-| **G1** | Core gameplay: lane switching, tile spawner (object pool), Void AI chase, obstacle | ✅ Code xong — scene đang hoàn thiện |
-| **G2** | Hệ thống: Score (combo), UI, Power-up, Audio, Save, Difficulty | ⏳ Tiếp theo |
+| **G1** | Core gameplay: lane switching, tile spawner (object pool), Void chase, obstacle | ✅ Code xong |
+| **G2** | Hệ thống: Score (combo), UI, Power-up, Audio, Save, Difficulty | ✅ Code xong |
+| **G2.5** | **Refactor gameplay theo review user** (Void tiến sát, player design, track vô tận, UI English) | 🔴 Chờ duyệt |
 | **G3** | Polish & Deploy: VFX, post-processing, WebGL → itch.io / Unity Play, README | ⏳ |
 
 ---

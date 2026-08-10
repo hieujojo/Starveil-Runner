@@ -5,15 +5,15 @@
 
 ---
 
-## 1. Concept game (đã chốt ✅)
+## 1. Concept game (đã chốt ✅ — cập nhật 2026-08-11 theo review user)
 
-**Void Runner**: quả bóng lăn trên đường tile 3 lane, tự chạy về phía trước. Phía sau, **"Hư Không" (The Void)** — khối bóng tối phình to, nhanh dần — đuổi theo bằng **AI pathfinding (NavMeshAgent)**. Bị nuốt → Game Over.
+**Void Runner**: nhân vật chạy (tàu/drone — chờ user chốt kiểu) trên đường tile 3 lane vô tận, tự chạy về phía trước. Phía sau, **"Hư Không" (The Void)** — khối bóng tối phình to — đuổi theo kiểu **Subway Surfers / Temple Run**: KHÔNG tự tăng tốc, chỉ TIẾN SÁT khi player đụng vật cản. Đụng 2 lần trong cửa sổ 10–15s → Void nuốt → Game Over.
 
 ```
-Chạy + né obstacle → thu coin / power-up → chạy thoát Void → chết → thử lại (best score)
+Chạy + né obstacle (đụng → Void tiến sát) → không chạm 10–15s → Void nới lại → thu coin/power-up → chạm lần 2 trong cửa sổ → Void nuốt → Game Over → thử lại (best score)
 ```
 
-**Điểm khác biệt vs. runner thường:** có AI chase (NavMesh) — kỹ thuật ít fresher có, tận dụng luôn enemy AI của codebase hiện tại.
+**Điểm khác biệt vs. runner thường:** cơ chế "Void tiến sát theo lỗi của player" — mỗi lần va chạm vật cản đều có hậu quả rõ ràng (Void gần hơn), tạo căng thẳng tăng dần phản ánh skill.
 
 | Thông tin | Chi tiết |
 |---|---|
@@ -22,6 +22,7 @@ Chạy + né obstacle → thu coin / power-up → chạy thoát Void → chết 
 | Ngôn ngữ | C# thuần — không asset store gameplay |
 | Nền tảng build | **WebGL** (itch.io chính + Unity Play dự phòng) |
 | Mục tiêu | Game production hoàn chỉnh, phát hành WebGL |
+| Ngôn ngữ UI | **Tiếng Anh** (gameplay + menu) |
 
 ---
 
@@ -167,6 +168,23 @@ Assets/
 - [x] Prefab power-up (Shield/Magnet/Slow-mo) + coin — đã tạo trong Unity: `Prefabs/Pickups/Coin.prefab`, `Prefabs/PowerUps/Pickup_{Shield,Magnet,SlowMo}.prefab` + 3 asset `ScriptableObjects/{Shield,Magnet,SlowMo}.asset`; `PickupSpawner` + `PowerUpSystem` gắn vào Managers — ⚠️ Coin thiếu `Rotator` (thêm sau, không ảnh hưởng chức năng)
 
 **✅ Milestone G2:** Chơi hoàn chỉnh — score, combo, 3 power-up, âm thanh, best score lưu lại, độ khó tăng dần
+
+### Giai đoạn 2.5 — REFACTOR GAMEPLAY (2026-08-11 — user review) 🔴 ĐANG CHỜ DUYỆT
+> Mục tiêu: sửa 4 vấn đề cốt lõi user báo — player design, track vô tận, cơ chế Void, game over panel.
+> ⚠️ **Chưa code — docs trước, user duyệt rồi mới thực thi.**
+
+- [ ] **R3-3 — Cơ chế Void kiểu Subway Surfers/Temple Run** (quan trọng nhất):
+  - Player đụng vật cản lần 1 → Void TIẾN SÁT 1 nấc (vd 9m → 5m)
+  - Player không chạm nữa 10–15s → Void NỚI LẠI khoảng cách ban đầu (nới dần, không tụt về tức thì)
+  - **Chạm 2 lần trong cửa sổ 10–15s → Void nuốt → Game Over**
+  - Void KHÔNG tự tăng tốc theo thời gian (bỏ co dần 60s hiện tại); Void chỉ lớn/to hơn khi tiến sát
+  - Cần: `VoidChase` viết lại logic + `GameEvents` thêm `OnObstacleHit` → xử lý nấc tiến + cửa sổ; bỏ `HandleGameOver` do obstacle trực tiếp
+- [ ] **R3-4 — Game Over panel luôn hiện**: điều tra + fix `UIManager.ShowGameOver` chạy đúng khi Void nuốt/GameOver
+- [ ] **R3-1 — Player design**: đổi trái banh cyan → nhân vật chính (chờ user chốt: tàu/drone/phi hành gia) + vật lý phù hợp
+- [ ] **R3-2 — Track vô tận thật**: verify tile recycle chạy > 400m không hết; xử lý Ground tĩnh 400m (bỏ giới hạn nền)
+- [ ] **R3-5 — UI tiếng Anh toàn bộ** gameplay + menu (SCORE/COMBO/GAME OVER/RETRY/MENU/BEST/SOUND ON-OFF...)
+- [ ] **R3-7 — Best score ẩn khi = 0** (chỉ hiện khi có điểm thật)
+- [ ] **R3-6 — Layout nút âm thanh** (padding đủ, không thụt vào viền, không quá chật)
 
 ### Giai đoạn 3 — Polish & Deploy
 > Mục tiêu: game đẹp, có link demo gắn CV

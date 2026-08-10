@@ -108,6 +108,25 @@
 
 ---
 
+## 🔄 Cơ chế Void mới — Subway Surfers / Temple Run (sau refactor)
+
+> Các mục test này chỉ áp dụng SAU khi refactor gameplay được duyệt + code xong.
+
+| # | Kiểm tra | Kết quả |
+|---|---|---|
+| V1 | Đụng vật cản lần 1 → **KHÔNG chết**, Void tiến sát hơn (cảm nhận rõ) | ☐ |
+| V2 | Không chạm vật cản trong **10–15s** → Void NỚI LẠI khoảng cách ban đầu | ☐ |
+| V3 | Đụng **2 lần trong cửa sổ 10–15s** → Void nuốt → Game Over panel hiện | ☐ |
+| V4 | Game Over panel **LUÔN hiện** khi chết (không bao giờ "chết mà không thấy màn hình") | ☐ |
+| V5 | Void **không tự tăng tốc** theo thời gian — chỉ tiến sát khi player lỗi | ☐ |
+| V6 | Player mới (không phải banh xanh) di chuyển mượt, nhìn hợp lý | ☐ |
+| V7 | Track chạy **> 400m không hết đường** (tile recycle thật sự vô tận) | ☐ |
+| V8 | **Toàn bộ text gameplay + menu = tiếng Anh** (không còn Việt lẫn lộn) | ☐ |
+| V9 | Best score **ẩn khi = 0** ở MainMenu; hiện khi đã có điểm | ☐ |
+| V10 | Nút âm thanh: text không thụt vào viền, không quá chật | ☐ |
+
+---
+
 ## 🛠️ Công cụ test tự động (đang xem xét — tham khảo)
 
 | Công cụ | Loại | Dành cho | Có cần thiết? |

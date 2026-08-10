@@ -73,9 +73,35 @@
 | V2-3 | **2 bên đường trống trải** | props `sideOffset 11` nằm NGOÀI tầm camera (FOV 60 thấy ±8) → không bao giờ thấy props | sideOffset **7** + targetHeight **4.5** + countPerSide **14** + spacing 7.5 + FOV **68** + nền sáng `(0.1,0.06,0.2)` + light **0.8** | 🔧 chờ user chạy tool |
 | V2-4 | **Điểm số bị che** | ScorePanel góc trái nằm DƯỚI các element khác (sibling order) + bị che bởi panel | ScorePanel đưa lên **giữa-đỉnh** (anchor 0.5,1) + `SetAsLastSibling` (vẽ trên cùng — không gì che được) | 🔧 chờ user chạy tool |
 
-## 🔜 Kế hoạch fix vòng 3 (theo thứ tự ưu tiên — từng cái một)
+## 🆕 Vòng 3 — REVIEW TOÀN DIỆN của user (2026-08-11) — chưa fix, chờ duyệt plan
 
-1. **User chạy 4 tool** (Game scene): `Fix Void Chase` → `Setup Ambient` → `Polish Scene` → `Overhaul UI`; MainMenu: `Overhaul UI` + `Fix Audio Listener` → Ctrl+S cả 2
-2. **Test từ MainMenu**: ▶ Play → bấm PLAY → Game scene → chạy/né/thu coin → Void đuổi theo → chết → Game Over → CHƠI LẠI/MENU
-3. Xác minh "điểm sáng trắng" (G6) — giảm emission coin/Void nếu cần
-4. Test gameplay toàn diện (Menu → chơi → chết → retry) → mới deploy
+> User review toàn diện sau khi test thật. Đây là các quyết định THIẾT KẾ + bug — phải
+> cập nhật docs (RULES/plan/FEATURES/README) trước, user duyệt → mới code. Không tự fix vội.
+
+### 🔴 Gameplay (refactor lớn — cơ chế cốt lõi)
+
+| # | Vấn đề user báo | Phân tích | Hướng fix đề xuất |
+|---|---|---|---|
+| R3-1 | **Player là "trái banh xanh" không hợp lý** với tên game Void Runner | Player hiện là sphere cyan (`Player.mat`), Rigidbody lăn. Tên game gợi "kẻ chạy" — banh không phù hợp chủ thể | Đổi player thành **nhân chính phù hợp**: tàu vũ trụ nhỏ / phi hành gia / drone (chờ user chốt). Giữ tông cyan nổi trên nền tối |
+| R3-2 | **Đường chạy 1 mức cố định rồi HẾT — không vô tận** | Track dựa trên TileSpawner pool recycle (đúng thiết kế vô tận) NHƯNG có `Ground` tĩnh 400m → khi player chạy quá 400m, hết nền → cảm giác "hết đường". Hoặc tile recycle có lỗi | Verify tile recycle thật (player chạy > 400m không hết). Nếu Ground tĩnh là giới hạn → bỏ/tách: nền phải vô hạn hoặc vô hình, track do tile quyết định |
+| R3-3 | **Void đuổi theo là "banh tím", tốc độ tăng rất chậm, sẽ chạm player ở 1 mức điểm cố định** | VoidChase hiện giữ khoảng cách 9m→1.5m co dần theo thời gian (60s) — tức là "chạy đủ lâu là chết", không phản ánh skill người chơi | **Đổi sang cơ chế Subway Surfers/Temple Run** (R0.4): đụng vật cản lần 1 → Void tiến sát 1 nấc; không chạm 10–15s → Void nới lại khoảng cách ban đầu; **chạm 2 lần trong cửa sổ 10–15s → Game Over**. Void chỉ tiến khi player lỗi — không tự tăng tốc |
+| R3-4 | **KHÔNG thấy màn hình kết thúc game** | UIManager có trong scene (grep thấy 1) + GameOverPanel có trong scene (1). Có thể GameOverPanel không hiện vì: player chết do Void nuốt nhưng event/panel không chạy, hoặc panel bị che, hoặc field chưa gán | Điều tra: (1) `GameEvents.RaiseGameOver` có được gọi khi Void nuốt không; (2) `UIManager.ShowGameOver` có chạy không; (3) GameOverPanel có bị che/bị ẩn. Fix cho panel luôn hiện khi GameOver |
+
+### 🎨 UI / MainMenu
+
+| # | Vấn đề user báo | Phân tích | Hướng fix đề xuất |
+|---|---|---|---|
+| R3-5 | **Tiếng Việt/Tiếng Anh lộn xộn** — cần thống nhất TIẾNG ANH trong gameplay | Game scene: `SCORE`, `GAME OVER`, `MENU` (EN) nhưng `CAO NHẤT`, `CHƠI LẠI`? (Việt). MainMenu: `VOID RUNNER`, `PLAY`, `HOW TO PLAY` (EN) + âm thanh (Việt) | **Toàn bộ text gameplay = TIẾNG ANH**: SCORE, COMBO, GAME OVER, RETRY, MENU, BEST, HIGH SCORE, SOUND: ON/OFF. MainMenu cũng tiếng Anh (đồng nhất) |
+| R3-6 | **Nút âm thanh: text bị thụt vào trong, viền xanh bo tròn, quá chật** | SoundButton (MainMenu) — text `ÂM THANH: BẬT` bị thụt so với viền button (padding âm/quá nhỏ), layout chật | Fix layout nút: padding text hợp lý (không sát viền), size button đủ rộng, căn giữa. Kiểm tra RectTransform + padding |
+| R3-7 | **Best score hiển thị ngay từ đầu (bằng 0) — vô nghĩa** | MainMenuManager.RefreshBestScore luôn set text `ĐIỂM CAO NHẤT: 0` | Chỉ hiển thị best score khi `SaveSystem.BestScore > 0` (đã chơi và có điểm). Lần đầu chơi → ẩn text hoặc hiện placeholder |
+| R3-8 | *(đi kèm)* Game Over panel có thể chưa hiện được đúng (liên quan R3-4) | — | Test toàn bộ luồng chết → panel → retry/menu sau khi fix R3-4 |
+
+## 🔜 Kế hoạch fix vòng 4 (SAU KHI user duyệt plan refactor — từng cái một)
+
+1. ✅ **Docs trước** (đang làm): RULES.md + BUGS.md vòng 3 + plan giai đoạn refactor + FEATURES/TESTING/README/CHANGELOG → user duyệt
+2. **Refactor gameplay** (R3-3): cơ chế Subway/Temple — đụng obstacle → Void tiến sát; 2 lần/cửa sổ 10–15s → Game Over; không chạm → nới khoảng cách
+3. **Fix Game Over panel** (R3-4): đảm bảo luôn hiện khi game kết thúc
+4. **Player design** (R3-1): đổi hình dạng player theo user chốt
+5. **Track vô tận thật** (R3-2): bỏ giới hạn Ground tĩnh / verify tile recycle
+6. **UI English + layout nút âm thanh + best score ẩn** (R3-5/6/7)
+7. Test gameplay toàn diện → deploy

@@ -71,6 +71,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 - ✅ G3: **UI Kenney (menu + HUD)** + **VFX** (particle + popup điểm + screen shake + trail Void) + **Post-processing** (Bloom + Vignette + Color Grading) + **Material/Lighting** hoàn tất
 - ✅ **Unity Test Framework: 24/24 test xanh** (EditMode 16 + PlayMode 8)
 - 🔧 Đang làm: **6 bộ Kenney assets** → convert sprite → **HUD đẹp hơn** (score glow + label) → **ambient 2 bên đường** (Space Kit)
-- ⏭️ Tiếp theo: **Tuning/60 FPS** → WebGL build → upload
+- 🆕 **ĐANG CHỜ DUYỆT — Refactor gameplay (vòng 3 review user, 2026-08-11):** cơ chế Void kiểu Subway Surfers/Temple Run (đụng obstacle → Void tiến sát, 2 lần/10–15s → Game Over), player design, track vô tận thật, game over panel, UI tiếng Anh, best score ẩn khi =0, layout nút âm thanh. Xem `void-runner-plan.md` mục 2.5 + `BUGS.md` vòng 3.
+- ⏭️ Sau khi duyệt: **Refactor gameplay** → Tuning/60 FPS → WebGL build → upload
 
 *Chi tiết lỗi đã sửa + bài học: xem [`CHANGELOG.md`](CHANGELOG.md). Kế hoạch đầy đủ: [`void-runner-plan.md`](void-runner-plan.md).*
