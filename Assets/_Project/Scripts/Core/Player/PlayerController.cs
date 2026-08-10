@@ -55,6 +55,12 @@ namespace VoidRunner.Core.Player
             _currentLane = laneCount / 2;
             _targetX = 0f;
             _currentSpeed = forwardSpeed;
+
+            // R0.1 (fix 2026-08-11): tàu KHÔNG lăn — đóng băng xoay để khỏi bị vật lý
+            // (sphere collider lăn trên Ground) lật tàu liên tục.
+            _rb.constraints = RigidbodyConstraints.FreezeRotation;
+            _rb.angularVelocity = Vector3.zero;
+
             BuildSpaceship();
         }
 
@@ -136,6 +142,7 @@ namespace VoidRunner.Core.Player
             _targetX = 0f;
             _currentSpeed = forwardSpeed; // DifficultyManager sẽ gửi lại tốc độ mới qua event
             _rb.linearVelocity = Vector3.zero;
+            _rb.angularVelocity = Vector3.zero;
             _rb.position = _startPos;
             if (_ship != null) _ship.localRotation = Quaternion.identity;
         }
