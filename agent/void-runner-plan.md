@@ -175,7 +175,7 @@ Assets/
 - [x] **Game HUD + Game Over panel đẹp**: `Editor/HUDUIBuilder.cs` (dựng ScorePanel + coin icon + combo + panel GAME OVER + nút CHƠI LẠI/MENU, tự gán field UIManager); `UI/UIManager.cs` thêm RetryButton/MenuButton (Restart qua GameManager, Menu load scene MainMenu) — ✅ hoàn tất (scene đã lưu + commit)
 - [x] VFX: Particle khi collect coin/power-up + **screen shake** khi va chạm (Cinemachine Impulse) — ✅ xong (`VFXManager` tạo particle bằng code, không prefab; screen shake qua Impulse; tool `Setup VFX in Game Scene`)
 - [x] VFX: **trail theo Void** (TrailRenderer tạo bằng code, nở rộng theo scale, clear khi restart) + **popup điểm** khi nhặt coin (DOTween bounce, pool, nhân combo, font Kenney Future) — ✅ xong
-- [ ] URP Post-processing: **Bloom, Vignette, Color Grading** (Global Volume)
+- [x] URP Post-processing: **Bloom, Vignette, Color Grading** (Global Volume) — ✅ hoàn tất: tool `PostProcessingSetupTool` tự dựng Global Volume + profile (`Settings/PostProcessing/VoidRunnerProfile.asset`) với 3 override + bật `renderPostProcessing` trên camera; đã chạy cho Game + MainMenu
 - [ ] Material PBR tối giản đồng bộ (tông "hư không": tím/đen phát sáng); lighting + skybox nhất quán
 - [ ] Tuning: độ khó fair; Unity Profiler đảm bảo **60 FPS**; test nhiều độ phân giải
 - [ ] **WebGL build**: Resolution responsive · **Compression: Brotli** · WebGL 2.0 · Linear color space · chỉnh Initial Memory hợp lý (256–512 MB), hạn chế GC spike

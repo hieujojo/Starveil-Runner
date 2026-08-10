@@ -47,8 +47,8 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | 13 | Game HUD + Game Over | `UI/UIManager.cs` | ScorePanel + coin icon + score + combo (ẩn khi ×1); Game Over: title + điểm + cao nhất + **nút CHƠI LẠI / MENU** | Panel fade DOTween; nút CHƠI LẠI gọi `GameManager.Restart()`, MENU load scene MainMenu |
 | 14 | VFX | `Systems/VFX/VFXManager.cs` + `Editor/VFXSetupTool.cs` | **Particle**: coin burst tại vị trí coin + power-up burst (màu theo loại) — tạo 100% bằng code; **Popup điểm** "+10" nhân combo (DOTween bounce bay lên, pool 8 text, font Kenney Future) khi nhặt coin; **Screen shake** khi đâm obstacle (Cinemachine Impulse); **Vệt khói tối** theo Void (TrailRenderer code, nở rộng theo scale, clear khi restart) | Sự kiện `GameEvents` (thêm `OnCoinCollectedAt(Vector3)` mang vị trí) — zero coupling; pool + `Emit()` → không GC spike |
 | 15 | VFX trail Void + popup | *(gộp vào 14)* | ✅ Đã làm xong | — |
-| 16 | Post-processing | *(chưa làm)* | Bloom, Vignette, Color Grading (Global Volume) | ⏳ Bước kế tiếp |
-| 16 | WebGL + deploy | *(chưa làm)* | Build Brotli → itch.io + Unity Play + README | ⏳ Cuối cùng |
+| 16 | Post-processing | `Editor/PostProcessingSetupTool.cs` + `Settings/PostProcessing/VoidRunnerProfile.asset` | **Global Volume** cả 2 scene: **Bloom** (intensity 0.35, tint xanh — coin/power-up phát sáng), **Vignette** (0.25 tối xanh — cảm giác "hư không"), **Color Adjustments** (contrast +8, saturation +6, filter lạnh); bật `renderPostProcessing` trên Main Camera (volumeTrigger + layerMask); tool 1 nút idempotent — tự sửa profile rỗng nếu có | Profile asset tạo bằng code → **phải `AddObjectToAsset` từng component** (bài học m_AtlasTextures) |
+| 17 | WebGL + deploy | *(chưa làm)* | Build Brotli → itch.io + Unity Play + README | ⏳ Cuối cùng |
 
 ---
 
@@ -64,7 +64,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 ## 📌 Trạng thái hiện tại
 
 - ✅ G1 + G2 hoàn tất (commit theo convention, đã push)
-- ✅ G3: **UI Kenney (menu + HUD)** + **VFX** (particle + popup điểm + screen shake + trail Void) hoàn tất
-- ⏭️ Tiếp theo: **Post-processing** → Material/Lighting → WebGL build → upload
+- ✅ G3: **UI Kenney (menu + HUD)** + **VFX** (particle + popup điểm + screen shake + trail Void) + **Post-processing** (Bloom + Vignette + Color Grading) hoàn tất
+- ⏭️ Tiếp theo: **Material/Lighting** → WebGL build → upload
 
 *Chi tiết lỗi đã sửa + bài học: xem [`CHANGELOG.md`](CHANGELOG.md). Kế hoạch đầy đủ: [`void-runner-plan.md`](void-runner-plan.md).*
