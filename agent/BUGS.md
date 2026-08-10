@@ -113,3 +113,16 @@
 | R3-7 | Best score = 0 hiển thị vô nghĩa | `MainMenuManager.RefreshBestScore` ẩn text khi `BestScore <= 0` | ✅ code xong |
 
 > 📌 **Việc còn lại của user:** chạy tool `Refactor: Both Scenes` (2 scene) → Ctrl+S → test theo `TESTING.md` V1–V11.
+
+---
+
+## 🆕 Vòng 5 — User test tay (2026-08-11): 6 vấn đề
+
+| # | Vấn đề | Trạng thái |
+|---|---|---|
+| V5-1 | **Tàu vũ trụ lật lên xuống liên tục** — sphere lăn trên Ground → root xoay → tàu lật | ✅ Fix: `FreezeRotation` + zero angularVelocity |
+| V5-2 | **Đè A/D không đổi lane liên tục** (bấm 1 lần qua 1 lane) | ✅ Fix: InputReader poll trong Update + repeat 0.12s |
+| V5-3 | **Điểm quá to vỡ khung chứa điểm** (font 58 > panel 300) | ✅ Fix tool: panel 360x90 + font 40 |
+| V5-4 | **Text "x2" (combo) che nửa góc trái** — ComboText anchor (0,1)@(34,-150) con Canvas | ✅ Fix tool: xuống dưới điểm (0.5,1)@(0,-110) |
+| V5-5 | **KHÔNG có vật cản + xu** — wiring scene đúng 100% nhưng không spawn | 🔍 Đang chẩn đoán: đã thêm log `[DiagSpawn]`/`[DiagObstacle]`/`[DiagCoin]`, user chơi 15s gửi log |
+| V5-6 | **2 hàng cảnh vật trái/phải** (ambient) — lỗi tái diễn nhiều lần | ⏳ **Chờ user REVIEW code** (`AmbientScroller.cs` + `AmbientSetupTool.cs` + config scene) trước khi cho phép sửa |

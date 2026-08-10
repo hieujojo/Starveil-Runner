@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-08-11 — Vòng test tay: tàu lật, đè phím không liên tục, điểm vỡ khung, combo che góc, không vật cản/xu
+
+> User test tay (Phần C) báo 6 vấn đề. 4 fix xong + commit `cb6f6e3`, 1 đang chẩn đoán (vật cản/xu — log diag), 1 chờ user review (ambient 2 hàng — KHÔNG sửa theo yêu cầu).
+
+### Đã fix
+
+- **Tàu vũ trụ lật lên xuống liên tục** → `PlayerController.Awake` thêm `_rb.constraints = FreezeRotation` + zero `angularVelocity` (nguyên nhân: SphereCollider vẫn còn trên root — physics làm quả cầu LĂN trên Ground → root xoay → tàu con bị lật theo; tàu KHÔNG cần lăn). Reset angularVelocity khi Restart.
+- **Bấm/đè A-D không đổi lane liên tục** (phải bấm 2 lần mới qua 2 lane) → `InputReader` viết lại: poll `ReadValue<Vector2>()` trong `Update`, bấm phát qua lane ngay, **ĐÈ GIỮ → lặp mỗi `repeatInterval` 0.12s** (kiểu Subway Surfers — cảm giác di chuyển mượt).
+- **Điểm quá to vỡ khung chứa điểm** → `RefactorGameplayTool.FixHudLayout`: ScorePanel 300→360 rộng, ScoreText font 58→40, căn giữa (idempotent).
+- **Text "x2" (combo) che nửa góc trái** → ComboText đang là con CANVAS, anchor (0,1)@(34,-150) = góc trái màn hình → tool đưa xuống **DƯỚI panel điểm, căn giữa (0.5,1)@(0,-110)**, font 36.
+
+### Đang chẩn đoán (chưa rõ nguyên nhân — đã thêm log tạm)
+
+- **KHÔNG có vật cản + xu dù wiring scene ĐÚNG 100%** (ObstacleManager 2 data + prefab thật, PickupSpawner coinPrefab + 3 powerup, TileSpawner tilePrefab + obstacleManager, DifficultyManager 0.45, Tile.Awake lane markers OK, ObjectPool OK — đã grep/đọc toàn bộ). Tiles spawn (đường chạy + lane marker trượt) nhưng không thấy obstacle/coin → thêm `[DiagSpawn]`/`[DiagObstacle]`/`[DiagCoin]` log (mỗi 2s) để xác định khâu nào chặn. → user chơi 15s gửi log.
+
+### Bài học (dự kiến — chờ kết quả diag)
+
+- **Rigidbody + collider sphere vẫn LĂN dù không dùng AddForce** — khi player đổi từ "banh lăn" sang "tàu bay", phải đóng băng xoay (`FreezeRotation`) nếu không muốn vật lý xoay.
+- **`performed` event chỉ fire 1 lần mỗi lần bấm** — muốn "đè giữ = lặp", phải poll trạng thái trong Update + repeat timer.
+
+---
+
 ## 2026-08-11 — Tool Refactor "Đổi 0 text" — FindObjectsByType bỏ qua GameObject ẩn
 
 ### Đã xong
