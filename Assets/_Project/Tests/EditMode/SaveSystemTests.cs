@@ -10,6 +10,15 @@ namespace VoidRunner.Tests
     /// </summary>
     public class SaveSystemTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            // BẮT BUỘC: xóa save thật trước mỗi test — nếu không, test "DefaultsToZero"
+            // đọc phải dữ liệu PlayerPrefs còn sót từ lần chơi thật (bug gặp phải 2026-08-10).
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save();
+        }
+
         [TearDown]
         public void TearDown()
         {

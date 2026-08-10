@@ -92,6 +92,22 @@
 
 ---
 
+## 🐞 Nhật ký bug phát hiện khi test
+
+> Mỗi lần test, ghi bug tìm thấy vào đây (kèm trạng thái) — tránh lặp lại, tạo nguồn tài liệu
+> cho QA. Bug đã fix sẽ được đánh dấu ✅.
+
+### Bug: `BestScore_DefaultsToZero` fail trong EditMode tests (SaveSystemTests)
+- Mục: **EditMode tests (Unity Test Runner)**
+- Mức độ: Nhẹ (lỗi test bị ảnh hưởng bởi dữ liệu cũ — KHÔNG phải lỗi logic game)
+- Ngày phát hiện: 2026-08-10
+- Bước tái hiện: 1. Chơi game thật (ghi best score vào PlayerPrefs) 2. Mở Test Runner → EditMode → Run All 3. Test `BestScore_DefaultsToZero` fail (đọc phải score cũ)
+- Nguyên nhân: Test chỉ xóa PlayerPrefs trong `[TearDown]` (SAU test) — KHÔNG xóa TRƯỚC. Test đầu tiên đọc phải dữ liệu save thật còn sót từ lần chơi trước.
+- Cách fix: Thêm `[SetUp]` gọi `PlayerPrefs.DeleteAll() + Save()` trước mỗi test.
+- Trạng thái: ✅ Đã fix (2026-08-10)
+
+---
+
 ## 🛠️ Công cụ test tự động (đang xem xét — tham khảo)
 
 | Công cụ | Loại | Dành cho | Có cần thiết? |
