@@ -171,17 +171,19 @@ Assets/
 
 ### Giai đoạn 2.5 — REFACTOR GAMEPLAY (2026-08-11 — user review) 🔴 ĐANG CHỜ DUYỆT
 > Mục tiêu: sửa 4 vấn đề cốt lõi user báo — player design, track vô tận, cơ chế Void, game over panel.
-> ⚠️ **Chưa code — docs trước, user duyệt rồi mới thực thi.**
+> ⚠️ **Chưa code — docs đã chốt, user duyệt rồi mới thực thi.**
+> ✅ Đã chốt thiết kế: **Player = tàu vũ trụ nhỏ** · **Void 2 nấc cố định (9m → 5m)**.
 
-- [ ] **R3-3 — Cơ chế Void kiểu Subway Surfers/Temple Run** (quan trọng nhất):
-  - Player đụng vật cản lần 1 → Void TIẾN SÁT 1 nấc (vd 9m → 5m)
-  - Player không chạm nữa 10–15s → Void NỚI LẠI khoảng cách ban đầu (nới dần, không tụt về tức thì)
-  - **Chạm 2 lần trong cửa sổ 10–15s → Void nuốt → Game Over**
-  - Void KHÔNG tự tăng tốc theo thời gian (bỏ co dần 60s hiện tại); Void chỉ lớn/to hơn khi tiến sát
-  - Cần: `VoidChase` viết lại logic + `GameEvents` thêm `OnObstacleHit` → xử lý nấc tiến + cửa sổ; bỏ `HandleGameOver` do obstacle trực tiếp
+- [ ] **R3-3 — Cơ chế Void 2 nấc cố định** (quan trọng nhất):
+  - Void giữ khoảng cách nền **9m** sau player (trong tầm camera offset -10 → nhìn thấy)
+  - Đụng vật cản lần 1 → Void tiến sát còn **5m** (chưa chết)
+  - Né sạch **10–15s** → Void nới dần về **9m** (reset nấc 0)
+  - Đụng lần 2 TRONG cửa sổ 10–15s → Void nuốt → Game Over
+  - Void KHÔNG tự tăng tốc theo thời gian (bỏ co dần 60s cũ)
+  - Cần: `VoidChase` viết lại logic (2 nấc + cửa sổ nới lại) + `GameEvents.OnObstacleHit` (đã có) → xử lý nấc; bỏ `PlayerController.Die()` khi đụng obstacle (thay bằng RaiseObstacleHit); ScoreSystem giữ `OnObstacleHit → ResetCombo`
 - [ ] **R3-4 — Game Over panel luôn hiện**: điều tra + fix `UIManager.ShowGameOver` chạy đúng khi Void nuốt/GameOver
-- [ ] **R3-1 — Player design**: đổi trái banh cyan → nhân vật chính (chờ user chốt: tàu/drone/phi hành gia) + vật lý phù hợp
-- [ ] **R3-2 — Track vô tận thật**: verify tile recycle chạy > 400m không hết; xử lý Ground tĩnh 400m (bỏ giới hạn nền)
+- [ ] **R3-1 — Player = TÀU VŨ TRỤ NHỎ (đã chốt)**: đổi trái banh cyan → tàu bay (thân cube + cánh, primitive hoặc model Kenney space-kit `craft_speederB` đã có trong ambient!), tông cyan, đổi lane mượt; giữ Rigidbody (vật lý hiện tại) nhưng bỏ xoay lăn
+- [ ] **R3-2 — Track vô tận thật**: verify tile recycle chạy > 400m không hết; xử lý Ground tĩnh 400m (bỏ giới hạn nền — Ground chỉ là nền vô hình hoặc recycle theo tile)
 - [ ] **R3-5 — UI tiếng Anh toàn bộ** gameplay + menu (SCORE/COMBO/GAME OVER/RETRY/MENU/BEST/SOUND ON-OFF...)
 - [ ] **R3-7 — Best score ẩn khi = 0** (chỉ hiện khi có điểm thật)
 - [ ] **R3-6 — Layout nút âm thanh** (padding đủ, không thụt vào viền, không quá chật)

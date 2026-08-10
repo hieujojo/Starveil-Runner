@@ -11,14 +11,16 @@
 
 > Các rule này là kết quả review của user, được chốt thành định hướng bất biến:
 
-- **R0.1 — Player KHÔNG được là "trái banh" trong game tên "Void Runner".** Tên game gợi "kẻ chạy trốn khỏi Void" → player phải là **nhân vật/vật thể chủ thể hợp lý** (tàu vũ trụ nhỏ / phi hành gia / drone... — chờ user chốt). Tông màu cyan giữ được (nổi trên nền tối) nhưng hình dạng không phải quả bóng lăn.
+- **R0.1 — Player = TÀU VŨ TRỤ NHỎ (spaceship) — ĐÃ CHỐT 2026-08-11.** Không phải trái banh (tên game gợi "kẻ chạy trốn khỏi Void"). Tàu bay lơ lửng trên đường, tông cyan neon nổi trên nền tối, đổi lane mượt. Dựng bằng primitive (thân cube + cánh) hoặc model Kenney space-kit — không cần model nhân vật phức tạp.
 - **R0.2 — Void là KẺ ĐUỔI THEO ĐÍCH THỰC, không phải "banh tím trôi sau lưng".** Void = khối bóng tối (hư không) phình to, xuất hiện áp sát khi player chạm vật cản.
 - **R0.3 — Track PHẢI vô tận thật sự** (TileSpawner pool recycle). Nếu đường chạy hết → bug hệ thống (Ground tĩnh 400m không được là giới hạn — chỉ là nền, không phải track).
-- **R0.4 — Cơ chế chết kiểu Subway Surfers / Temple Run:** player đụng vật cản KHÔNG chết ngay.
-  - Lần 1 chạm vật cản → **Void tiến sát** player hơn 1 nấc.
-  - Player giữ khoảng cách, không chạm nữa trong **10–15s** → Void nới về khoảng cách ban đầu.
-  - **Chạm 2 lần trong cửa sổ 10–15s** → Void nuốt → Game Over.
+- **R0.4 — Cơ chế chết kiểu Subway Surfers / Temple Run — 2 NẤC CỐ ĐỊNH (ĐÃ CHỐT 2026-08-11):**
+  - Void giữ khoảng cách nền **9m** sau player (trong tầm camera offset -10 → nhìn thấy).
+  - **NẤC 1**: player đụng vật cản → Void tiến sát còn **5m** (vẫn chưa chết).
+  - **Nới lại**: player né sạch **10–15s** không đụng nữa → Void nới dần về **9m** (reset về nấc 0).
+  - **CHẾT**: player đụng lần 2 TRONG CỬA SỔ 10–15s (khi Void đang ở nấc 5m) → Void nuốt → Game Over.
   - Mọi vật cản chỉ khiến Void tiến gần — KHÔNG có cơ chế chết do obstacle trực tiếp.
+  - Void KHÔNG tự tăng tốc theo thời gian (bỏ cơ chế co dần 60s cũ — gây chết ở mức điểm cố định).
 - **R0.5 — Toàn bộ text trong gameplay = TIẾNG ANH** (SCORE, COMBO, GAME OVER, RETRY, MENU, BEST...). Không lộn xộn Việt/Anh trong scene Game.
 - **R0.6 — MainMenu: Best score chỉ hiển thị khi có dữ liệu thật (BestScore > 0).** Lần đầu chơi = 0 → ẩn (hiển thị vô nghĩa). Sau khi chơi và có điểm → mới hiện.
 - **R0.7 — Game Over panel BẮT BUỘC hiện khi game kết thúc.** Nếu user không thấy màn hình game over → bug nghiêm trọng, ưu tiên fix trước.
