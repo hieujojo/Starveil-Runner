@@ -176,7 +176,9 @@ Assets/
 - [x] VFX: Particle khi collect coin/power-up + **screen shake** khi va chạm (Cinemachine Impulse) — ✅ xong (`VFXManager` tạo particle bằng code, không prefab; screen shake qua Impulse; tool `Setup VFX in Game Scene`)
 - [x] VFX: **trail theo Void** (TrailRenderer tạo bằng code, nở rộng theo scale, clear khi restart) + **popup điểm** khi nhặt coin (DOTween bounce, pool, nhân combo, font Kenney Future) — ✅ xong
 - [x] URP Post-processing: **Bloom, Vignette, Color Grading** (Global Volume) — ✅ hoàn tất: tool `PostProcessingSetupTool` tự dựng Global Volume + profile (`Settings/PostProcessing/VoidRunnerProfile.asset`) với 3 override + bật `renderPostProcessing` trên camera; đã chạy cho Game + MainMenu
-- [ ] Material PBR tối giản đồng bộ (tông "hư không": tím/đen phát sáng); lighting + skybox nhất quán
+- [x] Material PBR tối giản đồng bộ (tông "hư không": tím/đen phát sáng); lighting + skybox nhất quán — ✅ tool `MaterialLightingSetupTool` (5 material phát sáng + Light lạnh + ambient/fog tím), đã chạy 2 scene
+- [x] **Unity Test Framework** — 24 test (EditMode 16 + PlayMode 8), **kết quả 24/24 xanh**; asmdef `VoidRunner.Core` (code chính) + `DOTween.Modules` (bài học predefined assembly)
+- [x] **Kenney assets 6 bộ** (ui-pack, space-expansion, game-icons, particle-pack, space-kit, space-station-kit — CC0) — ✅ đã copy vào `Art/kenney_*`, đang convert + dựng HUD đẹp + ambient 2 bên đường
 - [ ] Tuning: độ khó fair; Unity Profiler đảm bảo **60 FPS**; test nhiều độ phân giải
 - [ ] **WebGL build**: Resolution responsive · **Compression: Brotli** · WebGL 2.0 · Linear color space · chỉnh Initial Memory hợp lý (256–512 MB), hạn chế GC spike
 - [ ] **Upload itch.io** (chính): tài khoản → New project → Kind: HTML → nén thư mục WebGL `.zip` → mô tả + screenshot + GIF → Publish
@@ -214,6 +216,10 @@ Assets/
 | AI Navigation (2.0.12) | NavMesh cho Void chase | ✅ Có sẵn |
 | URP (17.4.0), Input System, TextMesh Pro | Nền tảng | ✅ Có sẵn |
 | kenney_ui-pack + space-expansion | Sprite UI (button/panel/icon) tông Blue | [kenney.nl](https://kenney.nl) — CC0, miễn phí |
+| kenney_game-icons | 425 icon (menu/HUD/power-up) | [kenney.nl/assets/game-icons](https://kenney.nl/assets/game-icons) — CC0 |
+| kenney_particle-pack | 193 sprite particle (bụi sao, glow) | [kenney.nl/assets/particle-pack](https://kenney.nl/assets/particle-pack) — CC0 |
+| kenney_space-kit | 772 sprite + FBX (cột trụ, kiến trúc — ambient 2 bên đường) | [kenney.nl/assets/space-kit](https://kenney.nl/assets/space-kit) — CC0 |
+| kenney_space-station-kit | 104 sprite + FBX (trạm vũ trụ lơ lửng) | [kenney.nl/assets/space-station-kit](https://kenney.nl/assets/space-station-kit) — CC0 |
 | kenney_music-jingles | BGM 8-bit | [kenney.nl](https://kenney.nl/assets/music-jingles) — CC0 |
 | Editor tools (`_Project/Editor/`) | Convert sprite, tạo font, dựng UI tự động | Tự viết (menu `Tools/Void Runner/`) |
 

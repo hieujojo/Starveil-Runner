@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-08-10 — Test framework + asmdef (ngày sửa lỗi compile nhiều nhất)
+
+### Đã xong
+
+- `Assets/_Project/Tests/`: **Unity Test Framework** — 2 asmdef (EditMode + PlayMode) + 6 file test, tổng **24 test**: EditMode 16 (SaveSystem 6, GameEvents 5, ScoreSystem 5) + PlayMode 8 (combo tăng/clamp/reset, score theo distance, lane clamp). Kết quả test thật: **EditMode 16/16 + PlayMode 8/8 xanh**.
+- **`VoidRunner.Core.asmdef`** — code chính chuyển từ `Assembly-CSharp` (predefined) sang custom assembly để test reference được.
+- **`DOTween.Modules.asmdef`** — module DOTween (source code) rời khỏi `Assembly-CSharp-firstpass`.
+- `Editor/MaterialLightingSetupTool.cs` — 5 material tông "hư không" (phát sáng neon) + Directional Light lạnh + ambient/fog tím, idempotent, đã chạy cho 2 scene.
+
+### Bài học — **QUY TẮC CỨNG của Unity 6 về asmdef (không bao giờ quên nữa!)**
+
+- **Custom asmdef KHÔNG THỂ reference `Assembly-CSharp` (predefined) — kể cả khi `overrideReferences: true`.** Đây là quy tắc bất khả thay đổi của Unity (không phải lỗi cấu hình). Hậu quả: test assembly reference `Assembly-CSharp` bị Unity im lặng bỏ qua → `CS0234: 'Core' does not exist in namespace 'VoidRunner'`. **Fix đúng chuẩn: code chính phải nằm trong asmdef THẬT** (tạo `VoidRunner.Core.asmdef`). Editor tools vẫn hoạt động vì predefined `Assembly-CSharp-Editor` TỰ ĐỘNG reference mọi asmdef có `autoReferenced: true`.
+- **Khi tạo asmdef cho code chính, phải liệt kê references tường minh cho mọi package dùng** — `Unity.TextMeshPro`, `Unity.InputSystem`, `Unity.Cinemachine` (dù chúng có `autoReferenced: true`, liệt kê tường minh là chuẩn — loại bỏ mọi nghi ngờ). Nếu thiếu → `CS0246: TMPro/TextMeshProUGUI/InputAction/CinemachineImpulseSource not found` ở hàng loạt file.
+- **Source code (.cs) trong `Assets/Plugins/` bị compile vào `Assembly-CSharp-firstpass` (predefined)** — custom asmdef KHÔNG reference được nó! DOTween dll core (Plugins) vẫn thấy được nhưng `DOTweenModuleUI.cs` (source trong Plugins/Modules) thì không → `CS1929: CanvasGroup.DOFade` lỗi "best overload ShortcutExtensions.DOFade(Material)". **Fix: tạo asmdef riêng trong thư mục Modules** (`DOTween.Modules.asmdef`, `autoReferenced: true`) rồi `VoidRunner.Core` reference nó.
+- **`[UnityTest] IEnumerator` bắt buộc có ít nhất 1 `yield return`** — nếu không → `CS0161: not all code paths return a value`. Dù test không cần chờ frame vẫn phải có `yield return null;`.
+- **Test SaveSystem phải xóa PlayerPrefs trong `[SetUp]` (TRƯỚC), không chỉ `[TearDown]` (SAU)** — test `BestScore_DefaultsToZero` fail vì đọc phải dữ liệu save THẬT còn sót từ lần chơi trước.
+- **Warning `Assembly ... not valid. Loading of assembly skipped` khi mở lại Unity** — VÔ HẠI: Unity quét `Library/ScriptAssemblies/` có DLL test/package cũ không khớp version → báo rồi tự dọn. Biến mất sau lần mở sau; bấm Clear Console.
+- **Chuỗi lỗi "lên từ 11 → 17 lỗi" khi đọc log** — các lỗi CS cũ KHÔNG tự biến mất khỏi `Editor.log`; khi kiểm tra phải so vị trí dòng lỗi với dòng `Tundra build success` cuối (lỗi nằm SAU success mới là thật).
+
+---
+
 ## 2026-08-10 — G3: Post-processing (Bloom + Vignette + Color Adjustments)
 
 ### Đã xong

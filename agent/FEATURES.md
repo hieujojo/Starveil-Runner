@@ -48,7 +48,11 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | 14 | VFX | `Systems/VFX/VFXManager.cs` + `Editor/VFXSetupTool.cs` | **Particle**: coin burst tại vị trí coin + power-up burst (màu theo loại) — tạo 100% bằng code; **Popup điểm** "+10" nhân combo (DOTween bounce bay lên, pool 8 text, font Kenney Future) khi nhặt coin; **Screen shake** khi đâm obstacle (Cinemachine Impulse); **Vệt khói tối** theo Void (TrailRenderer code, nở rộng theo scale, clear khi restart) | Sự kiện `GameEvents` (thêm `OnCoinCollectedAt(Vector3)` mang vị trí) — zero coupling; pool + `Emit()` → không GC spike |
 | 15 | VFX trail Void + popup | *(gộp vào 14)* | ✅ Đã làm xong | — |
 | 16 | Post-processing | `Editor/PostProcessingSetupTool.cs` + `Settings/PostProcessing/VoidRunnerProfile.asset` | **Global Volume** cả 2 scene: **Bloom** (intensity 0.35, tint xanh — coin/power-up phát sáng), **Vignette** (0.25 tối xanh — cảm giác "hư không"), **Color Adjustments** (contrast +8, saturation +6, filter lạnh); bật `renderPostProcessing` trên Main Camera (volumeTrigger + layerMask); tool 1 nút idempotent — tự sửa profile rỗng nếu có | Profile asset tạo bằng code → **phải `AddObjectToAsset` từng component** (bài học m_AtlasTextures) |
-| 17 | WebGL + deploy | *(chưa làm)* | Build Brotli → itch.io + Unity Play + README | ⏳ Cuối cùng |
+| 17 | Material/Lighting | `Editor/MaterialLightingSetupTool.cs` | **5 material tông "hư không"**: Background tím đen, Player cyan phát sáng, Enemy (Void) tím hồng, PickUp vàng phát sáng, Obstacle cam phát sáng; **Directional Light** trắng lạnh 1.1 + shadow mềm; **Ambient** tím tối (Flat) + **Fog** ExponentialSquared tím nhẹ (chiều sâu) | URP Lit + `_EMISSION` keyword + `RealtimeEmissive` GI — Bloom kích hoạt glow |
+| 18 | Unity Test Framework | `Tests/EditMode` + `Tests/PlayMode` (2 asmdef + 6 file) | **24 test** (16 EditMode + 8 PlayMode): SaveSystem (best score/volume), GameEvents, ScoreSystem logic + combo tăng/clamp/reset theo thời gian thật, lane clamp | **Kết quả test thật: 24/24 xanh** ✅ |
+| 19 | Assembly architecture | `Scripts/VoidRunner.Core.asmdef` + `Plugins/.../DOTween.Modules.asmdef` | Code chính thành custom assembly (test reference được); DOTween modules tách riêng | Bài học: predefined assembly không reference được từ custom asmdef |
+| 20 | Kenney assets (6 bộ) | `Art/kenney_*` | UI pack + space-expansion + **game-icons (425) + particle-pack (193) + space-kit (772 + FBX) + space-station-kit (104 + FBX)** — CC0 | Đang convert → dựng HUD đẹp + ambient 2 bên đường |
+| 21 | WebGL + deploy | *(chưa làm)* | Build Brotli → itch.io + Unity Play + README | ⏳ Cuối cùng |
 
 ---
 
@@ -64,7 +68,9 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 ## 📌 Trạng thái hiện tại
 
 - ✅ G1 + G2 hoàn tất (commit theo convention, đã push)
-- ✅ G3: **UI Kenney (menu + HUD)** + **VFX** (particle + popup điểm + screen shake + trail Void) + **Post-processing** (Bloom + Vignette + Color Grading) hoàn tất
-- ⏭️ Tiếp theo: **Material/Lighting** → WebGL build → upload
+- ✅ G3: **UI Kenney (menu + HUD)** + **VFX** (particle + popup điểm + screen shake + trail Void) + **Post-processing** (Bloom + Vignette + Color Grading) + **Material/Lighting** hoàn tất
+- ✅ **Unity Test Framework: 24/24 test xanh** (EditMode 16 + PlayMode 8)
+- 🔧 Đang làm: **6 bộ Kenney assets** → convert sprite → **HUD đẹp hơn** (score glow + label) → **ambient 2 bên đường** (Space Kit)
+- ⏭️ Tiếp theo: **Tuning/60 FPS** → WebGL build → upload
 
 *Chi tiết lỗi đã sửa + bài học: xem [`CHANGELOG.md`](CHANGELOG.md). Kế hoạch đầy đủ: [`void-runner-plan.md`](void-runner-plan.md).*
