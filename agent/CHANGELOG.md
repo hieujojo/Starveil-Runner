@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-08-11 — THỰC THI GIAI ĐOẠN 2.5 — REFACTOR GAMEPLAY (user đã duyệt plan)
+
+> User duyệt toàn bộ plan docs → code theo đúng R0.1–R0.8. 7 task đã code + commit + push.
+
+### Đã xong
+
+- **R3-3 — VoidChase.cs viết lại cơ chế 2 NẤC CỐ ĐỊNH** (Subway Surfers/Temple Run): bỏ hoàn toàn "co dần 60s" cũ (gây chết ở mức điểm cố định). NẤC 0 giữ 9m; đụng obstacle lần 1 → NẤC 1 tiến sát 5m + mở cửa sổ `relaxWindow` 12s; né sạch hết cửa sổ → nới về 9m; **đụng lần 2 trong cửa sổ → Void nuốt → Game Over**. Void không tự tăng tốc theo thời gian. Scale phình to khi áp sát (đe dọa). Giữ safety net `swallowDistance` + guard trạng thái trong `OnTriggerEnter`.
+- **R3-1 — PlayerController.cs = TÀU VŨ TRỤ NHỎ**: dựng từ primitive (thân + cánh trái/phải + buồng lái + động cơ phát sáng) trong Awake — idempotent (`transform.Find("Ship")`); tắt MeshRenderer trái banh cũ; material neon tạo bằng code (URP Lit + `_EMISSION`); **banking nghiêng nhẹ khi đổi lane** (visual child, không đụng collider). **Đụng obstacle KHÔNG chết** — chỉ `RaiseObstacleHit` (bỏ `Die()`); Shield vẫn miễn nhiễm.
+- **R3-4 — UIManager.ShowGameOver luôn hiện panel**: bỏ early-return khi `_scoreSystem == null`; dời `_panelGroup` setup lên trước; lưu `SaveSystem.BestScore` độc lập với ScoreSystem.
+- **R3-5 — UI tiếng Anh toàn bộ**: `UIManager` (SCORE: / BEST:), `MainMenuManager` (BEST SCORE: / SOUND: ON-OFF), tool `RefactorGameplayTool` đổi text scene (RETRY, SCORE: 0, BEST: 0, HowToPlay English, SOUND: ON).
+- **R3-7 — MainMenuManager.RefreshBestScore ẩn khi = 0**: `bestScoreText.gameObject.SetActive(BestScore > 0)`.
+- **R3-6 — Layout nút âm thanh**: `RefactorGameplayTool` SoundButton 300×66 → 340×76, text stretch + padding 18px/6px, font 32, NoWrap, căn giữa (hết thụt vào viền).
+- **R3-2 — Track vô tận thật**: tool kéo Ground 400m → 6000m (400m chỉ đủ chơi ~15–30s rồi "hết đường"; track thật là tile recycle vô tận).
+- **VoidChasePlayTests.cs (5 test PlayMode)**: stage 0 giữ 9m / đụng lần 1 tiến 5m không chết / né sạch nới về 9m / đụng lần 2 trong cửa sổ = Game Over / đụng sau khi đã nới lại là "lần 1 mới" không chết. GameManager dùng disabled + reflect State=Playing để tránh Start noise.
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Git: KHÔNG chạy nhiều `git commit` song song (spawn_agents parallel)** — tranh chấp `.git/index.lock` → lỗi `fatal: Unable to create index.lock`; tệ hơn, `git add` của tiến trình này có thể bị `git commit` của tiến trình khác cuốn vào (commit dính file lạ). **Luôn chạy git tuần tự — 1 lệnh/lần spawn.** (Đã gặp 2026-08-11: 3 commit song song → 1 fail lock, 1 dính file của nhánh khác.)
+- **Cơ chế chết phản ánh skill**: "đụng lỗi → hậu quả (Void tiến sát) → nới lại khi né sạch" tạo căng thẳng công bằng — đúng yêu cầu user (Subway Surfers không phải Temple Run ngẫu nhiên).
+- **Player visual tự dựng từ primitive chạy được ngay mà không cần model**: body/wings/cockpit/engine + material neon code — đủ đẹp cho hyper-casual, không tốn asset.
+
+---
+
 ## 2026-08-11 — QUYẾT ĐỊNH REFACTOR GAMEPLAY (user review toàn diện — CHƯA code)
 
 > User test thật và báo 8 vấn đề → tạm dừng deploy, chuyển hướng refactor cơ chế cốt lõi.

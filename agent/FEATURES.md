@@ -8,7 +8,7 @@
 
 ## 🎮 Tổng quan
 
-**Void Runner** — endless runner 3D, 3 lane, tự chạy. "Hư Không" (void) đuổi theo bằng NavMesh AI. Bị nuốt/đụng obstacle → Game Over. Nhặt coin + power-up, điểm cao nhất lưu lại.
+**Void Runner** — endless runner 3D, 3 lane, tự chạy. Player = **tàu vũ trụ nhỏ**. "Hư Không" (The Void) đuổi theo **cơ chế 2 nấc** (Subway Surfers/Temple Run): đụng obstacle lần 1 → Void tiến sát; né sạch 12s → nới lại; **đụng lần 2 trong cửa sổ → Void nuốt → Game Over**. Nhặt coin + power-up, điểm cao nhất lưu lại. UI 100% tiếng Anh.
 
 ```
 MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
@@ -22,9 +22,9 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 
 | # | Tính năng | File | Cách hoạt động | Ghi chú |
 |---|---|---|---|---|
-| 1 | Điều khiển 3 lane | `Core/Player/PlayerController.cs` | Bóng tự lăn tới; A/D hoặc mũi tên để đổi lane; lerp mượt | Rigidbody + Input System |
+| 1 | Điều khiển 3 lane | `Core/Player/PlayerController.cs` | **Tàu vũ trụ nhỏ** (dựng từ primitive trong Awake) tự bay tới; A/D hoặc mũi tên đổi lane; lerp mượt + **banking nghiêng khi đổi lane**; đụng obstacle chỉ `RaiseObstacleHit` (không chết) | Rigidbody + Input System; tàu = Body/WingL/WingR/Cockpit/Engine + material neon code |
 | 2 | Object pool tile | `Core/World/TileSpawner.cs` + `Tile.cs` | Pool sẵn tile, spawn trước + recycle sau lưng | Không GC spike giữa chừng |
-| 3 | AI đuổi theo (Void) | `Core/World/VoidChase.cs` | NavMeshAgent đuổi player; tốc độ + kích thước tăng dần | Điểm khác biệt so với runner thường |
+| 3 | AI đuổi theo (Void) | `Core/World/VoidChase.cs` | **Cơ chế 2 nấc cố định** (không NavMeshAgent — track vô tận không bake được): nấc 0 giữ 9m → đụng obstacle lần 1 → nấc 1 áp sát 5m (phình to) → né sạch 12s → nới về 9m → đụng lần 2 trong cửa sổ → Void nuốt → Game Over | Điểm khác biệt so với runner thường — Void phản ánh lỗi của player, không tự tăng tốc |
 | 4 | State machine | `Core/Game/GameManager.cs` | Menu → Playing → GameOver; phím R restart (tạm) | Event-driven |
 | 5 | Obstacle weighted | `Core/World/ObstacleManager.cs` + `Data/ObstacleData.cs` | Spawn theo tỉ lệ, luôn chừa ≥1 lane an toàn | ScriptableObject |
 
@@ -32,12 +32,12 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 
 | # | Tính năng | File | Cách hoạt động | Ghi chú |
 |---|---|---|---|---|
-| 6 | Score + combo | `Systems/Score/ScoreSystem.cs` | Điểm theo khoảng cách (×10) + coin; combo ×2…×5, reset khi va chạm | Event → UI, không coupling |
+| 6 | Score + combo | `Systems/Score/ScoreSystem.cs` | Điểm theo khoảng cách (×10) + coin; combo ×2…×5, reset khi va chạm (vẫn giữ) | Event → UI, không coupling |
 | 7 | Save best score + volume | `Systems/Save/SaveSystem.cs` | PlayerPrefs wrapper; best score chỉ ghi khi cao hơn | Sẵn sàng đổi JSON sau |
 | 8 | 3 Power-up | `Systems/PowerUp/PowerUpSystem.cs` + `Data/PowerUpData.cs` | **Shield** (miễn nhiễm 3s), **Magnet** (hút coin 6m), **Slow-mo** (`timeScale=0.5` 3s) | Registry tĩnh coin — không GC mỗi frame |
 | 9 | Audio | `Systems/Audio/AudioManager.cs` | BGM loop + 5 SFX (coin/death/powerup/lane/start); volume qua SaveSystem; DontDestroyOnLoad | Nghe `GameEvents` — zero coupling |
 | 10 | Độ khó tăng dần | `Systems/Difficulty/DifficultyManager.cs` | Tốc độ 10→20 + mật độ 0.45→0.75 trong 60s qua AnimationCurve | Reset đúng khi Restart |
-| 11 | MainMenu | `UI/Screens/MainMenuManager.cs` | Play / How to play / best score / sound toggle; load scene Game | Scene riêng, Build Settings index 0 |
+| 11 | MainMenu | `UI/Screens/MainMenuManager.cs` | Play / How to play / best score / sound toggle; **best score ẩn khi = 0**; load scene Game; text tiếng Anh (BEST SCORE / SOUND ON-OFF) | Scene riêng, Build Settings index 0 |
 
 ### G3 — Polish (đang làm)
 
@@ -71,7 +71,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 - ✅ G3: **UI Kenney (menu + HUD)** + **VFX** (particle + popup điểm + screen shake + trail Void) + **Post-processing** (Bloom + Vignette + Color Grading) + **Material/Lighting** hoàn tất
 - ✅ **Unity Test Framework: 24/24 test xanh** (EditMode 16 + PlayMode 8)
 - 🔧 Đang làm: **6 bộ Kenney assets** → convert sprite → **HUD đẹp hơn** (score glow + label) → **ambient 2 bên đường** (Space Kit)
-- 🆕 **ĐANG CHỜ DUYỆT — Refactor gameplay (vòng 3 review user, 2026-08-11):** cơ chế Void kiểu Subway Surfers/Temple Run (đụng obstacle → Void tiến sát, 2 lần/10–15s → Game Over), player design, track vô tận thật, game over panel, UI tiếng Anh, best score ẩn khi =0, layout nút âm thanh. Xem `void-runner-plan.md` mục 2.5 + `BUGS.md` vòng 3.
-- ⏭️ Sau khi duyệt: **Refactor gameplay** → Tuning/60 FPS → WebGL build → upload
+- ✅ **REFACTOR GAMEPLAY (Giai đoạn 2.5) HOÀN TẤT (2026-08-11, user đã duyệt):** Void 2 nấc cố định + PlayMode test mới + player tàu vũ trụ + track 6000m + Game Over panel luôn hiện + UI tiếng Anh + best score ẩn khi 0 + layout nút âm thanh. Xem `void-runner-plan.md` mục 2.5.
+- ⏭️ Tiếp theo: user chạy tool `Refactor: Both Scenes` → test tay theo `TESTING.md` (mục A–E + V1–V11) → Tuning/60 FPS → WebGL build → upload
 
 *Chi tiết lỗi đã sửa + bài học: xem [`CHANGELOG.md`](CHANGELOG.md). Kế hoạch đầy đủ: [`void-runner-plan.md`](void-runner-plan.md).*

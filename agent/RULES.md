@@ -97,6 +97,7 @@
 - **R6.9** — Asset đang mở trong Unity thì đĩa chưa cập nhật (Ctrl+S trước khi commit).
 - **R6.10** — Test SaveSystem phải xóa PlayerPrefs trong `[SetUp]` TRƯỚC (không chỉ TearDown SAU).
 - **R6.11** — Warning `Assembly ... not valid. Loading skipped` khi mở lại Unity = vô hại (DLL cũ) → Clear Console.
+- **R6.12** — **GIT: KHÔNG chạy nhiều `git commit` song song (spawn_agents parallel)** — tranh chấp `.git/index.lock` (`fatal: Unable to create index.lock`) + `git add` của tiến trình này có thể bị `git commit` của tiến trình khác cuốn vào (commit dính file lạ). Luôn chạy git tuần tự — 1 lệnh git/lần spawn. *(Tái phạm được 2026-08-11.)*
 
 ## 📝 NHÓM 7 — Commit / Docs
 

@@ -73,10 +73,10 @@
 | V2-3 | **2 bên đường trống trải** | props `sideOffset 11` nằm NGOÀI tầm camera (FOV 60 thấy ±8) → không bao giờ thấy props | sideOffset **7** + targetHeight **4.5** + countPerSide **14** + spacing 7.5 + FOV **68** + nền sáng `(0.1,0.06,0.2)` + light **0.8** | 🔧 chờ user chạy tool |
 | V2-4 | **Điểm số bị che** | ScorePanel góc trái nằm DƯỚI các element khác (sibling order) + bị che bởi panel | ScorePanel đưa lên **giữa-đỉnh** (anchor 0.5,1) + `SetAsLastSibling` (vẽ trên cùng — không gì che được) | 🔧 chờ user chạy tool |
 
-## 🆕 Vòng 3 — REVIEW TOÀN DIỆN của user (2026-08-11) — chưa fix, chờ duyệt plan
+## ✅ Vòng 3 — REVIEW TOÀN DIỆN của user (2026-08-11) — ĐÃ FIX (vòng 4 bên dưới)
 
-> User review toàn diện sau khi test thật. Đây là các quyết định THIẾT KẾ + bug — phải
-> cập nhật docs (RULES/plan/FEATURES/README) trước, user duyệt → mới code. Không tự fix vội.
+> User review toàn diện sau khi test thật → user duyệt plan → **đã code + commit + push (vòng 4)**.
+> Chi tiết từng fix: `CHANGELOG.md` mục "THỰC THI GIAI ĐOẠN 2.5".
 
 ### 🔴 Gameplay (refactor lớn — cơ chế cốt lõi)
 
@@ -96,12 +96,20 @@
 | R3-7 | **Best score hiển thị ngay từ đầu (bằng 0) — vô nghĩa** | MainMenuManager.RefreshBestScore luôn set text `ĐIỂM CAO NHẤT: 0` | Chỉ hiển thị best score khi `SaveSystem.BestScore > 0` (đã chơi và có điểm). Lần đầu chơi → ẩn text hoặc hiện placeholder |
 | R3-8 | *(đi kèm)* Game Over panel có thể chưa hiện được đúng (liên quan R3-4) | — | Test toàn bộ luồng chết → panel → retry/menu sau khi fix R3-4 |
 
-## 🔜 Kế hoạch fix vòng 4 (SAU KHI user duyệt plan refactor — từng cái một)
+## ✅ Vòng 4 — ĐÃ FIX (2026-08-11 — thực thi Giai đoạn 2.5, user đã duyệt plan)
 
-1. ✅ **Docs trước** (đang làm): RULES.md + BUGS.md vòng 3 + plan giai đoạn refactor + FEATURES/TESTING/README/CHANGELOG → user duyệt
-2. **Refactor gameplay** (R3-3): cơ chế Subway/Temple — đụng obstacle → Void tiến sát; 2 lần/cửa sổ 10–15s → Game Over; không chạm → nới khoảng cách
-3. **Fix Game Over panel** (R3-4): đảm bảo luôn hiện khi game kết thúc
-4. **Player design** (R3-1): đổi hình dạng player theo user chốt
-5. **Track vô tận thật** (R3-2): bỏ giới hạn Ground tĩnh / verify tile recycle
-6. **UI English + layout nút âm thanh + best score ẩn** (R3-5/6/7)
-7. Test gameplay toàn diện → deploy
+> User duyệt toàn bộ docs → code theo R0.1–R0.8. Code xong + commit + push.
+> ⚠️ User còn phải CHẠY TOOL `Tools → Void Runner → Refactor: Both Scenes` + Ctrl+S để scene áp dụng
+> (Ground 6000m, English texts, SoundButton layout) rồi test tay.
+
+| # | Vấn đề | Fix | Trạng thái |
+|---|---|---|---|
+| R3-1 | Player = banh xanh | `PlayerController.BuildSpaceship()` — tàu vũ trụ primitive (Body/WingL/WingR/Cockpit/Engine) + neon cyan code, tắt banh cũ, banking đổi lane | ✅ code xong — chờ test |
+| R3-2 | Đường chạy hết (Ground 400m) | `RefactorGameplayTool` kéo Ground 400m → **6000m** | 🔧 chờ user chạy tool |
+| R3-3 | Void "banh tím tự tăng tốc" → chết ở mức điểm cố định | `VoidChase` viết lại **2 nấc cố định** (9m → 5m khi đụng, nới về 9m sau 12s sạch, đụng lần 2 trong cửa sổ = Game Over); bỏ co dần 60s | ✅ code xong + 5 PlayMode test |
+| R3-4 | KHÔNG thấy Game Over panel | Nguyên nhân gốc: trước đây Void không bao giờ bắt kịp (bug NavMesh/camera) nên không có game over. `UIManager.ShowGameOver` bỏ early-return khi ScoreSystem null + `_panelGroup` setup sớm → panel luôn hiện | ✅ code xong |
+| R3-5 | Việt/Anh lộn xộn | UIManager/MainMenuManager text English (SCORE/BEST/SOUND ON-OFF) + tool đổi text scene (RETRY/SCORE: 0/BEST: 0/HowToPlay English) | ✅ code + 🔧 chờ user chạy tool |
+| R3-6 | Nút âm thanh thụt viền, chật | `RefactorGameplayTool` SoundButton 300×66 → 340×76, text stretch + padding 18/6px, font 32 NoWrap | 🔧 chờ user chạy tool |
+| R3-7 | Best score = 0 hiển thị vô nghĩa | `MainMenuManager.RefreshBestScore` ẩn text khi `BestScore <= 0` | ✅ code xong |
+
+> 📌 **Việc còn lại của user:** chạy tool `Refactor: Both Scenes` (2 scene) → Ctrl+S → test theo `TESTING.md` V1–V11.

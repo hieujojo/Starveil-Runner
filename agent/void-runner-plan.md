@@ -169,24 +169,23 @@ Assets/
 
 **✅ Milestone G2:** Chơi hoàn chỉnh — score, combo, 3 power-up, âm thanh, best score lưu lại, độ khó tăng dần
 
-### Giai đoạn 2.5 — REFACTOR GAMEPLAY (2026-08-11 — user review) 🔴 ĐANG CHỜ DUYỆT
-> Mục tiêu: sửa 4 vấn đề cốt lõi user báo — player design, track vô tận, cơ chế Void, game over panel.
-> ⚠️ **Chưa code — docs đã chốt, user duyệt rồi mới thực thi.**
+### Giai đoạn 2.5 — REFACTOR GAMEPLAY (2026-08-11 — user review) ✅ ĐÃ THỰC THI
 > ✅ Đã chốt thiết kế: **Player = tàu vũ trụ nhỏ** · **Void 2 nấc cố định (9m → 5m)**.
+> ✅ Code xong + commit + push (2026-08-11) — user chạy tool `Refactor: Both Scenes` rồi test.
 
-- [ ] **R3-3 — Cơ chế Void 2 nấc cố định** (quan trọng nhất):
+- [x] **R3-3 — Cơ chế Void 2 nấc cố định** (quan trọng nhất):
   - Void giữ khoảng cách nền **9m** sau player (trong tầm camera offset -10 → nhìn thấy)
   - Đụng vật cản lần 1 → Void tiến sát còn **5m** (chưa chết)
   - Né sạch **10–15s** → Void nới dần về **9m** (reset nấc 0)
   - Đụng lần 2 TRONG cửa sổ 10–15s → Void nuốt → Game Over
   - Void KHÔNG tự tăng tốc theo thời gian (bỏ co dần 60s cũ)
-  - Cần: `VoidChase` viết lại logic (2 nấc + cửa sổ nới lại) + `GameEvents.OnObstacleHit` (đã có) → xử lý nấc; bỏ `PlayerController.Die()` khi đụng obstacle (thay bằng RaiseObstacleHit); ScoreSystem giữ `OnObstacleHit → ResetCombo`
-- [ ] **R3-4 — Game Over panel luôn hiện**: điều tra + fix `UIManager.ShowGameOver` chạy đúng khi Void nuốt/GameOver
-- [ ] **R3-1 — Player = TÀU VŨ TRỤ NHỎ (đã chốt)**: đổi trái banh cyan → tàu bay (thân cube + cánh, primitive hoặc model Kenney space-kit `craft_speederB` đã có trong ambient!), tông cyan, đổi lane mượt; giữ Rigidbody (vật lý hiện tại) nhưng bỏ xoay lăn
-- [ ] **R3-2 — Track vô tận thật**: verify tile recycle chạy > 400m không hết; xử lý Ground tĩnh 400m (bỏ giới hạn nền — Ground chỉ là nền vô hình hoặc recycle theo tile)
-- [ ] **R3-5 — UI tiếng Anh toàn bộ** gameplay + menu (SCORE/COMBO/GAME OVER/RETRY/MENU/BEST/SOUND ON-OFF...)
-- [ ] **R3-7 — Best score ẩn khi = 0** (chỉ hiện khi có điểm thật)
-- [ ] **R3-6 — Layout nút âm thanh** (padding đủ, không thụt vào viền, không quá chật)
+  - ✅ `VoidChase` viết lại (2 nấc + `relaxWindow` 12s + safety net) + `PlayerController` bỏ `Die()` (đụng obstacle chỉ `RaiseObstacleHit`); ScoreSystem giữ `OnObstacleHit → ResetCombo`; **thêm 5 PlayMode test** (`VoidChasePlayTests`)
+- [x] **R3-4 — Game Over panel luôn hiện**: fix `UIManager.ShowGameOver` — bỏ early-return khi ScoreSystem null, dời `_panelGroup` setup lên trước (nguyên nhân gốc "không thấy màn hình game over" trước đó là Void không bao giờ bắt kịp — bug camera/NavMesh đã fix)
+- [x] **R3-1 — Player = TÀU VŨ TRỤ NHỎ (đã chốt)**: `PlayerController.BuildSpaceship()` — primitive (Body/WingL/WingR/Cockpit/Engine) + material neon cyan code, tắt banh cũ, banking khi đổi lane; giữ Rigidbody
+- [x] **R3-2 — Track vô tận thật**: Ground 400m → 6000m qua tool (400m chỉ đủ 15–30s chơi); tile recycle vốn vô tận
+- [x] **R3-5 — UI tiếng Anh toàn bộ** gameplay + menu (SCORE/BEST/RETRY/SOUND ON-OFF/HowToPlay English...) — code + tool `RefactorGameplayTool`
+- [x] **R3-7 — Best score ẩn khi = 0** (chỉ hiện khi có điểm thật)
+- [x] **R3-6 — Layout nút âm thanh** (SoundButton 340×76 + padding 18px, font 32 NoWrap)
 
 ### Giai đoạn 3 — Polish & Deploy
 > Mục tiêu: game đẹp, có link demo gắn CV

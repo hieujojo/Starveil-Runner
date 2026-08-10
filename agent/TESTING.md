@@ -25,8 +25,8 @@
 | A1 | Tựa đề **"VOID RUNNER"** font Kenney Future sắc nét (không ô vuông □) | ☐ |
 | A2 | Nền tối tím + hơi sương mù, menu không chói | ☐ |
 | A3 | 3 nút (PLAY / HOW TO PLAY / âm thanh) có sprite Blue + hiệu ứng hover sáng | ☐ |
-| A4 | Best score hiển thị (lần đầu là 0) | ☐ |
-| A5 | Bấm **HOW TO PLAY** → panel kính hiện + bấm lại để ẩn | ☐ |
+| A4 | Best score **ẨN khi lần đầu chơi (= 0)** — chỉ hiện khi đã có điểm thật (R0.6) | ☐ |
+| A5 | Bấm **HOW TO PLAY** → panel kính hiện (nội dung tiếng Anh) + bấm lại để ẩn | ☐ |
 | A6 | Bấm nút **âm thanh** → icon đổi trạng thái, BGM tắt/bật theo | ☐ |
 | A7 | Bấm **PLAY** → chuyển sang scene Game | ☐ |
 
@@ -51,7 +51,7 @@
 
 | # | Kiểm tra | Kết quả |
 |---|---|---|
-| C1 | Chết → panel Game Over hiện (fade mượt), hiện ĐIỂM + CAO NHẤT (vàng) | ☐ |
+| C1 | Chết → panel Game Over hiện (fade mượt), hiện **SCORE + BEST** (vàng, tiếng Anh) | ☐ |
 | C2 | Bấm **CHƠI LẠI** → game chạy lại từ đầu, score reset, combo reset, **vệt khói Void không kéo dài xuyên map** | ☐ |
 | C3 | Bấm **MENU** → quay về MainMenu | ☐ |
 | C4 | Vào lại game → **Best score đã lưu** (PlayerPrefs) | ☐ |
@@ -110,7 +110,8 @@
 
 ## 🔄 Cơ chế Void mới — Subway Surfers / Temple Run (sau refactor)
 
-> Các mục test này chỉ áp dụng SAU khi refactor gameplay được duyệt + code xong.
+> ✅ Refactor gameplay ĐÃ CODE (2026-08-11) — các mục này test được ngay.
+> 🧪 **Test tự động đi kèm**: `VoidChasePlayTests` (PlayMode, 5 test) — đã chạy/validate trước khi test tay.
 
 | # | Kiểm tra | Kết quả |
 |---|---|---|
@@ -119,11 +120,12 @@
 | V3 | Đụng **2 lần trong cửa sổ 10–15s** → Void nuốt → Game Over panel hiện | ☐ |
 | V4 | Game Over panel **LUÔN hiện** khi chết (không bao giờ "chết mà không thấy màn hình") | ☐ |
 | V5 | Void **không tự tăng tốc** theo thời gian — chỉ tiến sát khi player lỗi | ☐ |
-| V6 | Player mới (không phải banh xanh) di chuyển mượt, nhìn hợp lý | ☐ |
-| V7 | Track chạy **> 400m không hết đường** (tile recycle thật sự vô tận) | ☐ |
-| V8 | **Toàn bộ text gameplay + menu = tiếng Anh** (không còn Việt lẫn lộn) | ☐ |
+| V6 | Player = **tàu vũ trụ nhỏ** (không còn banh xanh), banking khi đổi lane, nhìn hợp lý | ☐ |
+| V7 | Track chạy **> 400m không hết đường** (Ground 6000m + tile recycle) | ☐ |
+| V8 | **Toàn bộ text gameplay + menu = tiếng Anh** (RETRY/SCORE/BEST/SOUND ON-OFF/HowToPlay) | ☐ |
 | V9 | Best score **ẩn khi = 0** ở MainMenu; hiện khi đã có điểm | ☐ |
 | V10 | Nút âm thanh: text không thụt vào viền, không quá chật | ☐ |
+| V11 | Void **phình to hơn khi tiến sát** (nấc 1 đe dọa) | ☐ |
 
 ---
 

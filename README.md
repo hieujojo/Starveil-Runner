@@ -22,20 +22,22 @@
 
 | Tính năng | Kỹ thuật | Trạng thái |
 |---|---|---|
-| **The Void đuổi theo — cơ chế tiến sát khi player lỗi** | Chase trực tiếp + cửa sổ 10–15s (đụng 2 lần → Game Over) | 🚧 Refactor (chờ duyệt) |
-| Track sinh vô tận | **Object Pool** (`ObjectPool<T>`) — không Instantiate/Destroy giữa chừng | ✅ |
+| **The Void đuổi theo — cơ chế tiến sát khi player lỗi** | Chase trực tiếp + **2 nấc cố định** (9m → 5m khi đụng, nới lại sau 12s sạch, đụng lần 2 trong cửa sổ → Game Over) | ✅ |
+| Player = **tàu vũ trụ nhỏ** | Dựng từ primitive + material neon (không cần model), banking khi đổi lane | ✅ |
+| Track sinh vô tận | **Object Pool** (`ObjectPool<T>`) + Ground 6000m — chạy mãi không hết đường | ✅ |
 | Obstacle cấu hình được | **ScriptableObject** (`ObstacleData`) + gắn ngẫu nhiên theo weight | ✅ |
 | Giao tiếp hệ thống | **C# Event-driven** (`GameEvents`) — decoupled, không coupling trực tiếp | ✅ |
 | State machine | `GameManager` (Menu / Playing / GameOver / Restart) | ✅ |
 | Input hiện đại | **Unity Input System** (2D Vector composite, hỗ trợ A/D + mũi tên) | ✅ |
 | Camera điện ảnh | **Cinemachine** (Framing Transposer) | ✅ |
 | Kiến trúc | **Clean Architecture**: `UI → Systems → Core`, folder `Assets/_Project/` | ✅ |
-| Điểm số / combo | event-driven `ScoreSystem` | 🚧 Giai đoạn 2 |
-| UI (HUD / Menu / Game Over) | `UIManager` + TextMeshPro | 🚧 Giai đoạn 2 |
-| Power-up | Shield / Magnet / Slow-mo | 🚧 Giai đoạn 2 |
-| Audio + Save | `AudioManager` singleton + `SaveSystem` (PlayerPrefs) | 🚧 Giai đoạn 2 |
-| Polish | Post-processing, VFX, screen shake (DOTween) | 🚧 Giai đoạn 3 |
-| Deploy | **WebGL build → itch.io / Unity Play** | 🚧 Giai đoạn 3 |
+| Điểm số / combo | event-driven `ScoreSystem` | ✅ |
+| UI (HUD / Menu / Game Over) | `UIManager` + TextMeshPro — **toàn bộ tiếng Anh** | ✅ |
+| Power-up | Shield / Magnet / Slow-mo | ✅ |
+| Audio + Save | `AudioManager` singleton + `SaveSystem` (PlayerPrefs) | ✅ |
+| Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Void | ✅ |
+| Test tự động | **Unity Test Framework — 24 test + 5 PlayMode test Void 2 nấc** | ✅ |
+| Deploy | **WebGL build → itch.io / Unity Play** | ⏳ Giai đoạn 3 |
 
 ---
 
@@ -96,7 +98,7 @@ Assets/_Project/
 | **G0** | Setup: Clean Architecture, Cinemachine, DOTween | ✅ Hoàn thành |
 | **G1** | Core gameplay: lane switching, tile spawner (object pool), Void chase, obstacle | ✅ Code xong |
 | **G2** | Hệ thống: Score (combo), UI, Power-up, Audio, Save, Difficulty | ✅ Code xong |
-| **G2.5** | **Refactor gameplay theo review user** (Void tiến sát, player design, track vô tận, UI English) | 🔴 Chờ duyệt |
+| **G2.5** | **Refactor gameplay theo review user** (Void 2 nấc, player tàu vũ trụ, track vô tận, UI English, best score ẩn) | ✅ Hoàn thành (2026-08-11) |
 | **G3** | Polish & Deploy: VFX, post-processing, WebGL → itch.io / Unity Play, README | ⏳ |
 
 ---
