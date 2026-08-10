@@ -5,6 +5,19 @@
 
 ---
 
+## 2026-08-11 — 2 lỗi compile gây safe mode (CameraFollowFixTool)
+
+### Đã xong
+
+- **Fix `CS0103: The name 'BindingMode'/'AngularDampingMode' does not exist in the current context`** (2 lỗi đỏ → buộc vào safe mode) trong `Assets/_Project/Editor/CameraFollowFixTool.cs`. Nguyên nhân: `BindingMode` và `AngularDampingMode` nằm trong namespace **`Unity.Cinemachine.TargetTracking`**, KHÔNG phải `Unity.Cinemachine` (chỉ `CinemachineCamera`, `CinemachineFollow` ở namespace `Unity.Cinemachine`). File chỉ có `using Unity.Cinemachine;` → 2 enum này không resolve. **Fix: thêm `using Unity.Cinemachine.TargetTracking;`.**
+
+### Bài học — **QUY TẮC CỨNG của Cinemachine 3 (Unity 6)**
+
+- Trong Cinemachine 3 (Unity 6), các enum `BindingMode`, `AngularDampingMode` và struct `TrackerSettings` nằm trong **`Unity.Cinemachine.TargetTracking`** — khi viết Editor tool thao tác `CinemachineFollow.TrackerSettings` phải `using` cả `Unity.Cinemachine` LẪN `Unity.Cinemachine.TargetTracking`. Kiểm tra nhanh trước khi viết: `grep -rln 'enum BindingMode' Library/PackageCache/com.unity.cinemachine@*/Runtime/` → luôn trả về file `TargetTracking.cs` với `namespace Unity.Cinemachine.TargetTracking`.
+- **Khi tool mới gây safe mode:** 2 lỗi `CS0103` cùng 1 file Editor = 95% thiếu `using` namespace lồng của package (Cinemachine chia namespace sâu). Trước khi commit tool mới, nên grep namespace thật của mọi type lạ trong `Library/PackageCache`.
+
+---
+
 ## 2026-08-10 — Test framework + asmdef (ngày sửa lỗi compile nhiều nhất)
 
 ### Đã xong
