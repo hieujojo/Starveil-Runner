@@ -19,14 +19,14 @@ namespace VoidRunner.EditorTools
         [MenuItem("Tools/Void Runner/Setup Post-Processing in Open Scene")]
         public static void SetupPostProcessing()
         {
-            var scene = SceneManager.GetActiveScene();
+            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
             if (string.IsNullOrEmpty(scene.path))
             {
                 Debug.LogWarning("[VoidRunner] Vui lòng lưu scene trước (Ctrl+S) rồi chạy lại tool.");
                 return;
             }
 
-            var volumeGo = EnsureGlobalVolume(scene.name);
+            var volumeGo = EnsureGlobalVolume();
             var camera = Camera.main;
             if (camera == null)
             {
@@ -43,10 +43,10 @@ namespace VoidRunner.EditorTools
         }
 
         /// <summary>Đảm bảo tồn tại GameObject Global Volume (isGlobal) có profile với 3 override.</summary>
-        private static GameObject EnsureGlobalVolume(string sceneName)
+        private static GameObject EnsureGlobalVolume()
         {
             // 1. Tìm volume có sẵn trong scene
-            var existing = Object.FindFirstObjectByType<Volume>();
+            var existing = Object.FindAnyObjectByType<Volume>();
             if (existing != null && existing.isGlobal && existing.sharedProfile != null)
             {
                 Debug.Log($"[VoidRunner] Đã có Global Volume '{existing.gameObject.name}' — giữ nguyên.");
