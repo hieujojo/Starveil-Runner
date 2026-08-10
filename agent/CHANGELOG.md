@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-11 — Font Kenney Future SDF THIẾU GLYPH — combo "x2" hiện lỗi "H2" (đã fix, chờ user regenerate)
+
+> User chơi thấy text lạ "H2" màu cam góc trái, trông bị mirror/glitch = **ComboText "x2"** đang render qua **fallback font**.
+
+### Đã xong
+
+- **Root cause:** `TMP_FontAsset.CreateFontAsset(font, 128, 9, SDFAA, 1024, 1024)` — atlas **1024² + sampling 128 + padding 9 chỉ chứa ~40/95 ký tự ASCII** → font trên đĩa chỉ có **30-41 ký tự**: `0 : A B C D E H I L M N O P R S T U V W Y _ a h m n t Â …` → **THIẾU 'x', '2', các chữ thường còn lại** → ComboText "x2" + HowToPlay English (toàn chữ thường) render qua fallback (glyph lệch tỉ lệ → nhìn như "H2" mirror). Score "1,017" hiện đúng vì ScoreText dùng font khác đủ digit.
+- **Fix (3 thay đổi, commit):**
+  1. `UIBuilderHelpers.CreateFontAssetCore` — atlas **1024 → 2048** (đủ ~196 ô → toàn bộ ASCII).
+  2. Thêm **`ReadGuid`/`RestoreGuid`**: DeleteAsset+CreateAsset sinh **GUID MỚI** → mọi text trong scene mất font → lưu guid cũ trước khi xóa, restore vào `.meta` mới (Regex thay `guid: [0-9a-f]{32}` + `AssetDatabase.ImportAsset(ForceUpdate)`).
+  3. `CreateFontAssetIfMissing` **tự heal**: check `characterTable.Count >= 80` (không chỉ atlasTexture — font thiếu glyph vẫn có atlas) + log số ký tự sau khi tạo để phát hiện sớm.
+- **User cần chạy lại tool** `Tools → Void Runner → Create TMP Font (Kenney Future)` để tái tạo font 2048 (kèm `Refactor: Game Scene` cho HUD layout).
+
+### Bài học — **QUY TẮC MỚI**
+
+- **TMP font atlas 1024² + sampling 128 = chỉ đủ ~40 glyph** — khi text hiện ký tự "lạ/vỡ" (thường là chữ thường hoặc ký tự đặc biệt) → nghi ngờ **font thiếu glyph**, không phải lỗi layout. Kiểm tra nhanh: `grep 'm_Unicode:' <font>.asset` — đếm chữ thường (97-122) / digit (48-57) / chữ hoa (65-90).
+- **Editor tool regenerate asset (DeleteAsset+CreateAsset) sinh GUID MỚI** — mọi tham chiếu scene (text TMP, prefab...) gãy âm thầm (không lỗi console, text rơi về font mặc định). Khi regenerate asset đang được scene reference: **lưu guid cũ (đọc .meta) → restore sau khi tạo lại**.
+
+---
+
 ## 2026-08-11 — Vòng test tay: tàu lật, đè phím không liên tục, điểm vỡ khung, combo che góc, không vật cản/xu
 
 > User test tay (Phần C) báo 6 vấn đề. 4 fix xong + commit `cb6f6e3`, 1 đang chẩn đoán (vật cản/xu — log diag), 1 chờ user review (ambient 2 hàng — KHÔNG sửa theo yêu cầu).

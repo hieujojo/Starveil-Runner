@@ -83,6 +83,8 @@
 - **R5.5** — CanvasScaler 1920×1080 Match 0.5; EventSystem phải dùng **Input System UI module** (project dùng Input System).
 - **R5.6** — Nút phải có component `Button` thật (Text-TMP thuần không phải button — object picker không hiện).
 - **R5.7** — `AudioListener` chỉ 1 per scene — nếu gắn AudioManager (DontDestroyOnLoad) có RequireComponent(AudioListener) phải xóa listener trên Main Camera.
+- **R5.8** — **TMP font atlas phải đủ lớn cho TOÀN BỘ ký tự dùng** — 1024² + sampling 128 chỉ chứa ~40 glyph (thiếu chữ thường, 'x', '2' → text hiện "lạ/vỡ" qua fallback). Dùng **2048²** (`CreateFontAsset(font, 128, 9, SDFAA, 2048, 2048)`). Kiểm tra nhanh: `grep 'm_Unicode:' <font>.asset` — đếm chữ thường (97-122) / digit (48-57) / hoa (65-90). *(Bug 2026-08-11: combo "x2" thành "H2".)*
+- **R5.9** — **Editor tool regenerate asset (DeleteAsset+CreateAsset) sinh GUID MỚI → gãy mọi tham chiếu scene âm thầm** — phải lưu guid cũ (đọc `.meta`) trước khi xóa + restore sau khi tạo lại (`Regex` thay `guid: [0-9a-f]{32}` + `AssetDatabase.ImportAsset(path, ForceUpdate)`). *(Bug 2026-08-11: font.)*
 
 ## ⚙️ NHÓM 6 — Workflow Unity / Git (thủ tục bất biến)
 
