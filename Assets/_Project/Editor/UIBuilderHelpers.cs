@@ -24,7 +24,13 @@ namespace VoidRunner.EditorTools
         public static TMP_FontAsset CreateFontAssetIfMissing(string fontAssetPath)
         {
             var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(fontAssetPath);
-            if (existing != null && existing.atlasTexture != null) return existing;
+            // ⚠️ Check ĐỦ ký tự, không chỉ atlasTexture: font atlas 1024 cũ chỉ chứa ~30-41/95 ký tự ASCII
+            // (thiếu 'x', '2', chữ thường) → atlas tồn tại nhưng font VẪN HỎNG → phải tái tạo (bug 2026-08-11).
+            if (existing != null && existing.atlasTexture != null
+                && existing.characterTable != null && existing.characterTable.Count >= 80)
+            {
+                return existing;
+            }
 
             var font = AssetDatabase.LoadAssetAtPath<Font>(KenneyFontPath);
             if (font == null)
@@ -41,8 +47,14 @@ namespace VoidRunner.EditorTools
 
             if (File.Exists(fontAssetPath))
             {
+                // ⚠️ Giữ NGUYÊN guid khi tái tạo — nếu không, text trong scene mất font (rơi về mặc định).
+                string oldGuid = ReadGuid(fontAssetPath);
                 AssetDatabase.DeleteAsset(fontAssetPath);
                 AssetDatabase.Refresh();
+
+                TMP_FontAsset created = CreateFontAssetCore(font, fontAssetPath);
+                RestoreGuid(fontAssetPath, oldGuid);
+                return created;
             }
 
             return CreateFontAssetCore(font, fontAssetPath);
@@ -52,10 +64,12 @@ namespace VoidRunner.EditorTools
         /// Tạo TMP font + LƯU CẢ texture/material làm sub-asset — dùng chung cho mọi tool UI.
         /// (Bài học m_AtlasTextures: CreateFontAsset tạo texture/material trong memory, không tự lưu;
         /// thiếu AddObjectToAsset → file .asset ghi fileID 0 → mở lại Unity là font rỗng + exception.)
+        /// ⚠️ Atlas BẮT BUỘC 2048x2048 (không được 1024): sampling 128 + padding 9 → 1024 chỉ chứa ~40/95 ký tự
+        /// ASCII → thiếu 'x', '2', chữ thường → combo "x2" / HowToPlay chữ thường hiện lỗi (bug 2026-08-11).
         /// </summary>
         public static TMP_FontAsset CreateFontAssetCore(Font font, string fontAssetPath)
         {
-            var fontAsset = TMP_FontAsset.CreateFontAsset(font, 128, 9, GlyphRenderMode.SDFAA, 1024, 1024);
+            var fontAsset = TMP_FontAsset.CreateFontAsset(font, 128, 9, GlyphRenderMode.SDFAA, 2048, 2048);
             AssetDatabase.CreateAsset(fontAsset, fontAssetPath);
 
             // BẮT BUỘC: lưu atlas texture + material làm sub-asset
@@ -66,8 +80,52 @@ namespace VoidRunner.EditorTools
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"[VoidRunner] Đã tự tạo TMP font: {fontAssetPath}");
+            // Log số ký tự để phát hiện sớm nếu font lại bị thiếu glyph (bug 2026-08-11: chỉ 30/95 ký tự)
+            int charCount = fontAsset.characterTable != null ? fontAsset.characterTable.Count : 0;
+            Debug.Log($"[VoidRunner] Đã tự tạo TMP font: {fontAssetPath} ({charCount} ký tự).");
             return fontAsset;
+        }
+
+        /// <summary>Đọc guid từ file .meta của asset (null nếu chưa có .meta).</summary>
+        public static string ReadGuid(string assetPath)
+        {
+            string meta = assetPath + ".meta";
+            if (!File.Exists(meta)) return null;
+            foreach (string line in File.ReadAllLines(meta))
+            {
+                string trimmed = line.TrimStart();
+                if (trimmed.StartsWith("guid: "))
+                {
+                    string guid = trimmed.Substring("guid: ".Length).Trim();
+                    return guid.Length == 32 ? guid : null;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Ghi đè guid trong .meta vừa sinh bằng guid cũ — dùng sau khi DeleteAsset + CreateAsset
+        /// (Unity tạo guid MỚI khi recreate; mọi tham chiếu trong scene theo guid cũ sẽ gãy nếu không restore).
+        /// </summary>
+        public static void RestoreGuid(string assetPath, string oldGuid)
+        {
+            if (string.IsNullOrEmpty(oldGuid) || oldGuid.Length != 32) return;
+            string meta = assetPath + ".meta";
+            if (!File.Exists(meta)) return;
+
+            string text = File.ReadAllText(meta);
+            if (text.Contains(oldGuid)) return; // guid vẫn giữ nguyên — không cần làm gì
+
+            string updated = System.Text.RegularExpressions.Regex.Replace(
+                text, "guid: [0-9a-f]{32}", "guid: " + oldGuid, 1);
+            if (updated != text)
+            {
+                File.WriteAllText(meta, updated);
+                AssetDatabase.Refresh();
+                // BẮT BUỘC: ForceUpdate để asset database nạp lại asset theo guid mới (một số version cache guid trong memory)
+                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+                Debug.Log($"[VoidRunner] Đã khôi phục guid cũ ({oldGuid}) cho {assetPath}.");
+            }
         }
 
         public static Canvas FindOrCreateCanvas()
