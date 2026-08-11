@@ -26,18 +26,13 @@ namespace VoidRunner.Core.World
         [SerializeField] private ObstacleManager obstacleManager;
         [SerializeField] private PickupSpawner pickupSpawner;
 
-        private static int _instanceCount;
         private ObjectPool<Tile> _pool;
         private readonly List<Tile> _activeTiles = new List<Tile>();
         private float _nextSpawnZ;
         private bool _initialized;
-        private float _lastDiagLog; // tạm — chẩn đoán không có vật cản/xu (2026-08-11)
 
         private void Awake()
         {
-            _instanceCount++;
-            Debug.Log($"[DiagTS] Awake instance={_instanceCount} parent={(transform.parent != null ? transform.parent.name : "(root)")} pos={transform.position}");
-
             if (tilePrefab == null)
             {
                 Debug.LogError("TileSpawner thiếu tilePrefab.");
@@ -49,16 +44,6 @@ namespace VoidRunner.Core.World
                 factory: CreateTile,
                 onRelease: tile => tile.Deactivate(),
                 prewarmCount: poolSize);
-        }
-
-        private void OnDestroy()
-        {
-            _instanceCount--;
-        }
-
-        private void OnEnable()
-        {
-            Debug.Log($"[DiagTS] OnEnable instance={_instanceCount} — có TileSpawner khác chạy? count thực tế từ FindAny: {FindObjectsByType<TileSpawner>().Length}");
         }
 
         private Tile CreateTile()
@@ -141,13 +126,6 @@ namespace VoidRunner.Core.World
                 obstacleManager?.TrySpawn(tile);
             }
             pickupSpawner?.TrySpawn(tile);
-
-            // [TẠM] chẩn đoán — user báo không có vật cản/xu dù wiring đúng
-            if (Time.time - _lastDiagLog > 2f)
-            {
-                _lastDiagLog = Time.time;
-                Debug.Log($"[DiagSpawn] tile={_activeTiles.Count} playerZ={player.position.z:F1} nextZ={_nextSpawnZ:F1} pool={_pool != null}");
-            }
         }
     }
 }

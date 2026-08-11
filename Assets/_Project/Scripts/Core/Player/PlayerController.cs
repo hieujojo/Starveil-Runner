@@ -408,8 +408,6 @@ namespace VoidRunner.Core.Player
 
             _ship = ship.transform;
             _shipRenderers = _ship.GetComponentsInChildren<MeshRenderer>();
-
-            Debug.Log($"[Ship] Model: {prefab.name} (scale={ship.transform.localScale.x:F2}, size={scaled.size})");
         }
 
         private static Bounds GetRenderBounds(GameObject go)

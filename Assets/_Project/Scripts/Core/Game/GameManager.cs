@@ -145,7 +145,6 @@ namespace VoidRunner.Core
         {
             if (State == GameState.GameOver) return;
             State = GameState.GameOver;
-            Debug.Log("Game Over — nhấn R để chơi lại.");
         }
     }
 }

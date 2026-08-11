@@ -25,6 +25,32 @@
 
 ---
 
+## 2026-08-12 (v3e) — Dọn log diag tạm + fix material tím OBSTACLE (lỗi R3.16 tái phạm) + Select Ship to
+
+> User: "cho select ship to thêm, đừng quá tiết kiệm UI; đọc toàn bộ log, ngoài các log in ra thì có hàng loạt log đỏ, xóa bớt mấy log cũ; vật thể màu tím chứ ko phải màu nguyên bản — tưởng tuân theo rule rồi mà sao lại lặp lại lỗi này".
+
+### 1. Hàng loạt log đỏ — `MissingComponentException: There is no 'Renderer' attached to "AsteroidObstacle(Clone)"`
+
+- **Nguyên nhân (chính xác)**: log diag TẠM còn sót từ đợt chẩn đoán "không có obstacle/coin" (2026-08-11) — `ObstacleManager.cs:91` và `PickupSpawner.cs:89` gọi `GetComponent<Renderer>()` trên **ROOT** obstacle/coin. AsteroidObstacle root KHÔNG có Renderer (visual nằm ở con "Model") → Unity 6 throw MissingComponentException. Prefab cũ (cube/Ramp) có Renderer ngay root nên không lỗi — đổi sang Asteroid mới lộ ra.
+- **Fix**: xóa toàn bộ 9 log diag tạm (`[DiagObstacle]/[DiagCoin]/[DiagTS]/[DiagSpawn]` + log model `[Ship]/[Enemy]` + `Game Over` + `[Nebula]`) + biến `_lastDiagLog`/`_instanceCount` ở 7 file (ObstacleManager, PickupSpawner, TileSpawner, EnemyChase, PlayerController, GameManager, NebulaChanger) → Console sạch, không spam mỗi 2s.
+
+### 2. Vật thể màu TÍM — lỗi R3.16 TÁI PHẠM (user bắt bài đúng)
+
+- **Nguyên nhân (chính xác)**: `MaterialFixer.EnsureURPMaterials` trước đây CHỈ áp dụng cho tàu (PlayerController + ShipSelectManager) — **SÓT OBSTACLE**. Material OlegWER `Material.mat` dùng shader `m_Shader: {fileID: 46, guid: 000...}` = **Standard (Built-in)** → trong URP render TÍM/MAGENTA. AsteroidObstacle prefab dựng từ model này → obstacle tím.
+- **Fix**: `Obstacle.Awake()` → `MaterialFixer.EnsureURPMaterials(gameObject)` (self-heal R4.18 — mọi obstacle spawn ra tự ép URP/Lit giữ màu gốc, cache static không leak). Không cần sửa prefab asset (nested instance) — lúc spawn đã đúng.
+
+### 3. Select Ship to hơn (user: "đừng quá tiết kiệm UI")
+
+- Panel 520×560 → **680×720**; Title 36→44pt; Preview 360×300 → **480×400**; ShipName 30→36pt; mũi tên 110×52 → **130×62** (font 46); nút SELECT 300×56 → **360×64** (font 34); **RenderTexture 256² → 512²** (khung to mà 256² bị mờ); camera ortho 1.6→2.0 + model scale 1.2→1.6 (model to hơn trong khung).
+
+### Bài học — QUY TẮC MỚI (bổ sung R3.16)
+
+- **MaterialFixer phải áp dụng cho MỌI model 3rd-party nhập mới — không chỉ tàu**: khi tích hợp gói model mới (obstacle/coin/monster) PHẢI check material (`grep 'm_Shader:' *.mat` — fileID 46 = Standard Built-in) + đảm bảo component spawn nó gọi `MaterialFixer.EnsureURPMaterials`. Cách chống tái phạm: đặt self-heal ngay trong `Awake()` của component gốc (Obstacle/Coin/PowerUp...) thay vì nhớ gọi ở từng nơi instantiate. *(Bug 2026-08-12 — user: "tưởng tuân rule rồi mà lặp lại".)*
+- **Debug.Log diag tạm PHẢI xóa sau khi fix xong** — log "[DiagX]" chừa lại = spam Console (mỗi 2s) + có thể GÂY LỖI (truy cập component không tồn tại trên root khi prefab cấu trúc đổi). Quy tắc: thêm log diag → fix xong → xóa ngay trong cùng đợt.
+- **`GetComponent<Renderer>()` trên root KHÔNG an toàn nếu prefab đổi cấu trúc** — visual có thể nằm ở con (Model). Muốn check renderer: `GetComponentInChildren<Renderer>()` (hoặc đừng log).
+
+---
+
 ## 2026-08-12 (v3c) — Tích hợp obstacle = Asteroid (OlegWER thiên thạch)
 
 > User: "cứ thực thi từng việc đi, làm từ việc obstacle trước" (sau khi tải OlegWER Asteroid thay obstacle kenney).

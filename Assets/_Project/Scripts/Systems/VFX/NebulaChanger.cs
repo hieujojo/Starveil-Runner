@@ -55,7 +55,6 @@ namespace VoidRunner.Systems.VFX
 
             _currentIndex = index;
             RenderSettings.skybox = mat;
-            Debug.Log($"[Nebula] difficulty level={level:F2} → skybox '{mat.name}' (index {index})");
         }
     }
 }

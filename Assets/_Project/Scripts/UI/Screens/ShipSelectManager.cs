@@ -110,7 +110,7 @@ namespace VoidRunner.UI
             prt.anchorMin = new Vector2(0.5f, 0.5f);
             prt.anchorMax = new Vector2(0.5f, 0.5f);
             prt.anchoredPosition = Vector2.zero;
-            prt.sizeDelta = new Vector2(520f, 560f);
+            prt.sizeDelta = new Vector2(680f, 720f); // FIX 2026-08-12: 520×560 → 680×720 (user: "cho select ship to thêm, đừng quá tiết kiệm UI")
             var pimg = panel.GetComponent<Image>();
             pimg.color = new Color(0.06f, 0.04f, 0.12f, 1f); // tím đen đục
 
@@ -122,10 +122,10 @@ namespace VoidRunner.UI
             trt.anchorMax = new Vector2(0.5f, 1f);
             trt.pivot = new Vector2(0.5f, 1f);
             trt.anchoredPosition = new Vector2(0f, -16f);
-            trt.sizeDelta = new Vector2(440f, 48f);
+            trt.sizeDelta = new Vector2(600f, 56f);
             var ttmp = title.GetComponent<TextMeshProUGUI>();
             ttmp.text = "SELECT SHIP";
-            ttmp.fontSize = 36;
+            ttmp.fontSize = 44;
             ttmp.fontStyle = FontStyles.Bold;
             ttmp.color = new Color(1f, 0.85f, 0.3f, 1f);
             ttmp.alignment = TextAlignmentOptions.Center;
@@ -139,8 +139,8 @@ namespace VoidRunner.UI
             prt2.anchorMin = new Vector2(0.5f, 1f);
             prt2.anchorMax = new Vector2(0.5f, 1f);
             prt2.pivot = new Vector2(0.5f, 1f);
-            prt2.anchoredPosition = new Vector2(0f, -80f);
-            prt2.sizeDelta = new Vector2(360f, 300f);
+            prt2.anchoredPosition = new Vector2(0f, -92f);
+            prt2.sizeDelta = new Vector2(480f, 400f);
             _previewImage = previewGo.GetComponent<RawImage>();
 
             // Tên tàu đang chọn
@@ -150,10 +150,10 @@ namespace VoidRunner.UI
             nrt.anchorMin = new Vector2(0.5f, 1f);
             nrt.anchorMax = new Vector2(0.5f, 1f);
             nrt.pivot = new Vector2(0.5f, 1f);
-            nrt.anchoredPosition = new Vector2(0f, -395f);
-            nrt.sizeDelta = new Vector2(440f, 44f);
+            nrt.anchoredPosition = new Vector2(0f, -525f);
+            nrt.sizeDelta = new Vector2(600f, 50f);
             _nameText = nameGo.GetComponent<TextMeshProUGUI>();
-            _nameText.fontSize = 30;
+            _nameText.fontSize = 36;
             _nameText.fontStyle = FontStyles.Bold;
             _nameText.color = Color.white;
             _nameText.alignment = TextAlignmentOptions.Center;
@@ -162,8 +162,8 @@ namespace VoidRunner.UI
             AssignFallbackFont(_nameText);
 
             // Nút mũi tên trái / phải
-            CreateArrowButton(panel.transform, "PrevButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-170f, -410f), "<");
-            CreateArrowButton(panel.transform, "NextButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(170f, -410f), ">");
+            CreateArrowButton(panel.transform, "PrevButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-225f, -575f), "<");
+            CreateArrowButton(panel.transform, "NextButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(225f, -575f), ">");
 
             // Nút chọn (xác nhận)
             var confirmGo = new GameObject("ConfirmButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -173,7 +173,7 @@ namespace VoidRunner.UI
             crt.anchorMax = new Vector2(0.5f, 0f);
             crt.pivot = new Vector2(0.5f, 0f);
             crt.anchoredPosition = new Vector2(0f, 24f);
-            crt.sizeDelta = new Vector2(300f, 56f);
+            crt.sizeDelta = new Vector2(360f, 56f); // FIX reviewer 2026-08-12: cao 64@y30 → top chạm mũi tên (11px overlap) — hạ 56@y24
             var cimg = confirmGo.GetComponent<Image>();
             cimg.color = new Color(0.2f, 0.75f, 1f, 1f);
             var cbtn = confirmGo.GetComponent<Button>();
@@ -189,7 +189,7 @@ namespace VoidRunner.UI
             clrt.offsetMax = Vector2.zero;
             var ctmp = clabel.GetComponent<TextMeshProUGUI>();
             ctmp.text = "SELECT";
-            ctmp.fontSize = 30;
+            ctmp.fontSize = 34;
             ctmp.fontStyle = FontStyles.Bold;
             ctmp.color = Color.white;
             ctmp.alignment = TextAlignmentOptions.Center;
@@ -268,7 +268,7 @@ namespace VoidRunner.UI
             rt.anchorMax = aMax;
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(110f, 52f);
+            rt.sizeDelta = new Vector2(130f, 62f);
             var img = go.GetComponent<Image>();
             img.color = new Color(0.3f, 0.2f, 0.6f, 1f);
             var btn = go.GetComponent<Button>();
@@ -285,7 +285,7 @@ namespace VoidRunner.UI
             lrt.offsetMax = Vector2.zero;
             var tmp = label.GetComponent<TextMeshProUGUI>();
             tmp.text = arrow;
-            tmp.fontSize = 40;
+            tmp.fontSize = 46;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.white;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -313,7 +313,7 @@ namespace VoidRunner.UI
                 var go = new GameObject("ShipPreviewCamera", typeof(Camera));
                 _previewCam = go.GetComponent<Camera>();
                 _previewCam.orthographic = true;
-                _previewCam.orthographicSize = 1.6f;
+                _previewCam.orthographicSize = 2.0f; // FIX 2026-08-12: khung preview to hơn → model cũng nên to hơn
                 _previewCam.nearClipPlane = 0.1f;
                 _previewCam.farClipPlane = 50f;
                 _previewCam.clearFlags = CameraClearFlags.SolidColor;
@@ -324,7 +324,7 @@ namespace VoidRunner.UI
 
             if (_rt == null)
             {
-                _rt = new RenderTexture(256, 256, 16);
+                _rt = new RenderTexture(512, 512, 16); // FIX 2026-08-12: khung preview 480×400 → 256² bị mờ, nâng 512²
                 _previewCam.targetTexture = _rt;
                 if (_previewImage != null) _previewImage.texture = _rt;
             }
@@ -369,7 +369,7 @@ namespace VoidRunner.UI
             Bounds b = GetRenderBounds(model);
             if (b.size.y > 0.001f)
             {
-                model.transform.localScale = Vector3.one * (1.2f / b.size.y);
+                model.transform.localScale = Vector3.one * (1.6f / b.size.y); // FIX 2026-08-12: model to hơn trong khung preview
             }
             // Model quay 180 quanh Y để nhìn về camera (camera ở -Z nhìn +Z)
             model.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);

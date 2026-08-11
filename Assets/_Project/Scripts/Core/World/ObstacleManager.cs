@@ -32,8 +32,6 @@ namespace VoidRunner.Core.World
             }
         }
 
-        private float _lastDiagLog; // tạm — chẩn đoán không có vật cản (2026-08-11)
-
         /// <summary>
         /// Các lane đã chặn ở tile gần nhất (reset mỗi TrySpawn) — PickupSpawner đọc để đặt hàng coin
         /// sang lane KHÁC, tránh obstacle đè lên xu (fix 2026-08-11).
@@ -48,20 +46,13 @@ namespace VoidRunner.Core.World
         public void TrySpawn(Tile tile)
         {
             _blockedLanes.Clear();
-            // [TẠM] chẩn đoán — log trạng thái mỗi 2s
-            if (Time.time - _lastDiagLog > 2f)
-            {
-                _lastDiagLog = Time.time;
-                Debug.Log($"[DiagObstacle] types={(obstacleTypes == null ? 0 : obstacleTypes.Length)} chance={CurrentSpawnChance}");
-            }
-
             if (obstacleTypes == null || obstacleTypes.Length == 0) return;
             if (Random.value > CurrentSpawnChance) return;
 
             ObstacleData data = PickRandomType();
             if (data == null || data.prefab == null)
             {
-                Debug.LogWarning($"[DiagObstacle] data rỗng hoặc prefab null (data={(data == null ? "null" : data.name)})");
+                Debug.LogWarning($"[ObstacleManager] data rỗng hoặc prefab null (data={(data == null ? "null" : data.name)})");
                 return;
             }
 
@@ -83,12 +74,9 @@ namespace VoidRunner.Core.World
 
         private void SpawnOnTile(ObstacleData data, Tile tile, float x)
         {
-            // [TẠM] chẩn đoán — log WORLD position + tile rotation (để biết tile có bị xoay không)
-            Debug.Log($"[DiagObstacle] TẠO {data.name} lane={x} tileRot={tile.transform.eulerAngles} tilePos={tile.transform.position}");
             GameObject obstacle = Instantiate(data.prefab, tile.transform);
             // y=0.5: obstacle nằm trên mặt road (road surface ở y≈0.05) — trigger nên không cần vật lý đặt xuống
             obstacle.transform.localPosition = new Vector3(x, 0.5f, Random.Range(0f, tile.Length * 0.6f));
-            Debug.Log($"[DiagObstacle] WORLD {obstacle.transform.position} local={obstacle.transform.localPosition} parent={obstacle.transform.parent.name} renderer={obstacle.GetComponent<Renderer>()?.enabled}");
 
             Obstacle comp = obstacle.GetComponent<Obstacle>();
             if (comp == null)

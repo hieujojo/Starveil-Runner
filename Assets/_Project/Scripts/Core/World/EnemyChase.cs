@@ -157,8 +157,6 @@ namespace VoidRunner.Core.World
             // ⚠️ KHÔNG ép mỗi frame (R4.17): enemy có Animator — ghi đè localRotation mỗi frame
             // sẽ đánh nhau với root motion của animation.
             enemy.transform.localRotation = Quaternion.Euler(0f, enemyYaw, 0f);
-
-            Debug.Log($"[Enemy] Model: {enemyPrefab.name} (scale={enemy.transform.localScale.x:F2}, bounds={b.size})");
         }
 
         /// <summary>Bounds world gộp mọi renderer (dùng để chuẩn hóa scale enemy).</summary>

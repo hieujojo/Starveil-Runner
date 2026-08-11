@@ -39,8 +39,6 @@ namespace VoidRunner.Core.World
         [Tooltip("Bề rộng 1 lane (khớp ObstacleManager)")]
         [SerializeField] private float laneWidth = 2f;
 
-        private float _lastDiagLog; // tạm — chẩn đoán không có xu (2026-08-11)
-
         private ObstacleManager _obstacleManager; // để biết lane nào đã bị obstacle chặn ở tile này
 
         /// <summary>TileSpawner truyền vào lúc Initialize — coin chọn lane KHÔNG trùng obstacle (fix 2026-08-11).</summary>
@@ -50,13 +48,6 @@ namespace VoidRunner.Core.World
         public void TrySpawn(Tile tile)
         {
             if (tile == null) return;
-
-            // [TẠM] chẩn đoán — log trạng thái mỗi 2s
-            if (Time.time - _lastDiagLog > 2f)
-            {
-                _lastDiagLog = Time.time;
-                Debug.Log($"[DiagCoin] coinPrefab={(coinPrefab != null)} powerUps={(powerUpTypes == null ? 0 : powerUpTypes.Length)} coinChance={coinChance}");
-            }
 
             if (coinPrefab != null && Random.value <= coinChance)
             {
@@ -76,17 +67,12 @@ namespace VoidRunner.Core.World
             int lane = PickLaneAvoidingObstacles();
             float x = (lane - (laneCount - 1) * 0.5f) * laneWidth;
 
-            // [TẠM] chẩn đoán — log WORLD position + tile lossyScale (coin không thấy dù spawn)
-            Debug.Log($"[DiagCoin] TẠO hàng coin lane={x} tileScale={tile.transform.lossyScale} tilePos={tile.transform.position}");
-
             // Hàng coin nằm ở 1 nửa tile, tránh chồng lên obstacle ở đầu tile
             float startZ = tile.Length * 0.25f;
             for (int i = 0; i < coinRowCount; i++)
             {
                 GameObject coin = Instantiate(coinPrefab, tile.transform);
                 coin.transform.localPosition = new Vector3(x, 0.8f, startZ + i * coinSpacing);
-                if (i == 0)
-                    Debug.Log($"[DiagCoin] WORLD {coin.transform.position} scale={coin.transform.lossyScale} renderer={coin.GetComponent<Renderer>()?.enabled}");
             }
         }
 

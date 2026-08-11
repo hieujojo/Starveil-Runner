@@ -2983,6 +2983,8 @@ MonoBehaviour:
   enemyPrefab: {fileID: 1174681552261998, guid: cda9515b23e2f454b9c8d645acee645e, type: 3}
   enemyTargetHeight: 1.8
   enemyYaw: 0
+  hitSpeedUp: 2
+  catchDelay: 1.1
 --- !u!135 &2067106722
 SphereCollider:
   m_ObjectHideFlags: 0

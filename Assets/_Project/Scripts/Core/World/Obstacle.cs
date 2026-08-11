@@ -1,5 +1,6 @@
 using UnityEngine;
 using VoidRunner.Data;
+using VoidRunner.Utils;
 
 namespace VoidRunner.Core.World
 {
@@ -24,6 +25,12 @@ namespace VoidRunner.Core.World
             {
                 col.isTrigger = true;
             }
+
+            // FIX 2026-08-12 (user: "vật thể màu tím chứ ko phải màu nguyên bản — tưởng tuân rule rồi"):
+            // material 3rd-party (OlegWER asteroid) dùng shader Standard Built-in → TÍM trong URP.
+            // Trước đây MaterialFixer chỉ áp dụng cho tàu (PlayerController/ShipSelectManager) — sót OBSTACLE.
+            // Self-heal R3.16/R4.18: mọi obstacle spawn ra tự ép material URP/Lit giữ màu gốc.
+            MaterialFixer.EnsureURPMaterials(gameObject);
         }
     }
 }
