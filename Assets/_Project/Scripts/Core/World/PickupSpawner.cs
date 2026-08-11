@@ -74,9 +74,6 @@ namespace VoidRunner.Core.World
                 GameObject coin = Instantiate(coinPrefab, tile.transform);
                 coin.transform.localPosition = new Vector3(x, 0.8f, startZ + i * coinSpacing);
             }
-
-            // [DIAG-TẠM] user yêu cầu log vị trí coin (2026-08-12 v3f.3) — XÓA SAU KHI XÁC NHẬN
-            Debug.Log($"[DIAG-Coin] lane={x:F2} startZ={startZ:F1} spacing={coinSpacing} count={coinRowCount} first={new Vector3(x, 0.8f, startZ).ToString("F1")}");
         }
 
         private void SpawnPowerUp(Tile tile)

@@ -312,14 +312,6 @@ namespace VoidRunner.Core.World
             {
                 GameEvents.RaiseGameOver();
             }
-
-            // [DIAG-TẠM] user yêu cầu log vị trí con bọ (2026-08-12 v3f.3) — XÓA SAU KHI XÁC NHẬN THẤY BỌ
-            if (Time.frameCount % 120 == 0)
-            {
-                Camera cam = Camera.main;
-                string camPos = cam != null ? cam.transform.position.ToString("F1") : "(no cam)";
-                Debug.Log($"[DIAG-Enemy] pos={transform.position.ToString("F1")} stage={_stage} dist={_currentDistance:F1} | cam={camPos} | player={player.position.ToString("F1")}");
-            }
         }
 
         private void OnTriggerEnter(Collider other)

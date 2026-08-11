@@ -78,29 +78,12 @@ namespace VoidRunner.Core.World
             // y=0.5: obstacle nằm trên mặt road (road surface ở y≈0.05) — trigger nên không cần vật lý đặt xuống
             obstacle.transform.localPosition = new Vector3(x, 0.5f, Random.Range(0f, tile.Length * 0.6f));
 
-            // [DIAG-TẠM] user yêu cầu log vị trí obstacle (2026-08-12 v3f.3) — XÓA SAU KHI XÁC NHẬN
-            Bounds b = GetRenderBounds(obstacle);
-            Debug.Log($"[DIAG-Obstacle] {data.name} localPos={obstacle.transform.localPosition.ToString("F2")} worldPos={obstacle.transform.position.ToString("F1")} bounds={b.size.ToString("F2")} center={b.center.ToString("F1")}");
-
             Obstacle comp = obstacle.GetComponent<Obstacle>();
             if (comp == null)
             {
                 comp = obstacle.AddComponent<Obstacle>();
             }
             comp.SetData(data); // gán data đã chọn — component biết mình thuộc loại nào
-        }
-
-        private static Bounds GetRenderBounds(GameObject go)
-        {
-            Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
-            bool has = false;
-            foreach (var r in go.GetComponentsInChildren<Renderer>())
-            {
-                if (r == null || !r.enabled) continue;
-                if (has) bounds.Encapsulate(r.bounds);
-                else { bounds = r.bounds; has = true; }
-            }
-            return has ? bounds : new Bounds(Vector3.zero, Vector3.one);
         }
 
         private ObstacleData PickRandomType()

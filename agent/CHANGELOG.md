@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-08-12 (v3f.6) — VFX: vệt glow tàu + hệ sao trôi + dọn DIAG logs
+
+- **Xóa 3 DIAG logs** (EnemyChase/ObstacleManager/PickupSpawner) — user đã xác nhận mọi thứ OK (R7.11). Xóa luôn `GetRenderBounds` dead trong ObstacleManager (chỉ DIAG dùng — R3.15).
+- **Vệt glow tàu** (user: "qua làm VFX — tàu có hiệu ứng"): `VFXManager.SetupShipTrail` — TrailRenderer additive (cyan → trong suốt) bám theo player, vẽ đường bay + chuyển lane = cảm giác tốc độ. Clear khi restart.
+- **Hệ sao trôi (SpaceDrift)**: ParticleSystem World quanh player — chấm nhỏ tròn (0.06–0.18) trôi ngược hướng chạy, box 26×12×30 (rộng hơn road ±9) — chiều sâu vũ trụ. Chấm NHỎ + TRÒN (không phải vệt dài — user từng chê "vệt sao ko giống sao").
+- **NEW `CreateAdditiveSoftMaterial`** (URP Particles/Additive) + refactor texture chung `BuildSoftTexture` (không duplicate — code reuse).
+- **Popup +20 đã tồn tại** — verify: VFXManager `OnCoinCollectedAt` → burst hạt vàng + popup `+{popupScore 10 × combo}` (số 20 = combo 2) ✓ không cần thêm.
+
 ## 2026-08-12 (v3f.5.3) — Bọ áp sát quá gần + to hơn + animation nhìn không rõ
 
 - **Bọ áp sát quá gần khi chạm obstacle 1 lần** (DIAG: stage 1 → dist 3.0m) — user: "đang gần quá, chỉ cần chạm 1 lần trong thời gian quy định, cho ra xa 2-3m nữa". Fix: `closeDistance 3 → 5.5m` (code + scene + test `CloseDist`). Cơ chế 2 nấc GIỮ NGUYÊN: chạm 1 lần → bọ tiến sát 5.5m; chạm lần 2 trong cửa sổ → bắt.
