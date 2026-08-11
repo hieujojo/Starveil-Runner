@@ -324,49 +324,68 @@ namespace VoidRunner.EditorTools
                 return;
             }
 
-            // Layout dọc (anchor giữa): title giữ 260; dãn nút chính cách tâm 120-130px;
-            // BestScore -250; SHIP/CREDITS (tạo bằng code runtime) -320.
-            // Các nút nằm trong scene → ép qua SerializedObject (không phá prefab).
+            // Layout dọc (anchor giữa): Title lên 330 + 1 dòng; dãn nút chính NHẸ so với bản gốc
+            // (60/-60/-160 — user: "giãn quá mức, chỉ tăng 1 tí"); Best -250; SHIP/CREDITS -335.
             // ⚠️ GAP TÍNH THEO MÉP (fix reviewer 2026-08-12): Play 420x100 → bán kính 50;
             // HowTo 340x76 → 38; Sound 340x76 → 38; Best 600x50 → 25.
-            //   Play 160 (đáy 110) · HowTo 0 (đỉnh 38)  → gap 72px
-            //   HowTo -38 (đáy)   · Sound -160 (đỉnh -122) → gap 84px
-            //   Sound -198 (đáy)   · Best -250 (đỉnh -225) → gap 27px (text mỏng, đủ)
+            //   Play 120 (đáy 70)  · HowTo -20 (đỉnh 18)  → gap 52px (gốc 32px)
+            //   HowTo -58 (đáy)    · Sound -150 (đỉnh -112) → gap 54px (gốc 24px)
+            //   Sound -188 (đáy)   · Best -250 (đỉnh -225) → gap 37px (gốc 17px)
             int changed = 0;
-            if (SetRectPosition("PlayButton", new Vector2(0f, 160f))) changed++;
-            if (SetRectPosition("HowToPlayButton", new Vector2(0f, 0f))) changed++;
-            if (SetRectPosition("SoundButton", new Vector2(0f, -160f))) changed++;
+            if (SetRectPosition("PlayButton", new Vector2(0f, 120f))) changed++;
+            if (SetRectPosition("HowToPlayButton", new Vector2(0f, -20f))) changed++;
+            if (SetRectPosition("SoundButton", new Vector2(0f, -150f))) changed++;
             if (SetRectPosition("BestScoreText", new Vector2(0f, -250f))) changed++;
 
-            // HowToPlayText: font 30 → 36 + lineSpacing thoáng (khó đọc với font pixel)
-            var howText = FindTransformRecursive(scene.GetRootGameObjects()[0].transform, "HowToPlayText");
-            if (howText != null && howText.TryGetComponent<TextMeshProUGUI>(out var ht))
+            // --- TitleText: 1 DÒNG NGANG (fix 2026-08-12, user "đừng xuống dòng VOID RUNNER") ---
+            // Root cause: fontSize 110pt wrap trong rect 900px → "VOID / RUNNER" 2 dòng, dòng 2 bị
+            // PlayButton đè (R..R). Fix: fontSize 96 + rect rộng 1100 + NoWrap + đẩy lên 330.
+            // Lặp qua MỌI root (không dùng GetRootGameObjects()[0] — canvas có thể không phải root 0,
+            // góp ý reviewer 2026-08-12).
+            foreach (var root in scene.GetRootGameObjects())
             {
-                ht.fontSize = 36;
-                ht.lineSpacing = 1.15f;
-                ht.color = new Color(0.92f, 0.95f, 1f, 1f);
-                EditorUtility.SetDirty(ht);
-                changed++;
+                var canvas = root.GetComponentInChildren<Canvas>(true);
+                if (canvas == null) continue;
+
+                var title = FindTransform(canvas.transform, "TitleText");
+                if (title != null && title.TryGetComponent<TextMeshProUGUI>(out var tt))
+                {
+                    tt.fontSize = 96;
+                    tt.textWrappingMode = TextWrappingModes.NoWrap;
+                    var trt = title.GetComponent<RectTransform>();
+                    trt.anchoredPosition = new Vector2(0f, 330f);
+                    trt.sizeDelta = new Vector2(1100f, 160f);
+                    EditorUtility.SetDirty(tt);
+                    EditorUtility.SetDirty(trt);
+                    changed++;
+                }
+
+                // TitleGlow (cyan mờ sau title, nếu có) — dịch theo title để không lệch
+                var glow = FindTransform(canvas.transform, "TitleGlow");
+                if (glow != null && glow.TryGetComponent<RectTransform>(out var grt))
+                {
+                    grt.anchoredPosition = new Vector2(0f, 330f);
+                    EditorUtility.SetDirty(grt);
+                    changed++;
+                }
+
+                // HowToPlayText: font 30 → 36 + lineSpacing thoáng (khó đọc với font pixel)
+                var howText = FindTransform(canvas.transform, "HowToPlayText");
+                if (howText != null && howText.TryGetComponent<TextMeshProUGUI>(out var ht))
+                {
+                    ht.fontSize = 36;
+                    ht.lineSpacing = 1.15f;
+                    ht.color = new Color(0.92f, 0.95f, 1f, 1f);
+                    EditorUtility.SetDirty(ht);
+                    changed++;
+                }
             }
 
             EditorSceneManager.MarkSceneDirty(scene);
             Debug.Log($"[VoidRunner] Fix MainMenu Spacing xong: {changed} phần tử ép vị trí/font.");
             EditorUtility.DisplayDialog("Void Runner — MainMenu Spacing",
-                $"Đã dãn {changed} phần tử (Play 160 / HowTo 0 / Sound -160 / Best -250 / HowToPlayText 36pt).\n\n" +
+                $"Đã dãn {changed} phần tử (Play 120 / HowTo -20 / Sound -150 / Best -250 / Title 330pt 1 dòng / HowToPlayText 36pt).\n\n" +
                 "Nhớ Ctrl+S lưu scene.", "OK");
-        }
-
-        /// <summary>Tìm RectTransform theo tên (đệ quy) — dùng cho text nằm sâu trong panel.</summary>
-        private static Transform FindTransformRecursive(Transform root, string name)
-        {
-            if (root == null) return null;
-            foreach (Transform child in root)
-            {
-                if (child.name == name) return child;
-                var deep = FindTransformRecursive(child, name);
-                if (deep != null) return deep;
-            }
-            return null;
         }
 
         private static bool SetRectPosition(string objectName, Vector2 pos)

@@ -66,6 +66,36 @@ namespace VoidRunner.Utils
             // Giữ màu gốc: ưu tiên _BaseColor (URP), fallback _Color (Built-in)
             if (src.HasProperty("_BaseColor")) converted.SetColor("_BaseColor", src.GetColor("_BaseColor"));
             else if (src.HasProperty("_Color")) converted.SetColor("_BaseColor", src.GetColor("_Color"));
+
+            // ⚠️ FIX 2026-08-12 (bug "tàu thành màu trắng"): trước đây chỉ copy màu, KHÔNG copy
+            // texture → URP/Lit không có _BaseMap → render trắng. Copy _MainTex → _BaseMap +
+            // normal/metallic/occlusion/emission + hệ số smoothness/metallic để giữ nguyên vẻ gốc.
+            if (src.HasProperty("_MainTex") && src.GetTexture("_MainTex") != null)
+            {
+                converted.SetTexture("_BaseMap", src.GetTexture("_MainTex"));
+                if (src.HasProperty("_MainTex_ST"))
+                {
+                    converted.SetTextureScale("_BaseMap", src.GetTextureScale("_MainTex"));
+                    converted.SetTextureOffset("_BaseMap", src.GetTextureOffset("_MainTex"));
+                }
+            }
+            if (src.HasProperty("_BumpMap") && src.GetTexture("_BumpMap") != null)
+            {
+                converted.SetTexture("_BumpMap", src.GetTexture("_BumpMap"));
+                converted.EnableKeyword("_NORMALMAP");
+            }
+            if (src.HasProperty("_MetallicGlossMap") && src.GetTexture("_MetallicGlossMap") != null)
+            {
+                converted.SetTexture("_MetallicGlossMap", src.GetTexture("_MetallicGlossMap"));
+                converted.EnableKeyword("_METALLICSPECGLOSSMAP");
+            }
+            if (src.HasProperty("_OcclusionMap") && src.GetTexture("_OcclusionMap") != null)
+            {
+                converted.SetTexture("_OcclusionMap", src.GetTexture("_OcclusionMap"));
+                converted.EnableKeyword("_OCCLUSIONMAP");
+            }
+            if (src.HasProperty("_Glossiness")) converted.SetFloat("_Smoothness", src.GetFloat("_Glossiness"));
+            if (src.HasProperty("_Metallic")) converted.SetFloat("_Metallic", src.GetFloat("_Metallic"));
             if (src.HasProperty("_EmissionColor"))
             {
                 Color em = src.GetColor("_EmissionColor");
@@ -73,6 +103,10 @@ namespace VoidRunner.Utils
                 {
                     converted.EnableKeyword("_EMISSION");
                     converted.SetColor("_EmissionColor", em);
+                }
+                if (src.HasProperty("_EmissionMap") && src.GetTexture("_EmissionMap") != null)
+                {
+                    converted.SetTexture("_EmissionMap", src.GetTexture("_EmissionMap"));
                 }
             }
 

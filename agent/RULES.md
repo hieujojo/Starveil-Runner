@@ -136,6 +136,8 @@
 - **R5.17** — **Nút đóng popup = dấu X NHỎ (40-44px) góc trên phải, không phải nút CLOSE to** — CLOSE to che chữ trong panel (HowToPlay/Credits/Select ship đều bị). Vị trí: pivot (1,1) pos (-8,-8).
 - **R5.18** — **Text panel (HowToPlay) font pixel 30pt nhỏ khó đọc → tăng 36 + lineSpacing 1.15.** Credits body font 20→22 kèm panel to hơn (760×660) — 24 tràn ~19 dòng.
 - **R5.19** — **Input System only (activeInputHandler=1): bắt phím dùng `Keyboard.current[key].wasPressedThisFrame`, KHÔNG dùng legacy `Input.GetKeyDown`** (vô hiệu). ShipSelectManager cần `using UnityEngine.InputSystem;` (asmdef đã reference Unity.InputSystem).
+- **R5.20** — **Button tạo bằng code: subscribe onClick ĐÚNG 1 NƠI** — nếu 2 hàm cùng AddListener (hàm tạo + hàm cache-refs) = **double-subscribe**: 1 click = handler chạy 2 lần → với 2 lựa chọn đảo qua rồi về cũ = nhìn như "bấm không hoạt động" (phím vẫn hoạt động — triệu chứng gây nhầm). Fix chuẩn: hàm cache-refs dùng `RemoveAllListeners()` trước `AddListener()` (idempotent, chạy lại an toàn khi panel đã tồn tại). *(Bug 2026-08-12: ShipSelectManager chuột mũi tên không đổi tàu.)*
+- **R5.21** — **Convert shader Standard → URP/Lit phải copy CẢ texture, KHÔNG chỉ màu** — `_MainTex → _BaseMap` (+ `_MainTex_ST → _BaseMap_ST`), `_BumpMap`, `_MetallicGlossMap`, `_OcclusionMap`, `_EmissionMap`, `_Glossiness → _Smoothness`, `_Metallic`; kèm **enable keyword** tương ứng (`_NORMALMAP`, `_METALLICSPECGLOSSMAP`, `_OCCLUSIONMAP`, `_EMISSION`) — không enable keyword = texture copy vô tác dụng (shader_feature_local). Triệu chứng: tàu TÍM (shader không compile) → sau khi convert → **TRẮNG** = chỉ copy màu, quên texture. *(Bug 2026-08-12.)*
 
 ## ⚙️ NHÓM 6 — Workflow Unity / Git (thủ tục bất biến)
 

@@ -34,6 +34,27 @@
 
 ---
 
+## 2026-08-12 — Fix UI MainMenu vòng 2 (2 ảnh user test): giãn quá + Title 2 dòng + chuột ship + tàu trắng + popup lộ menu
+
+> User: "bạn giãn quá mức cần thiết rồi, chỉ tăng thêm 1 tí so với ban nãy thôi, và đừng xuống dòng chữ VOID RUNNER nữa, cho nó nằm ngang đi; ship bấm phím mũi tên đổi được nhưng bấm CHUỘT thì không đổi; tại sao tàu thành màu TRẮNG; popup how to play có nền đen thì đồng bộ toàn bộ popup còn lại".
+
+### Root cause từng lỗi + fix (commit `…`)
+
+- **Title "VOID RUNNER" xuống 2 dòng + bị PLAY đè (R..R)** — fontSize **110pt** wrap trong rect 900px → "VOID / RUNNER" 2 dòng, dòng 2 chạm PlayButton. Fix `FixMainMenuSpacing`: fontSize **96** + rect **1100×160** + `textWrappingMode = NoWrap` + đẩy lên **y=330** (cả TitleGlow theo). 1 dòng ngang, không còn đè.
+- **Giãn quá mức** (bản trước Play 160/HowTo 0/Sound -160) — user chỉ muốn tăng 1 tí so với gốc (60/-60/-160). Fix: **Play 120 / HowTo -20 / Sound -150 / Best -250** → gap mép 52/54/37px (gốc 32/24/17). SHIP/CREDITS -320 → **-335** (đồng bộ scene + code runtime `ShipSelectManager` + `MainMenuManager.EnsureCredits`).
+- **Bấm CHUỘT mũi tên không đổi tàu (phím vẫn đổi)** — **DOUBLE-SUBSCRIBE**: `CreateArrowButton` `btn.onClick.AddListener(onClick)` VÀ `CachePanelRefs` `prevBtn.onClick.AddListener(SelectPrev)` → 1 click gọi `SelectPrev` 2 lần → 2 tàu đảo qua rồi về cũ = nhìn như không đổi. Phím hoạt động vì 1 lần/frame. Fix: `CreateArrowButton` **bỏ AddListener** (bỏ cả tham số onClick), `CachePanelRefs` **`RemoveAllListeners()` + AddListener** (idempotent — chạy lại an toàn khi panel đã tồn tại).
+- **Tàu thành màu TRẮNG** (sau fix tím vòng trước) — `MaterialFixer` chỉ copy `_Color`/`_EmissionColor`, **KHÔNG copy texture** → URP/Lit không có `_BaseMap` → render trắng. Fix: copy `_MainTex` → **`_BaseMap`** (+ `_MainTex_ST` scale/offset) + `_BumpMap` → `_BumpMap` (enable `_NORMALMAP`) + `_MetallicGlossMap` (enable `_METALLICSPECGLOSSMAP`) + `_OcclusionMap` (enable `_OCCLUSIONMAP`) + `_Glossiness` → `_Smoothness` + `_Metallic` + `_EmissionMap`. Giữ nguyên vẻ gốc của model.
+- **Popup ship lộ menu sau lưng (không nhất quán với HowToPlay)** — `ShipSelectManager.TogglePanel` dùng `SetAsFirstSibling` (dimmer chìm DƯỚI menu) — khác `MainMenuManager` đã fix `SetAsLastSibling`. Fix: dimmer `SetAsLastSibling` TRƯỚC panel (đồng bộ 100% với HowToPlay/Credits).
+- Reviewer góp ý: `FixMainMenuSpacing` dùng `GetRootGameObjects()[0]` (canvas có thể không phải root 0) → lặp qua MỌI root như `OverhaulMainMenu`; `_OCCLUSIONMAP` keyword cho `_OcclusionMap`.
+
+### Bài học — **QUY TẮC MỚI (R5.20/R5.21)**
+
+- **Button tạo bằng code: subscribe onClick ĐÚNG 1 NƠI** — tạo button ở 1 hàm, subscribe ở 1 hàm khác (refs-cache) → nếu 2 hàm cùng AddListener = **double-subscribe**: 1 click = handler chạy 2 lần = với 2 lựa chọn đảo qua rồi về cũ, nhìn như "không hoạt động" (phím vẫn hoạt động → triệu chứng lạ). Fix chuẩn: `RemoveAllListeners()` trước `AddListener()` (idempotent).
+- **Convert shader Standard → URP/Lit phải copy CẢ texture, không chỉ màu** — `_MainTex → _BaseMap` (+ `_MainTex_ST` → `_BaseMap_ST`), `_BumpMap`, `_MetallicGlossMap`, `_OcclusionMap`, `_EmissionMap`, `_Glossiness → _Smoothness`, `_Metallic`; kèm enable keyword tương ứng (`_NORMALMAP`, `_METALLICSPECGLOSSMAP`, `_OCCLUSIONMAP`, `_EMISSION`) — không enable keyword = texture copy vô tác dụng (shader_feature_local). Triệu chứng: tàu tím (shader không compile) → sau khi convert → TRẮNG = chỉ copy màu, quên texture.
+- **Title dài phải kiểm tra wrap** — fontSize to + rect hẹp = tự xuống dòng; dòng 2 đè lên element dưới. Fix: NoWrap + rect đủ rộng (1100px cho 11 ký tự 96pt) + đẩy lên. Kiểm tra bằng ảnh user chụp (chữ bị đè nửa là dấu hiệu wrap).
+
+---
+
 ## 2026-08-12 — Fix UI MainMenu theo 4 ảnh user test (bước 1)
 
 > User gửi 4 ảnh: (1) nút menu sát nhau, (2) CLOSE to che chữ HowToPlay + font khó đọc, (3) Select ship CLOSE to + không đổi tàu bằng phím mũi tên + tàu màu TÍM, (4) Credits chữ nhỏ + CLOSE to + mọi popup lộ menu phía sau.

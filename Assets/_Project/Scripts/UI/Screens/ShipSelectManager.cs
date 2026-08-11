@@ -69,7 +69,7 @@ namespace VoidRunner.UI
             var rt = (RectTransform)go.transform;
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(-160f, -320f); // CÙNG HÀNG với CREDITS (bên phải 160) — SHIP bên trái (Fix Spacing 2026-08-12)
+            rt.anchoredPosition = new Vector2(-160f, -335f); // CÙNG HÀNG với CREDITS (bên phải 160) — SHIP bên trái (Fix Spacing 2026-08-12)
             rt.sizeDelta = new Vector2(300f, 56f);
 
             var img = go.GetComponent<Image>();
@@ -162,8 +162,8 @@ namespace VoidRunner.UI
             AssignFallbackFont(_nameText);
 
             // Nút mũi tên trái / phải
-            CreateArrowButton(panel.transform, "PrevButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-170f, -410f), "<", SelectPrev);
-            CreateArrowButton(panel.transform, "NextButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(170f, -410f), ">", SelectNext);
+            CreateArrowButton(panel.transform, "PrevButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-170f, -410f), "<");
+            CreateArrowButton(panel.transform, "NextButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(170f, -410f), ">");
 
             // Nút chọn (xác nhận)
             var confirmGo = new GameObject("ConfirmButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -234,6 +234,12 @@ namespace VoidRunner.UI
             CachePanelRefs();
         }
 
+        /// <summary>
+        /// Cache refs + subscribe nút mũi tên. ⚠️ FIX 2026-08-12 (bug "bấm chuột mũi tên không
+        /// đổi tàu"): trước đây CreateArrowButton cũng AddListener → DOUBLE-SUBSCRIBE → 1 click gọi
+        /// SelectPrev 2 lần → 2 tàu đổi qua rồi về cũ = nhìn như không đổi (phím hoạt động vì 1 lần/frame).
+        /// Giờ: RemoveAllListeners trước khi Add → idempotent, không bao giờ subscribe 2 lần.
+        /// </summary>
         private void CachePanelRefs()
         {
             if (_panel == null) return;
@@ -241,11 +247,19 @@ namespace VoidRunner.UI
             _nameText = _panel.transform.Find("ShipName")?.GetComponent<TextMeshProUGUI>();
             var prevBtn = _panel.transform.Find("PrevButton")?.GetComponent<Button>();
             var nextBtn = _panel.transform.Find("NextButton")?.GetComponent<Button>();
-            if (prevBtn != null) prevBtn.onClick.AddListener(SelectPrev);
-            if (nextBtn != null) nextBtn.onClick.AddListener(SelectNext);
+            if (prevBtn != null)
+            {
+                prevBtn.onClick.RemoveAllListeners();
+                prevBtn.onClick.AddListener(SelectPrev);
+            }
+            if (nextBtn != null)
+            {
+                nextBtn.onClick.RemoveAllListeners();
+                nextBtn.onClick.AddListener(SelectNext);
+            }
         }
 
-        private void CreateArrowButton(Transform parent, string name, Vector2 aMin, Vector2 aMax, Vector2 pos, string arrow, UnityEngine.Events.UnityAction onClick)
+        private void CreateArrowButton(Transform parent, string name, Vector2 aMin, Vector2 aMax, Vector2 pos, string arrow)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
@@ -259,7 +273,8 @@ namespace VoidRunner.UI
             img.color = new Color(0.3f, 0.2f, 0.6f, 1f);
             var btn = go.GetComponent<Button>();
             btn.transition = Selectable.Transition.ColorTint;
-            btn.onClick.AddListener(onClick);
+            // ⚠️ KHÔNG AddListener ở đây — CachePanelRefs() đảm nhận (tránh double-subscribe,
+            // bug 2026-08-12 "bấm chuột mũi tên không đổi tàu" — fix ở CachePanelRefs).
 
             var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             label.transform.SetParent(go.transform, false);
@@ -406,15 +421,15 @@ namespace VoidRunner.UI
             bool show = !_panel.activeSelf;
 
             // Dimmer che menu phía sau khi mở panel (fix 2026-08-12: panel đè lộ VOID RUNNER phía sau)
+            // ⚠️ FIX vòng 2 (2026-08-12, user "popup lộ menu sau lưng"): trước đây SetAsFirstSibling
+            // chìm dimmer XUỐNG DƯỚI menu → menu sáng rõ sau panel (giống bug cũ MainMenuManager).
+            // Đúng: dimmer SetAsLastSibling TRƯỚC, panel SetAsLastSibling SAU → dimmer che menu, panel che dimmer.
             if (show) EnsureDimmer();
             _panel.SetActive(show);
-            if (_dimmer != null)
-            {
-                _dimmer.SetActive(show);
-                if (show) _dimmer.transform.SetAsFirstSibling();
-            }
+            if (_dimmer != null) _dimmer.SetActive(show);
             if (show)
             {
+                _dimmer.transform.SetAsLastSibling();
                 _panel.transform.SetAsLastSibling();
                 RefreshPreview();
             }
