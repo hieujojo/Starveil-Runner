@@ -58,7 +58,7 @@ namespace VoidRunner.Core.World
 
         private void OnEnable()
         {
-            Debug.Log($"[DiagTS] OnEnable instance={_instanceCount} — có TileSpawner khác chạy? count thực tế từ FindAny: {FindObjectsByType<TileSpawner>(FindObjectsSortMode.None).Length}");
+            Debug.Log($"[DiagTS] OnEnable instance={_instanceCount} — có TileSpawner khác chạy? count thực tế từ FindAny: {FindObjectsByType<TileSpawner>().Length}");
         }
 
         private Tile CreateTile()
