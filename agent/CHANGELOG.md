@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-11 — CS0234: ShipSelectSetupTool không compile được (safe mode)
+
+> User: "hiện có 1 log lỗi, ưu tiên fix đi".
+
+### Nguyên nhân (chính xác)
+
+- `Assets/_Project/Editor/ShipSelectSetupTool.cs(8,21): error CS0234: The type or namespace name 'Screens' does not exist in the namespace 'VoidRunner.UI'`.
+- File tool đang `using VoidRunner.UI.Screens;` nhưng **tất cả** script UI trong thư mục `Scripts/UI/Screens/` (MainMenuManager, ShipSelectManager) khai báo namespace `VoidRunner.UI` — thư mục `Screens/` chỉ là tổ chức vật lý, KHÔNG phải namespace. `VoidRunner.UI.Screens` không tồn tại → compile fail → Unity bắt vào safe mode.
+
+### Cách fix
+
+- Bỏ dòng `using VoidRunner.UI.Screens;` (dòng 8) khỏi tool — `using VoidRunner.UI;` đã có sẵn nên `ShipSelectManager`/`MainMenuManager` vẫn resolve được.
+
+### Bài học — **QUY TẮC MỚI (R0.x)**
+
+- **Namespace phải khớp chính xác với file, không khớp với thư mục.** Trước khi viết `using X.Y.Z` phải `grep -n '^namespace'` file đích để xác minh namespace THẬT.
+- Khi log báo lỗi ở dòng có `using` → nghi ngờ sai namespace trước tiên (CS0234/CS0246).
+
+---
+
 ## 2026-08-11 — Ẩn TẠM cảnh vật 2 bên lề (Ambient props) — chờ user review UI
 
 > User: "có background rồi thì cảnh vật 2 bên lề trông lơ lửng ở giữa vũ trụ không hợp lý — xóa cảnh vật 2 bên, nhưng để an toàn hãy ẩn/xóa tạm thời — tôi sẽ review UI trực tiếp rồi mới quyết định xóa hẳn hay không".

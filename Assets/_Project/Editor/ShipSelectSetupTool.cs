@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using VoidRunner.Core.Player;
 using VoidRunner.UI;
-using VoidRunner.UI.Screens;
 
 namespace VoidRunner.EditorTools
 {
