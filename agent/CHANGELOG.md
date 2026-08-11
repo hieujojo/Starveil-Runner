@@ -25,6 +25,25 @@
 
 ---
 
+## 2026-08-12 (v3f.2) — Fix rào chắn: quá dài/văng khỏi đường + cùng màu lề + vật thể không đè nhau
+
+> User test: "rào chắn hơi dài, cùng màu với lề đường cực khó nhìn, văng ra khỏi trục đường chính, các vật thể ko được phép đè lên nhau; drone lúc đầu bị che bởi màu trắng nhưng sau vài lần retry hiển thị bình thường".
+
+### Root cause & fix
+
+- **Rào DÀI + VĂNG KHỎI ĐƯỜNG** — tool scale đều cả 3 trục theo chiều cao (1.6) → Fence_Long_01 (bản dài) giữ tỉ lệ → bề ngang vượt laneWidth 4.5 → tràn lane khác + ra ngoài road ±9. **Fix**: `BarrierTargetWidth = 4.2` — sau scale chiều cao, đo bounds thật rồi ép bề ngang (hướng chắn lane) ≤ 4.2 (pattern NormalizeScale R4.18) → rào GỌN TRONG 1 lane, không đè vật thể bên cạnh, không văng khỏi đường.
+- **CÙNG MÀU LỀ ĐƯỜNG** — lane marker cyan (0.2,0.8,1) + nền tối → rào xám trạm lẫn vào. **Fix**: `ApplyWarningColor` — ép material INSTANCE (new Material(src) — không đụng asset gói) sang **cam neon** `_BaseColor (1,0.45,0.05)` + `_EmissionColor (1,0.28,0)` + keyword `_EMISSION` → rào nổi bật, đọc rõ từ xa. Chỉ áp cho rào (drone giữ nguyên bản — đã hiển thị đúng).
+- **Menu mới `Rebuild SciFi Obstacles`** — xóa 2 prefab cũ + dựng lại (ép kích thước/màu). Tool vẫn idempotent: `Setup` không đổi prefab đã tồn tại; `Rebuild` ép buộc dựng lại.
+- **Drone trắng lúc đầu** — material Standard (Built-in) → `Obstacle.Awake` self-heal MaterialFixer (R3.16) fix ngay frame đầu; "trắng vài frame rồi đúng" = MaterialFixer chạy sau 1 frame — KHÔNG phải bug (đã xác nhận tự hết sau retry).
+
+### Bài học — QUY TẮC (bổ sung R7.9/R4.18)
+
+- **Scale model 3rd-party: ép CẢ chiều cao LẪN bề ngang** — chỉ ép chiều cao theo tỉ lệ đều = model dài sẵn tràn lane/road. Luôn đo bounds thật sau scale rồi normalize từng trục về ràng buộc (chiều cao mục tiêu + bề ngang ≤ laneWidth).
+- **Obstacle phải ĐỌC ĐƯỢC trên nền road** — màu vật cản phải TƯƠNG PHẢN với lane marker/road (rào xám lẫn lane cyan → ép cam neon emission). Kiểm tra màu nền (lane marker) trước khi chốt material obstacle.
+- **Menu tool idempotent cần thêm phiên bản "Rebuild"** — khi sửa thông số (kích thước/màu) mà prefab đã tồn tại: `Setup` sẽ bỏ qua (idempotent) → cần menu riêng xóa prefab + dựng lại.
+
+---
+
 ## 2026-08-12 (v3f) — Obstacle = SciFi (Fence + Drone) thay Asteroid + cache chuyển sang ổ D
 
 > User: "trong 1 game vũ trụ thì tự nhiên có cục thiên thạch giữa đường có kì quá ko, bạn đề xuất vài giải pháp tối ưu; tôi ko muốn vẽ bằng code, muốn dùng chính các assets có sẵn (giống dùng thư viện icon thay vì tự vẽ)". → Chốt: **Fence_Long_01 (3D Scifi Kit Starter Kit — Creepy_Cat) + Robot_Guardian (Sci fi Drones — Lukas Bobor)**.

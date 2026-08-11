@@ -38,10 +38,25 @@ namespace VoidRunner.EditorTools
         private const string DroneOutputPath = "Assets/_Project/Prefabs/Obstacles/DroneObstacle.prefab";
 
         private const float BarrierTargetHeight = 1.6f; // rào chắn lane (vừa đủ chặn tàu, không to quá che đường)
+        private const float BarrierTargetWidth = 4.2f;  // FIX 2026-08-12 v3f (user: "rào dài quá, văng khỏi đường"): ép bề ngang ≤ laneWidth 4.5
         private const float DroneTargetHeight = 1.2f;   // drone bay giữa lane (nhỏ — né dễ, đọc rõ)
 
         [MenuItem(MenuRoot + "Setup Obstacle = SciFi (Fence + Drone Guardian)")]
         public static void Setup()
+        {
+            SetupCore();
+        }
+
+        [MenuItem(MenuRoot + "Rebuild SciFi Obstacles (ép kích thước + màu)")]
+        public static void Rebuild()
+        {
+            // Xóa prefab cũ → dựng lại với kích thước/màu mới (fix 2026-08-12 v3f)
+            AssetDatabase.DeleteAsset(BarrierOutputPath);
+            AssetDatabase.DeleteAsset(DroneOutputPath);
+            SetupCore();
+        }
+
+        private static void SetupCore()
         {
             // 1. Load 2 model nguồn
             var fence = AssetDatabase.LoadAssetAtPath<GameObject>(FenceSourcePath);
@@ -85,6 +100,13 @@ namespace VoidRunner.EditorTools
         private static GameObject LoadOrBuild(string outputPath, GameObject source, float targetHeight,
             string rootName, string childName, bool rotateToBlockLane)
         {
+            return LoadOrBuild(outputPath, source, targetHeight, rotateToBlockLane ? BarrierTargetWidth : 0f,
+                rootName, childName, rotateToBlockLane);
+        }
+
+        private static GameObject LoadOrBuild(string outputPath, GameObject source, float targetHeight, float targetWidth,
+            string rootName, string childName, bool rotateToBlockLane)
+        {
             GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(outputPath);
             if (existing != null) return existing;
 
@@ -118,6 +140,20 @@ namespace VoidRunner.EditorTools
                 model.transform.localRotation = Quaternion.identity;
             }
 
+            // FIX 2026-08-12 v3f (user: "rào dài quá + văng khỏi trục đường"): ép bề ngang
+            // (hướng chắn lane) ≤ targetWidth — rào nằm GỌN TRONG 1 lane, không tràn lane khác,
+            // không đè vật thể bên cạnh, không văng ra ngoài road. Pattern NormalizeScale (R4.18).
+            if (targetWidth > 0f)
+            {
+                Bounds sized = GetRenderBounds(model);
+                float widest = Mathf.Max(sized.size.x, sized.size.z);
+                if (widest > targetWidth && widest > 0.001f)
+                {
+                    float sw = targetWidth / widest;
+                    model.transform.localScale *= sw;
+                }
+            }
+
             // ⚠️ Vô hiệu collider CON (góp ý reviewer 2026-08-12 v3f): prefab Scifi Kit có thể kèm
             // MeshCollider/BoxCollider solid ở con → ĐẨY VẬT LÝ player thay vì OnTriggerEnter trên
             // root (pattern giống EnemyChase.BuildEnemyVisual — chỉ root trigger nuốt).
@@ -133,6 +169,15 @@ namespace VoidRunner.EditorTools
             float radius = Mathf.Max(final.extents.x, final.extents.z) * 1.05f;
             col.radius = Mathf.Max(radius, 0.5f);
             col.center = new Vector3(0f, final.center.y, 0f);
+
+            // FIX 2026-08-12 v3f (user: "cùng màu với lề đường, khó nhìn"): ép MÀU CẢNH BÁO cam neon
+            // cho material rào chắn — khác hẳn lane marker cyan (0.2,0.8,1) + nền tối, đọc rõ từ xa.
+            // Chỉ áp cho rào chắn (drone giữ nguyên bản — đã hiển thị đúng). Tạo material INSTANCE
+            // (new Material(src)) → không sửa asset material gốc của gói.
+            if (rotateToBlockLane)
+            {
+                ApplyWarningColor(model);
+            }
 
             EnsureFolder(outputPath);
             bool saved = PrefabUtility.SaveAsPrefabAsset(root, outputPath);
@@ -162,6 +207,41 @@ namespace VoidRunner.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(data);
             return 1;
+        }
+
+        /// <summary>
+        /// Ép màu cảnh báo cam neon cho mọi renderer (material INSTANCE — không đụng asset gói).
+        /// URP/Lit: _BaseColor cam + _EmissionColor cam sáng (keyword _EMISSION) → nổi trên nền tối + lane cyan.
+        /// </summary>
+        private static void ApplyWarningColor(GameObject go)
+        {
+            Color warning = new Color(1f, 0.45f, 0.05f, 1f); // cam neon
+            Color emission = new Color(1f, 0.28f, 0f, 1f);
+            Shader urp = Shader.Find("Universal Render Pipeline/Lit");
+
+            Renderer[] renderers = go.GetComponentsInChildren<Renderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Renderer r = renderers[i];
+                if (r == null) continue;
+                Material[] mats = r.sharedMaterials;
+                for (int m = 0; m < mats.Length; m++)
+                {
+                    Material src = mats[m];
+                    if (src == null) continue;
+                    Shader s = src.shader;
+                    bool isURP = s != null && (s.name.Contains("Universal Render Pipeline") || s.name.Contains("Shader Graphs"));
+                    Material inst = isURP ? new Material(src) : (urp != null ? new Material(urp) : new Material(src));
+                    inst.SetColor("_BaseColor", warning);
+                    if (inst.HasProperty("_EmissionColor"))
+                    {
+                        inst.SetColor("_EmissionColor", emission);
+                        inst.EnableKeyword("_EMISSION");
+                    }
+                    mats[m] = inst;
+                }
+                r.sharedMaterials = mats;
+            }
         }
 
         private static Bounds GetRenderBounds(GameObject go)
