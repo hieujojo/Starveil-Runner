@@ -14,7 +14,9 @@ namespace VoidRunner.Core.World
     public class Tile : MonoBehaviour
     {
         [SerializeField] private float length = 10f;
-        [SerializeField] private float roadHalfWidth = 5f;
+        // Road rộng hơn (fix 2026-08-11 — user: "đường quá nhỏ"): half 5 → 7 (cả đường 14 đơn vị),
+        // khớp Ground scale x=14 + laneWidth=3 mà tool Refactor set trong scene.
+        [SerializeField] private float roadHalfWidth = 7f;
 
         /// <summary>Material dùng chung cho mọi lane marker (tạo 1 lần, tông cyan neon).</summary>
         private static Material _laneMat;

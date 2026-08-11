@@ -4,6 +4,8 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VoidRunner.Core.Player;
+using VoidRunner.Core.World;
 
 namespace VoidRunner.EditorTools
 {
@@ -50,17 +52,22 @@ namespace VoidRunner.EditorTools
 
             // 1. Ground tĩnh 400m chỉ đủ chơi ~15-30s rồi "đường hết" → kéo dài 6000m
             // (track thật là tile recycle vô tận — Ground chỉ là nền dưới, không được giới hạn)
+            // Road cũng RỘNG HƠN: scale x 10 → 14 (fix "đường quá nhỏ" 2026-08-11)
             GameObject ground = GameObject.Find("Ground");
             if (ground != null)
             {
                 ground.transform.localPosition = new Vector3(0f, -0.5f, 100f);
-                ground.transform.localScale = new Vector3(10f, 1f, 6000f);
-                Debug.Log("[Refactor] Ground: 400m → 6000m — track không còn 'chạy hết'.");
+                ground.transform.localScale = new Vector3(14f, 1f, 6000f);
+                Debug.Log("[Refactor] Ground: 400m → 6000m, rộng 10 → 14 — track không còn 'chạy hết' + road rộng.");
             }
             else
             {
                 Debug.LogWarning("[Refactor] Không tìm thấy Ground trong Game scene — bỏ qua track.");
             }
+
+            // 1b. Road rộng hơn → laneWidth 2 → 3 cho Player / Obstacle / Pickup (khớp road ±7)
+            // + đẩy ambient 2 bên ra ngoài mép road (sideOffset 7 → 9.5)
+            WidenRoadAndMoveAmbientOut();
 
             // 2. R0.5: English texts trong gameplay
             RewriteTexts(text =>
@@ -84,10 +91,30 @@ namespace VoidRunner.EditorTools
             RectTransform panel = FindRectTransform("ScorePanel");
             if (panel != null) panel.sizeDelta = new Vector2(360f, 90f);
 
-            // ScoreText: font 58 → 40 (hết vỡ khung chứa điểm)
+            // ScoreLabel "SCORE": đưa lên sát đỉnh panel, căn giữa, font nhỏ — TÁCH khỏi số điểm
+            // (fix 2026-08-11: label đang nằm ngay trên số → "SCORE và số quá sát nhau")
+            TextMeshProUGUI label = FindText("ScoreLabel");
+            if (label != null)
+            {
+                RectTransform lrt = label.rectTransform;
+                lrt.anchorMin = new Vector2(0.5f, 1f);
+                lrt.anchorMax = new Vector2(0.5f, 1f);
+                lrt.anchoredPosition = new Vector2(0f, -4f);
+                lrt.sizeDelta = new Vector2(220f, 24f);
+                label.fontSize = 20f;
+                label.fontStyle = FontStyles.Bold;
+                label.alignment = TextAlignmentOptions.Center;
+            }
+
+            // ScoreText: nửa DƯỚI panel (cách label thoải mái), font 40
             TextMeshProUGUI score = FindText("ScoreText");
             if (score != null)
             {
+                RectTransform srt = score.rectTransform;
+                srt.anchorMin = new Vector2(0f, 0f);
+                srt.anchorMax = new Vector2(1f, 0.72f);
+                srt.anchoredPosition = Vector2.zero;
+                srt.sizeDelta = Vector2.zero;
                 score.fontSize = 40f;
                 score.fontSizeMin = 18f;
                 score.alignment = TextAlignmentOptions.Center;
@@ -105,7 +132,43 @@ namespace VoidRunner.EditorTools
             TextMeshProUGUI comboText = FindText("ComboText");
             if (comboText != null) comboText.fontSize = 36f;
 
-            Debug.Log("[Refactor] HUD: ScorePanel 360x90, ScoreText 40, ComboText dưới điểm (0,-110).");
+            Debug.Log("[Refactor] HUD: ScorePanel 360x90, label SCORE trên (y=-4) + số dưới (tách rõ), ComboText dưới điểm (0,-110).");
+        }
+
+        /// <summary>
+        /// Road rộng hơn: laneWidth 2 → 3 (Player/Obstacle/Pickup — khớp road ±7) + ambient đẩy ra
+        /// ngoài mép road (sideOffset 7 → 9.5) để prop không nằm trên đường.
+        /// </summary>
+        private static void WidenRoadAndMoveAmbientOut()
+        {
+            int changed = 0;
+
+            var pc = UnityEngine.Object.FindAnyObjectByType<PlayerController>();
+            if (SetSerializedFloat(pc, "laneWidth", 3f)) changed++;
+
+            var om = UnityEngine.Object.FindAnyObjectByType<ObstacleManager>();
+            if (SetSerializedFloat(om, "laneWidth", 3f)) changed++;
+
+            var ps = UnityEngine.Object.FindAnyObjectByType<PickupSpawner>();
+            if (SetSerializedFloat(ps, "laneWidth", 3f)) changed++;
+
+            var ambient = UnityEngine.Object.FindAnyObjectByType<AmbientScroller>();
+            if (SetSerializedFloat(ambient, "sideOffset", 9.5f)) changed++;
+
+            Debug.Log($"[Refactor] Road rộng: laneWidth 2→3 ({changed} component) + ambient sideOffset→9.5.");
+        }
+
+        /// <summary>Set field float trên component qua SerializedObject (không phá prefab).</summary>
+        private static bool SetSerializedFloat<T>(T comp, string field, float value) where T : Component
+        {
+            if (comp == null) return false;
+            var so = new SerializedObject(comp);
+            SerializedProperty prop = so.FindProperty(field);
+            if (prop == null) return false;
+            prop.floatValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(comp);
+            return true;
         }
 
         private static RectTransform FindRectTransform(string name)
