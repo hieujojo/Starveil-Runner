@@ -34,6 +34,26 @@
 
 ---
 
+## 2026-08-11 — CS0246 AmbientSetupTool sau đợt dọn file (2 log đỏ)
+
+> User: "đang có 2 log lỗi đỏ, đọc log rồi fix nhé".
+
+### Nguyên nhân (chính xác)
+
+- **Lỗi THẬT — `AmbientSetupTool.cs(112,41)` CS0246 `AmbientScroller could not be found`**: sau khi xóa `AmbientScroller.cs` (đợt dọn file, user duyệt), Editor tool `AmbientSetupTool` vẫn tham chiếu class đó → compile fail → 2 log đỏ.
+- **Lỗi CŨ — `ShipSelectSetupTool.cs(8,21)` CS0234**: nằm TRƯỚC `Tundra build success` trong log → đã fix từ trước, chỉ còn trong log cũ (R6.6: lỗi sau success mới là thật). Clear Console là hết.
+
+### Cách fix
+
+- **Xóa `AmbientSetupTool.cs` + `.meta`** — tool chỉ có 1 menu "Setup Ambient in Game Scene", không ai gọi, Ambient đã xóa hẳn khỏi scene (count=0) → vô dụng, không sửa được (chỉ làm mỗi việc gắn AmbientScroller). Commit `61433f0`.
+
+### Bài học — **QUY TẮC MỚI (R3.14 / bổ sung R6.7)**
+
+- **Khi xóa 1 script (class), PHẢI quét Editor tools tham chiếu nó trước** (`grep -rln '<TênClass>' Assets/_Project/Editor/`) — tool tham chiếu class đã xóa = compile fail toàn project. Nếu tool chỉ phục vụ đúng cái đã xóa → xóa luôn tool.
+- Khi user báo "N log đỏ": phân biệt lỗi thật/cũ bằng vị trí so với `Tundra build success` cuối (R6.6) + mtime log.
+
+---
+
 ## 2026-08-11 — CS0234: ShipSelectSetupTool không compile được (safe mode)
 
 > User: "hiện có 1 log lỗi, ưu tiên fix đi".
