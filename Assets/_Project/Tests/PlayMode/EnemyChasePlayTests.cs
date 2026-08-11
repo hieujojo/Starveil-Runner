@@ -9,11 +9,11 @@ using VoidRunner.Core.World;
 namespace VoidRunner.Tests
 {
     /// <summary>
-    /// Play Mode tests cho cơ chế Enemy 2 NẤC CỐ ĐỊNH (R0.4) — FIX 2026-08-12 v3:
-    /// - NẤC 0: Enemy giữ baseDistance (16m) sau lưng player (đẩy ra vì camera cách player 10m
-    ///   → 9m cũ làm bọ chỉ cách camera 1m, bị cắt khỏi màn hình).
-    /// - Đụng obstacle lần 1 → NẤC 1: Enemy tiến sát closeDistance (12m) + vỗ cánh nhanh hơn.
-    /// - Né sạch hết cửa sổ → Enemy nới về 16m (reset nấc 0).
+    /// Play Mode tests cho cơ chế Enemy 2 NẤC CỐ ĐỊNH (R0.4) — FIX 2026-08-12 v3f.3:
+    /// - NẤC 0: Enemy giữ baseDistance (5m) sau lưng player — camera cách player 10m nên
+    ///   5m = bọ ở 5m TRƯỚC camera → nhìn thấy cả con (16m cũ = 6m SAU camera → không bao giờ thấy).
+    /// - Đụng obstacle lần 1 → NẤC 1: Enemy tiến sát closeDistance (3m) + vỗ cánh nhanh hơn.
+    /// - Né sạch hết cửa sổ → Enemy nới về 5m (reset nấc 0).
     /// - Đụng lần 2 trong cửa sổ → Enemy LAO TỚI BẮT (atack) → sau catchDelay → Game Over.
     /// GameManager chỉ dùng để có Instance + State=Playing (disable để chặn Start noise).
     /// </summary>
@@ -26,8 +26,8 @@ namespace VoidRunner.Tests
         private bool _gameOverRaised;
         private System.Action _gameOverHandler;
 
-        private const float BaseDist = 16f;
-        private const float CloseDist = 12f;
+        private const float BaseDist = 5f;
+        private const float CloseDist = 3f;
 
         [SetUp]
         public void SetUp()
@@ -39,7 +39,7 @@ namespace VoidRunner.Tests
             // Enemy: primitive sphere (có Collider — yêu cầu của EnemyChase)
             _enemyGo = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             _enemyGo.name = "TestEnemy";
-            _enemyGo.transform.position = new Vector3(0f, 0f, -BaseDist); // sau lưng player 9m
+            _enemyGo.transform.position = new Vector3(0f, 0f, -BaseDist); // sau lưng player
             _enemy = _enemyGo.AddComponent<EnemyChase>();
             _enemy.Setup(_playerGo.transform);
 
@@ -86,7 +86,7 @@ namespace VoidRunner.Tests
         {
             yield return new WaitForSeconds(0.3f);
             Assert.AreEqual(BaseDist, DistanceBehind(), 0.8f,
-                "NẤC 0: Enemy phải giữ ~16m sau lưng player (không tự tăng tốc).");
+                "NẤC 0: Enemy phải giữ ~5m sau lưng player (không tự tăng tốc).");
         }
 
         [UnityTest]
@@ -97,7 +97,7 @@ namespace VoidRunner.Tests
 
             yield return new WaitForSeconds(0.2f);
             Assert.AreEqual(CloseDist, DistanceBehind(), 0.8f,
-                "Đụng lần 1: Enemy phải tiến sát còn ~12m (nấc 1) nhưng chưa chết.");
+                "Đụng lần 1: Enemy phải tiến sát còn ~3m (nấc 1) nhưng chưa chết.");
             Assert.IsFalse(_gameOverRaised, "Nấc 1 không được Game Over.");
         }
 
@@ -111,7 +111,7 @@ namespace VoidRunner.Tests
             // Không đụng gì nữa → hết cửa sổ (0.3s) → nới về nấc 0
             yield return new WaitForSeconds(0.8f);
             Assert.AreEqual(BaseDist, DistanceBehind(), 0.8f,
-                "Né sạch hết cửa sổ: Enemy phải nới lại về ~16m (reset nấc 0).");
+                "Né sạch hết cửa sổ: Enemy phải nới lại về ~5m (reset nấc 0).");
         }
 
         [UnityTest]

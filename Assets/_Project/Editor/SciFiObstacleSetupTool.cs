@@ -170,6 +170,12 @@ namespace VoidRunner.EditorTools
             col.radius = Mathf.Max(radius, 0.5f);
             col.center = new Vector3(0f, final.center.y, 0f);
 
+            // FIX 2026-08-12 v3f.3 (user: "drone ở giữa 2 lane, sát lề bên phải — né trái/phải đều dính"):
+            // model 3rd-party có PIVOT LỆCH (mesh không nằm giữa gốc — Robot_Guardian lệch X≈-1.45).
+            // Bù model.transform.localPosition theo bounds center để mesh nằm ĐÚNG TÂM lane khi
+            // ObstacleManager đặt wrapper ở x=lane. (Root giữ ở localPosition 0 — vị trí lane.)
+            model.transform.localPosition = new Vector3(-final.center.x, -final.center.y, -final.center.z);
+
             // FIX 2026-08-12 v3f (user: "cùng màu với lề đường, khó nhìn"): ép MÀU CẢNH BÁO cam neon
             // cho material rào chắn — khác hẳn lane marker cyan (0.2,0.8,1) + nền tối, đọc rõ từ xa.
             // Chỉ áp cho rào chắn (drone giữ nguyên bản — đã hiển thị đúng). Tạo material INSTANCE
@@ -180,6 +186,7 @@ namespace VoidRunner.EditorTools
             }
 
             EnsureFolder(outputPath);
+            Debug.Log($"[SciFiObstacle] Prefab {outputPath}: bounds={final.size.ToString("F2")} pivotOffset={model.transform.localPosition.ToString("F2")}");
             bool saved = PrefabUtility.SaveAsPrefabAsset(root, outputPath);
             Object.DestroyImmediate(root); // ⚠️ hủy cả cây con — KHÔNG truy cập model sau dòng này (R7.10)
             if (!saved)

@@ -35,11 +35,11 @@ namespace VoidRunner.Core.World
         [Header("Khoảng cách")]
         [SerializeField] private Transform player;
 
-        [SerializeField, Tooltip("Khoảng cách nền (nấc 0) sau lưng player — FIX 2026-08-12 v3: 9→16m vì camera cách player 10m → bọ cách camera chỉ 1m → bị cắt khỏi màn hình (chỉ thấy phần đầu)")]
-        private float baseDistance = 16f;
+        [SerializeField, Tooltip("Khoảng cách nền (nấc 0) sau lưng player — FIX 2026-08-12 v3f.3: 16→5m vì CAMERA cách player 10m; 16m = bọ nằm 6m SAU camera → không bao giờ thấy (chỉ thấy lúc bị bắt lao tới). 5m = bọ ở 5m TRƯỚC camera → thấy cả con, đủ đe dọa")]
+        private float baseDistance = 5f;
 
-        [SerializeField, Tooltip("Khoảng cách khi đụng vật cản lần 1 (nấc 1) — áp sát nhưng vẫn thấy cả con bọ (fix 2026-08-12 v3: 7.5→12m cùng lý do camera)")]
-        private float closeDistance = 12f;
+        [SerializeField, Tooltip("Khoảng cách khi đụng vật cản lần 1 (nấc 1) — áp sát nhưng vẫn trước camera (fix 2026-08-12 v3f.3: 12→3m — camera cách player 10m nên 3m vẫn trong khung hình)")]
+        private float closeDistance = 3f;
 
         [SerializeField, Tooltip("Dưới ngưỡng này (khoảng cách z thật) = enemy nuốt player — safety net")]
         private float swallowDistance = 1.6f;
@@ -303,6 +303,14 @@ namespace VoidRunner.Core.World
             if (Mathf.Abs(transform.position.z - player.position.z) < swallowDistance)
             {
                 GameEvents.RaiseGameOver();
+            }
+
+            // [DIAG-TẠM] user yêu cầu log vị trí con bọ (2026-08-12 v3f.3) — XÓA SAU KHI XÁC NHẬN THẤY BỌ
+            if (Time.frameCount % 120 == 0)
+            {
+                Camera cam = Camera.main;
+                string camPos = cam != null ? cam.transform.position.ToString("F1") : "(no cam)";
+                Debug.Log($"[DIAG-Enemy] pos={transform.position.ToString("F1")} stage={_stage} dist={_currentDistance:F1} | cam={camPos} | player={player.position.ToString("F1")}");
             }
         }
 
