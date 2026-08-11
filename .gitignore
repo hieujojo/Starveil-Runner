@@ -129,3 +129,9 @@ InitTestScene*.unity*
 /Assets/Monster/
 /Assets/Flying Beetle/
 /Assets/fantasySpider/
+# (kèm theo .meta của folder — Unity tự tái sinh khi tải lại gói)
+/Assets/SF_Fighter.meta
+/Assets/Sparrow_Fighter.meta
+/Assets/Monster.meta
+/Assets/Flying Beetle.meta
+/Assets/fantasySpider.meta
