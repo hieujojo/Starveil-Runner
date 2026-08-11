@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-08-11 — ROOT CAUSE CUỐI CÙNG: obstacle/coin "văng lung tung" = Rotator gắn nhầm lên Managers (cha của mọi tile)
+
+> User chạy lại với diag mới (113 log): fix scale đã chạy (`tileScale=(1,1,1)`) nhưng obstacle/coin WORLD position vẫn lệch X/Y lung tung.
+
+### Root cause (đã xác minh 100% bằng log + scene)
+
+- `[DiagObstacle]` log có `tileRot=(357.36, 355.37, 352.94)` ≈ gần 360° và nhiều giá trị xoay lung tung (297, 345, 256...) → **TILE ĐANG QUAY VÒNG LIÊN TỤC**.
+- `Rotator.cs` (xoay `(15°, 30°, 45°)/giây` — file user tưởng đã thêm vào **coin**) thực tế bị gắn lên GameObject **"Managers"** (`m_GameObject: {fileID: 288287876}`) trong Game scene — Managers là cha của TileSpawner → cha của TOÀN BỘ tiles → cả track + obstacle + coin + void **quay vòng**.
+- Hậu quả dây chuyền: obstacle/coin là con tile → world position nhân theo rotation → văng X/Y lung tung (y từ -2.61 đến +3.90); tile xoay → vị trí z đổi liên tục → `tile=2` (recycle nhầm, track chỉ giữ 2 tile); player chạy 14,500 điểm không bao giờ đụng obstacle.
+- **Vì sao mất 3 tuần:** 2 root cause CHỒNG NHAU — (1) tile scale nhân vào con (đã fix `3d1a794`), (2) Rotator trên Managers khiến mọi thứ quay. Fix xong scale thì Rotator lộ ra.
+
+### Đã fix (commit `43f2936`)
+
+- Xóa block Rotator (fileID `288287887`) khỏi GameObject Managers trong `Game.unity` (gỡ cả component khỏi m_Component list + m_Script GUID `0a1e4dc7...`).
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Rotator (hoặc bất kỳ component xoay visual nào) CHỈ gắn lên đúng GameObject có visual cần xoay (coin, obstacle, particle) — TUYỆT ĐỐI không gắn lên container/manager/cha có con mang vị trí world** (Managers, TileSpawner, tile) → xoay cả cây con, phá toàn bộ thế giới. Dấu hiệu: `transform.eulerAngles` của tile/container quay vòng theo thời gian + con cái world position lệch lung tung dù localPosition đúng.
+- **Khi user nói "tôi đã thêm component X vào Y", hãy VERIFY component thực sự nằm ở đâu trong scene** (grep GUID script trong scene/prefab, tìm block m_GameObject của component) — component có thể bị kéo thả nhầm vào object khác mà user không biết. Đừng tin lời nói, hãy tin file trên đĩa.
+- **Hai bug chồng nhau che dấu nhau** — fix xong bug A mà triệu chứng còn, đừng kết luận "fix không ăn"; tìm bug B có cùng triệu chứng (scale → rotation).
+
+---
+
 ## 2026-08-11 — ROOT CAUSE "không thấy vật cản/xu" — tile scale nhân vào con (bug 3 tuần)
 
 > User hỏi "fix lỗi ko hiển thị xu (coin) và vật cản" — bug dai dẳng nhiều vòng. Lần này tìm ra gốc rễ thật.

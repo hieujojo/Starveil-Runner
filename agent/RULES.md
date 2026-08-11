@@ -77,6 +77,7 @@
 - **R4.13** — `ParticleSystem.Emit()` bypass emission module → bỏ dead config.
 - **R4.14** — `[UnityTest] IEnumerator` bắt buộc có ≥1 `yield return` (CS0161).
 - **R4.15** — **KHÔNG scale ROOT của container chứa con đặt vị trí (tile/chunk/spawner)** — Unity nhân scale parent vào CẢ vị trí lẫn kích thước con (`world = parentScale × local`) → obstacle/coin bay ra ngoài đường + dẹt vô hình. Container scale = (1,1,1); muốn to/nhỏ thì scale CHILD visual. Dấu hiệu: "log spawn ĐÃ TẠO nhưng không thấy gì" → nghi scale parent. *(Bug 3 tuần 2026-08-11.)*
+- **R4.17** — **Component xoay (Rotator) CHỈ gắn lên visual cần xoay (coin, obstacle) — KHÔNG gắn lên container/manager/cha có con mang vị trí world** (Managers, TileSpawner, tile) → xoay cả cây con → obstacle/coin văng X/Y lung tung dù localPosition đúng + track recycle sai (`tile=2`). Dấu hiệu: `eulerAngles` của container quay vòng theo thời gian. **Khi user nói "đã thêm X vào Y" → VERIFY trong file scene/prefab (grep GUID component, đọc block m_GameObject) — component có thể bị kéo nhầm vào object khác mà user không biết.** *(Bug 2026-08-11: Rotator trên Managers — root cause cuối của bug 3 tuần.)*
 - **R4.16** — **OnTriggerEnter chỉ fire khi ≥1 collider là trigger** — obstacle phải `IsTrigger:1` (+ bỏ gravity/kinematic) để player solid sphere detect được; solid-solid = OnCollisionEnter (không chạy code OnTriggerEnter). **Collider `m_Size` phải khớp mesh** (Ramp mesh 2×0.5×2 → collider size 2×0.5×2). *(Fix 2026-08-11.)*
 
 ## 🎨 NHÓM 5 — UI / TMP / Visual

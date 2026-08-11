@@ -48,14 +48,10 @@
 - **Package**: URP (Universal Render Pipeline) + Cinemachine + Input System (asset `InputSystem_Actions.inputactions`) + TextMeshPro + DOTween (Plugins).
 - **Scene**: `MainMenu.unity` (entry) → `Game.unity` (play). Build settings đã có cả 2.
 
-### ĐANG DIỄN RA (bàn giao cho Agent B nếu cần tiếp tục)
-**Bug đang debug: obstacle/coin spawn đúng localPosition nhưng WORLD position bị xáo trộn (X/Y lệch, có cả trường hợp z < tile z).** Trạng thái:
-- ✅ Fix scale tile (root scale = 1,1,1; road chuyển thành child "Road") — đã chạy, `tileScale=(1,1,1)` trong log.
-- ✅ Fix coin material GUID hỏng.
-- 🔍 Nghi vấn hiện tại: `tile=2` (chỉ 2 tile active dù cần ~7) → có thể có **2 TileSpawner/2 hệ thống spawn song song** (scene Game + DontDestroyOnLoad?), hoặc tile bị rotate.
-- 🔬 Log diag đang chờ user chạy: `[DiagTS]` (đếm instance), `[DiagObstacle]` có tileRot + localPosition + parent.
+### ✅ BUG ĐÃ GIẢI QUYẾT (2026-08-11 — commit `43f2936`)
+**Root cause cuối của bug "không thấy vật cản/xu" (kể cả 3 tuần):** `Rotator.cs` (xoay 15/30/45°/giây — user tưởng thêm vào coin) bị gắn nhầm lên GameObject **"Managers"** (cha TileSpawner → cha toàn bộ tiles) → cả track + obstacle + coin quay vòng liên tục (`tileRot ≈ 360°` trong log) → world position con lệch X/Y lung tung + `tile=2`. **Đã xóa Rotator khỏi Managers trong `Game.unity`.**
 
-**Nếu Agent B nhận phần này:** đọc `Tile.cs`, `TileSpawner.cs`, `ObstacleManager.cs`, `PickupSpawner.cs`, `VoidChase.cs` + log `[DiagTS]/[DiagObstacle]/[DiagCoin]` từ user, tìm hệ thống thứ 2 hoặc thứ đang di chuyển tile.
+**Trạng thái hiện tại cần user xác nhận:** sau khi pull/push `43f2936`, chơi thử phải thấy obstacle + coin hiển thị đúng trên đường. Nếu còn lỗi → đọc `agent/CHANGELOG.md` mục mới nhất (R4.17) rồi xử theo.
 
 ## 6. Mẹo làm việc với Unity + agent
 
