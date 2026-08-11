@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-11 — Vòng 5 vấn đề: HowToPlay khó đọc + obstacle đè coin + player bắt đầu khác nhau + cảnh vật lúc có lúc không
+
+> User đọc 166 log, báo 5 vấn đề. Điều tra từng gốc rễ → fix 7 file + góp ý reviewer.
+
+### Root cause & fix (commit `f7b704d` + reviewer)
+
+- **HowToPlay popup đè lên menu khó đọc** — panel nền alpha 0.92 nhưng main menu 2 bên vẫn sáng → `MainMenuManager.EnsureDimmer()`: Image đen alpha 0.72 phủ fullscreen + panel `SetAsLastSibling` vẽ trên. **Góp ý reviewer:** dimmer raycastTarget=true sẽ CHẶN nút HowToPlay phía sau → user kẹt không đóng được → thêm `Button` trên dimmer: click vùng tối = đóng popup (UX chuẩn).
+- **Obstacle ĐÈ coin** — 2 hệ thống chọn lane NGẪU NHIÊN ĐỘC LẬP (log: tile 0 obstacle lane=-3 + coin lane=-3 CÙNG lane). Fix: `ObstacleManager._blockedLanes` (HashSet, clear mỗi TrySpawn) + `PickupSpawner.PickLaneAvoidingObstacles()` — coin/powerup chọn lane KHÔNG trùng obstacle (wire qua `TileSpawner.Initialize → BindObstacleManager`). **Góp ý reviewer:** safe-zone không gọi TrySpawn → BlockedLanes stale từ tile trước → coin tránh lane vô cớ → thêm `ClearBlockedLanes()` gọi khi inSafeZone.
+- **Player bắt đầu KHÁC NHAU mỗi lần** — log `[DiagSpawn] tile=1 playerZ=148.9 nextZ=138.9` = sau restart player KHÔNG về 0 (HandleRestart set `_rb.position` nhưng thứ tự event/rigidbody không chắc) → track dựng quanh vị trí cũ. Fix: `PlayerController.ResetToStart()` public — set CẢ `transform.position` LẪN `_rb.position` về `_startPos` (scene (0,1,0) cố định); `GameManager.Restart()` gọi TRỰC TIẾP `player.ResetToStart()` TRƯỚC `RaiseRestart` + `StartTrack` (không phụ thuộc thứ tự subscriber). Safe zone `TileSpawner.safeZoneAhead=20m`: tile đầu không spawn obstacle (trước đây obstacle spawn ngay z=1.7 → chết tức thì).
+- **Cảnh vật 2 bên lúc có lúc không** — `AmbientScroller` chỉ self-heal 1 lần ở `Start()` → sau restart props vẫn nằm quanh vị trí cũ (z~150). Fix: subscribe `GameEvents.OnRestart` → `BuildProps()` lại quanh vị trí player (đã reset). `BuildProps` phân nhánh `Destroy` (runtime) / `DestroyImmediate` (editor).
+
+### Bài học — **QUY TẮC MỚI**
+
+- **2 hệ thống spawn cùng tile phải chia sẻ trạng thái lane** — obstacle chọn lane ngẫu nhiên độc lập + coin chọn lane ngẫu nhiên độc lập = luôn có xác suất chồng (obstacle đè coin). Hệ thống spawn sau (coin) phải đọc lane đã bị spawn trước (obstacle) chặn. Khi thêm cơ chế tránh, đừng quên đường "không spawn" (safe zone) — state phải được clear.
+- **Teleport player khi restart phải set CẢ `transform.position` + `_rb.position`** — chỉ set `_rb.position` có thể không chắc chắn (thứ tự event/rigidbody sync) → vị trí khác nhau mỗi lần chơi. Và orchestrator (GameManager) nên gọi reset TRỰC TIẾP trước khi phát event — không phụ thuộc thứ tự subscriber.
+- **Dimmer (overlay chặn click) PHẢI có cơ chế đóng riêng** — raycastTarget=true chặn nút phía sau → user kẹt nếu popup không có nút close. Chuẩn UX: click vào vùng tối = đóng (dimmer là Button).
+- **Safe zone đầu game là bắt buộc cho endless runner** — obstacle spawn ngay tile đầu (z≈1.7) = chết tức thì khi bắt đầu, cảm giác "không công bằng". Chừa 20m đầu không obstacle (coin vẫn có).
+
+---
+
 ## 2026-08-11 — Vòng fix sau khi thấy obstacle/coin: props đè road + hết props + void không hố đen + không hiệu ứng va chạm
 
 > User chơi thấy obstacle/coin hiện đúng (fix Rotator thành công) nhưng báo 4 vấn đề mới. Đọc 89 log → xử 3 code + xác nhận 1 đã đúng.

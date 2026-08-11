@@ -41,6 +41,10 @@ namespace VoidRunner.Core.World
         private readonly HashSet<int> _blockedLanes = new HashSet<int>();
         public IReadOnlyCollection<int> BlockedLanes => _blockedLanes;
 
+        /// <summary>Xóa trạng thái lane chặn của tile trước (TileSpawner gọi khi tile thuộc safe zone —
+        /// không spawn obstacle nên không gọi TrySpawn → phải clear tay, không thì coin tránh lane cũ vô cớ).</summary>
+        public void ClearBlockedLanes() => _blockedLanes.Clear();
+
         public void TrySpawn(Tile tile)
         {
             _blockedLanes.Clear();

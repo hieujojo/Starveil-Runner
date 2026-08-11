@@ -97,6 +97,13 @@ namespace VoidRunner.UI
             img.color = new Color(0f, 0f, 0f, 0.72f);
             img.raycastTarget = true; // chặn click xuyên xuống nút menu phía sau
 
+            // Click vào vùng tối (ngoài popup) = đóng popup — dimmer phải là Button, nếu không
+            // user bị kẹt (nút HowToPlay phía sau bị dimmer chặn, không đóng được — góp ý reviewer)
+            var btn = go.AddComponent<Button>();
+            btn.targetGraphic = img;
+            btn.onClick.AddListener(ToggleHowToPlay);
+            btn.transition = Selectable.Transition.None;
+
             go.SetActive(false);
             _dimmer = go;
         }

@@ -10,10 +10,11 @@
 
 ## 🎮 Gameplay
 
-- **3 lane vô tận**: chuyển lane trái/phải (`A`/`D` hoặc mũi tên) để né chướng ngại vật
-- **The Void đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Void **tiến sát**; né sạch 10–15s → Void **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Void nuốt chửng = **Game Over**
-- **Chướng ngại vật**: Ramp cố định, Pillar cần né, DynamicBox di động (được gắn ngẫu nhiên, luôn chừa ≥1 lane an toàn)
-- **Coin & Power-up**: gom coin tăng điểm, nhặt power-up (Shield / Magnet / Slow-mo)
+- **3 lane vô tận**: đè giữ `A`/`D` (hoặc mũi tên) để trượt qua nhiều lane, nhả = tự về giữa lane — né chướng ngại vật
+- **The Void = HỐ ĐEN đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Void **tiến sát** (phình to, đe dọa); né sạch 10–15s → Void **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Void nuốt chửng = **Game Over**. Đụng obstacle → tàu **nhấp nháy** (feedback rõ ràng)
+- **Chướng ngại vật**: Ramp + DynamicBox gắn ngẫu nhiên, **luôn chừa ≥1 lane an toàn** + **safe zone 20m đầu game** (không obstacle — không chết tức thì)
+- **Coin & Power-up**: gom coin tăng điểm (hàng coin **không bao giờ đè lên obstacle** — chọn lane khác), nhặt power-up (Shield / Magnet / Slow-mo)
+- **Cảnh vật 2 bên**: mô hình Kenney Space Kit rải dọc đường, tự tái sinh sau mỗi lần chơi lại
 - **Độ khó công bằng**: tốc độ nền tăng dần + combo multiplier — cái chết do **lỗi của bạn**, không phải ngẫu nhiên
 
 ---
@@ -22,20 +23,20 @@
 
 | Tính năng | Kỹ thuật | Trạng thái |
 |---|---|---|
-| **The Void đuổi theo — cơ chế tiến sát khi player lỗi** | Chase trực tiếp + **2 nấc cố định** (9m → 5m khi đụng, nới lại sau 12s sạch, đụng lần 2 trong cửa sổ → Game Over) | ✅ |
+| **The Void = HỐ ĐEN — cơ chế tiến sát khi player lỗi** | Chase trực tiếp + **2 nấc cố định** (9m → 5m khi đụng, nới lại sau 12s sạch, đụng lần 2 → Game Over) + visual hố đen (đĩa bồi tụ phát sáng + hạt bị hút) | ✅ |
 | Player = **tàu vũ trụ nhỏ** | Dựng từ primitive + material neon (không cần model), banking khi đổi lane | ✅ |
 | Track sinh vô tận | **Object Pool** (`ObjectPool<T>`) + Ground 6000m — chạy mãi không hết đường | ✅ |
-| Obstacle cấu hình được | **ScriptableObject** (`ObstacleData`) + gắn ngẫu nhiên theo weight | ✅ |
+| Obstacle cấu hình được | **ScriptableObject** (`ObstacleData`) + gắn ngẫu nhiên theo weight, luôn chừa ≥1 lane trống, safe zone 20m đầu game | ✅ |
 | Giao tiếp hệ thống | **C# Event-driven** (`GameEvents`) — decoupled, không coupling trực tiếp | ✅ |
 | State machine | `GameManager` (Menu / Playing / GameOver / Restart) | ✅ |
-| Input hiện đại | **Unity Input System** (2D Vector composite, hỗ trợ A/D + mũi tên) | ✅ |
+| Input hiện đại | **Unity Input System** — đè giữ trượt liên tục (kiểu Subway Surfers), hỗ trợ A/D + mũi tên | ✅ |
 | Camera điện ảnh | **Cinemachine** (Framing Transposer) | ✅ |
 | Kiến trúc | **Clean Architecture**: `UI → Systems → Core`, folder `Assets/_Project/` | ✅ |
 | Điểm số / combo | event-driven `ScoreSystem` | ✅ |
 | UI (HUD / Menu / Game Over) | `UIManager` + TextMeshPro — **toàn bộ tiếng Anh** | ✅ |
 | Power-up | Shield / Magnet / Slow-mo | ✅ |
 | Audio + Save | `AudioManager` singleton + `SaveSystem` (PlayerPrefs) | ✅ |
-| Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Void | ✅ |
+| Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Void, đụng obstacle → tàu nhấp nháy, coin không đè obstacle | ✅ |
 | Test tự động | **Unity Test Framework — 24 test + 5 PlayMode test Void 2 nấc** | ✅ |
 | Deploy | **WebGL build → itch.io / Unity Play** | ⏳ Giai đoạn 3 |
 

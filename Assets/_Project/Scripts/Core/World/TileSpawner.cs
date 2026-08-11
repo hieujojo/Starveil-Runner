@@ -132,7 +132,14 @@ namespace VoidRunner.Core.World
             // Safe zone: tile trong đoạn đầu (so với vị trí player hiện tại) KHÔNG spawn obstacle
             // (coin vẫn có — vô hại). Trước đây obstacle spawn ngay tile đầu (z≈1.7) → chết tức thì.
             bool inSafeZone = z < player.position.z + safeZoneAhead;
-            if (!inSafeZone) obstacleManager?.TrySpawn(tile);
+            if (inSafeZone)
+            {
+                obstacleManager?.ClearBlockedLanes(); // tile an toàn không có obstacle → xóa lane chặn của tile trước
+            }
+            else
+            {
+                obstacleManager?.TrySpawn(tile);
+            }
             pickupSpawner?.TrySpawn(tile);
 
             // [TẠM] chẩn đoán — user báo không có vật cản/xu dù wiring đúng
