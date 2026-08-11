@@ -50,8 +50,8 @@ namespace VoidRunner.Core.World
         [SerializeField, Tooltip("Tốc độ co/nới khoảng cách (m/s) — enemy trượt mượt giữa 2 nấc")]
         private float distanceLerpSpeed = 3f;
 
-        [SerializeField, Tooltip("Tốc độ bám ngang theo lane của player (m/s)")]
-        private float lateralFollow = 4f;
+        [SerializeField, Tooltip("Tốc độ bám ngang theo lane của player (m/s) — FIX 2026-08-12 v3f.4: 4→20 (player đổi lane 4.5m @16m/s ≈ 0.28s/lane nhưng enemy 4m/s mất 1.1s = trễ ~0.8s — user: \"con bọ phải di chuyển cùng lúc với player, ko thể trễ 0.5s\"). 20m/s ≈ 0.22s = đồng bộ với player)")]
+        private float lateralFollow = 20f;
 
         [Header("Hình dạng")]
         [SerializeField, Tooltip("Scale ở nấc 0 (nền)")]

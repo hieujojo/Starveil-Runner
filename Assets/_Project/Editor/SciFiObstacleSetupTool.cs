@@ -40,6 +40,10 @@ namespace VoidRunner.EditorTools
         private const float BarrierTargetHeight = 1.6f; // rào chắn lane (vừa đủ chặn tàu, không to quá che đường)
         private const float BarrierTargetWidth = 4.2f;  // FIX 2026-08-12 v3f (user: "rào dài quá, văng khỏi đường"): ép bề ngang ≤ laneWidth 4.5
         private const float DroneTargetHeight = 1.2f;   // drone bay giữa lane (nhỏ — né dễ, đọc rõ)
+        // FIX 2026-08-12 v3f.4 (R3.1 — bug màu TÍM/MAGENTA): material tạo bằng code lúc EDIT-TIME
+        // phải lưu thành ASSET — nếu không SaveAsPrefabAsset ghi objectReference {fileID: 0}
+        // (material null) → renderer hiện MAGENTA (đúng bug user thấy ở rào chắn). Material dùng chung.
+        private const string BarrierMatPath = "Assets/_Project/Materials/Obstacles/BarrierWarning.mat";
 
         [MenuItem(MenuRoot + "Setup Obstacle = SciFi (Fence + Drone Guardian)")]
         public static void Setup()
@@ -53,6 +57,7 @@ namespace VoidRunner.EditorTools
             // Xóa prefab cũ → dựng lại với kích thước/màu mới (fix 2026-08-12 v3f)
             AssetDatabase.DeleteAsset(BarrierOutputPath);
             AssetDatabase.DeleteAsset(DroneOutputPath);
+            AssetDatabase.DeleteAsset(BarrierMatPath); // material cam cũng dựng lại sạch (R3.1)
             SetupCore();
         }
 
@@ -217,14 +222,14 @@ namespace VoidRunner.EditorTools
         }
 
         /// <summary>
-        /// Ép màu cảnh báo cam neon cho mọi renderer (material INSTANCE — không đụng asset gói).
-        /// URP/Lit: _BaseColor cam + _EmissionColor cam sáng (keyword _EMISSION) → nổi trên nền tối + lane cyan.
+        /// Ép màu cảnh báo cam neon cho mọi renderer rào chắn — dùng CHUNG 1 material ASSET đã lưu
+        /// (FIX 2026-08-12 v3f.4, R3.1): material runtime `new Material()` không được
+        /// SaveAsPrefabAsset serialize → objectReference {fileID: 0} → renderer null material →
+        /// hiện MÀU TÍM/MAGENTA (bug user thấy). Cùng material asset = đồng màu + 1 draw call.
         /// </summary>
         private static void ApplyWarningColor(GameObject go)
         {
-            Color warning = new Color(1f, 0.45f, 0.05f, 1f); // cam neon
-            Color emission = new Color(1f, 0.28f, 0f, 1f);
-            Shader urp = Shader.Find("Universal Render Pipeline/Lit");
+            Material warningMat = GetOrCreateWarningMaterial();
 
             Renderer[] renderers = go.GetComponentsInChildren<Renderer>(true);
             for (int i = 0; i < renderers.Length; i++)
@@ -234,21 +239,33 @@ namespace VoidRunner.EditorTools
                 Material[] mats = r.sharedMaterials;
                 for (int m = 0; m < mats.Length; m++)
                 {
-                    Material src = mats[m];
-                    if (src == null) continue;
-                    Shader s = src.shader;
-                    bool isURP = s != null && (s.name.Contains("Universal Render Pipeline") || s.name.Contains("Shader Graphs"));
-                    Material inst = isURP ? new Material(src) : (urp != null ? new Material(urp) : new Material(src));
-                    inst.SetColor("_BaseColor", warning);
-                    if (inst.HasProperty("_EmissionColor"))
-                    {
-                        inst.SetColor("_EmissionColor", emission);
-                        inst.EnableKeyword("_EMISSION");
-                    }
-                    mats[m] = inst;
+                    if (mats[m] == null) continue;
+                    mats[m] = warningMat;
                 }
                 r.sharedMaterials = mats;
             }
+        }
+
+        /// <summary>Load hoặc tạo material cam cảnh báo (asset đã lưu — idempotent; ép màu lại mỗi lần chạy).</summary>
+        private static Material GetOrCreateWarningMaterial()
+        {
+            EnsureFolder(BarrierMatPath);
+            Material mat = AssetDatabase.LoadAssetAtPath<Material>(BarrierMatPath);
+            if (mat == null)
+            {
+                Shader urp = Shader.Find("Universal Render Pipeline/Lit");
+                mat = new Material(urp != null ? urp : Shader.Find("Standard"));
+                AssetDatabase.CreateAsset(mat, BarrierMatPath);
+            }
+
+            mat.SetColor("_BaseColor", new Color(1f, 0.45f, 0.05f, 1f)); // cam neon — khác lề cyan (0.2,0.8,1)
+            if (mat.HasProperty("_EmissionColor"))
+            {
+                mat.SetColor("_EmissionColor", new Color(1f, 0.28f, 0f, 1f));
+                mat.EnableKeyword("_EMISSION");
+            }
+            EditorUtility.SetDirty(mat);
+            return mat;
         }
 
         private static Bounds GetRenderBounds(GameObject go)
@@ -264,14 +281,23 @@ namespace VoidRunner.EditorTools
             return has ? bounds : new Bounds(Vector3.zero, Vector3.one);
         }
 
+        /// <summary>Đảm bảo folder chứa assetPath tồn tại — tạo từng cấp (generic: Prefabs, Materials, ...).</summary>
         private static void EnsureFolder(string assetPath)
         {
             string folder = System.IO.Path.GetDirectoryName(assetPath).Replace('\\', '/');
             if (AssetDatabase.IsValidFolder(folder)) return;
-            if (!AssetDatabase.IsValidFolder("Assets/_Project/Prefabs"))
-                AssetDatabase.CreateFolder("Assets/_Project", "Prefabs");
-            if (!AssetDatabase.IsValidFolder("Assets/_Project/Prefabs/Obstacles"))
-                AssetDatabase.CreateFolder("Assets/_Project/Prefabs", "Obstacles");
+
+            string current = "Assets";
+            string[] parts = folder.Substring("Assets/".Length).Split('/');
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string parent = current;
+                current = current + "/" + parts[i];
+                if (!AssetDatabase.IsValidFolder(current))
+                {
+                    AssetDatabase.CreateFolder(parent, parts[i]);
+                }
+            }
         }
     }
 }

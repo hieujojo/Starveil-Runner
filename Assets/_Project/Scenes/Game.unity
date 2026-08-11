@@ -2977,7 +2977,7 @@ MonoBehaviour:
   swallowDistance: 1.6
   relaxWindow: 12
   distanceLerpSpeed: 3
-  lateralFollow: 4
+  lateralFollow: 20
   baseScale: 1
   closeScale: 1.2
   enemyPrefab: {fileID: 1174681552261998, guid: cda9515b23e2f454b9c8d645acee645e, type: 3}

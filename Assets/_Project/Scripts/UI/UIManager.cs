@@ -25,7 +25,6 @@ namespace VoidRunner.UI
         [SerializeField] private TextMeshProUGUI bestScoreText;
         [SerializeField] private Button retryButton;
         [SerializeField] private Button menuButton;
-        [SerializeField] private Button creditsButton; // tạo bằng code (CreditsPanelBuilder)
 
         [Header("Hiệu ứng")]
         [SerializeField] private float fadeDuration = 0.4f;
@@ -57,9 +56,6 @@ namespace VoidRunner.UI
 
             if (retryButton != null) retryButton.onClick.AddListener(RestartGame);
             if (menuButton != null) menuButton.onClick.AddListener(GoToMenu);
-
-            EnsureCreditsButton(); // nút CREDITS trên Game Over panel (tạo bằng code)
-            EnsureCreditsPanel();  // panel credits (dùng chung CreditsPanelBuilder)
 
             // Chuẩn bị CanvasGroup cho fade TRƯỚC — panel phải luôn hiện được dù ScoreSystem lỗi
             _panelGroup = gameOverPanel != null ? gameOverPanel.GetComponent<CanvasGroup>() : null;
@@ -121,7 +117,6 @@ namespace VoidRunner.UI
         {
             if (retryButton != null) retryButton.onClick.RemoveListener(RestartGame);
             if (menuButton != null) menuButton.onClick.RemoveListener(GoToMenu);
-            if (creditsButton != null) creditsButton.onClick.RemoveListener(ToggleCredits);
         }
 
         private void RestartGame()
@@ -130,49 +125,6 @@ namespace VoidRunner.UI
             {
                 GameManager.Instance.Restart();
             }
-        }
-
-        /// <summary>Nút CREDITS nhỏ dưới Game Over panel — mở panel credits (idempotent).</summary>
-        private void EnsureCreditsButton()
-        {
-            if (gameOverPanel == null) return;
-            Canvas canvas = FindAnyObjectByType<Canvas>();
-            if (canvas == null) return;
-
-            // ⚠️ Gắn làm CON của gameOverPanel (không phải canvas root) — nếu không nút sẽ HIỆN LỘ
-            // khi panel ẩn (SetActive(false) chỉ ẩn con, không ẩn nút nằm ngoài panel).
-            // y=-240: dưới RetryButton (-140)/MenuButton (-140) — tránh đè lề dưới 2 nút (góp ý reviewer)
-            creditsButton = CreditsPanelBuilder.EnsureButton(gameOverPanel.transform, "GameOverCreditsButton", new Vector2(0f, -240f), new Vector2(220f, 48f));
-            if (creditsButton != null) creditsButton.onClick.AddListener(ToggleCredits);
-        }
-
-        private void EnsureCreditsPanel()
-        {
-            Canvas canvas = FindAnyObjectByType<Canvas>();
-            if (canvas == null) return;
-
-            GameObject panel = CreditsPanelBuilder.EnsurePanel(canvas);
-            if (panel != null)
-            {
-                Transform close = panel.transform.Find("CreditsClose");
-                if (close != null)
-                {
-                    var closeBtn = close.GetComponent<Button>();
-                    if (closeBtn != null) closeBtn.onClick.AddListener(ToggleCredits);
-                }
-            }
-        }
-
-        private void ToggleCredits()
-        {
-            Canvas canvas = FindAnyObjectByType<Canvas>();
-            if (canvas == null) return;
-            Transform panel = canvas.transform.Find("CreditsPanel");
-            if (panel == null) return;
-
-            bool show = !panel.gameObject.activeSelf;
-            panel.gameObject.SetActive(show);
-            if (show) panel.SetAsLastSibling();
         }
 
         private void GoToMenu()

@@ -5,6 +5,12 @@
 
 ---
 
+## 2026-08-12 (v3f.4) — Enemy đồng bộ lane + bỏ Credit màn Game Over
+
+- **Enemy trễ ~0.8s khi player đổi lane** (user: "con bọ phải di chuyển cùng lúc, ko thể trễ 0.5s") — root cause: `lateralFollow = 4 m/s` → băng 1 lane 4.5m mất 1.1s, trong khi player `laneChangeSpeed = 16 m/s` → 0.28s/lane. Fix: **`lateralFollow 4 → 20`** (code default + scene serialized `Game.unity` dòng 2980) — enemy đuổi lane đồng bộ player. **Bài học:** khi tăng tốc di chuyển player, phải rà soát MỌI thứ "bám theo" player (enemy, camera, target) — nếu không âm thầm tụt lại thành trễ vô hình.
+- **Credit hiện trên màn hình Game Over** (user: "ở màn hình cuối game bỏ credit đi") — fix: xóa toàn bộ nhánh credit khỏi `UIManager` (field `creditsButton` + `EnsureCreditsButton` + `EnsureCreditsPanel` + `ToggleCredits` + listener OnDestroy) — panel + nút đó được tạo bằng code nên không cần dọn scene; **MainMenu GIỮ CREDITS**. **Bài học:** tính năng dùng chung (CreditsPanelBuilder) phải xác định rõ hiển thị ở đâu — Game Over chỉ nên có SCORE/BEST/RETRY/MENU.
+- **RÀO CHẮN HIỆN MÀU TÍM/MAGENTA** (screenshot: "magenta/purple low-poly structures") — root cause: `ApplyWarningColor` tạo `new Material(src)` là object RUNTIME, `SaveAsPrefabAsset` không serialize được → prefab ghi `m_Materials.Array.data[0] → objectReference {fileID: 0}` = **material NULL** → renderer hiện magenta (màu báo lỗi của Unity). Đúng rule **R3.1** (ScriptableObject/material tạo bằng code phải `AssetDatabase.CreateAsset`/`AddObjectToAsset`). Fix: tạo **1 material asset dùng chung** `Materials/Obstacles/BarrierWarning.mat` (idempotent — load có thì dùng, ép màu lại mỗi lần) + Rebuild xóa luôn material cũ; `EnsureFolder` nâng cấp generic (tạo từng cấp folder). **Bài học:** mọi object edit-time được REFERENCE bởi asset lưu (prefab/material/volume) phải là ASSET — dấu hiệu nhận biết: mở file .prefab thấy `objectReference: {fileID: 0}` ở material = chắc chắn màu tím/magenta.
+
 ## 2026-08-12 (v3d) — Fix tool Asteroid: MissingReferenceException (gameObject destroyed)
 
 > User: "đọc log, hiện tại không chạy tool được" — tool `Setup Obstacle = Asteroid (OlegWER thiên thạch)` crash ngay sau khi tạo prefab.
