@@ -9,119 +9,96 @@ using VoidRunner.Data;
 namespace VoidRunner.EditorTools
 {
     /// <summary>
-    /// Fix 2026-08-12 (user chốt: "Fence + Drone Guardian" — không muốn vẽ bằng code, dùng asset thật):
-    /// thay asteroid bằng vật cản đúng chất trạm kiểm soát vũ trụ từ 2 gói đã tải:
-    ///   - OBSTACLE CHÍNH (Ramp.asset)  = Fence_Long_01   (rào chắn trạm — 3D Scifi Kit Starter Kit, Creepy_Cat)
-    ///   - OBSTACLE PHỤ  (DynamicBox)   = Robot_Guardian  (drone bảo vệ — Sci fi Drones, Lukas Bobor)
+    /// FIX 2026-08-12 v3f.5 (user: "cổng trông như cái cổng chứ đâu phải bãi mìn → XÓA HẲN;
+    /// chỉ drone + vài hiệu ứng là đủ cho trò chơi vũ trụ"): obstacle DUY NHẤT = drone Robot_Guardian
+    /// (Sci fi Drones). Đã bỏ hẳn rào/cổng Fence_Long_01 (BarrierObstacle.prefab + BarrierWarning.mat).
     ///
-    /// Việc tool làm (idempotent — chạy lại an toàn):
-    /// 1. Tạo prefab wrapper (nếu chưa có):
-    ///    - `Prefabs/Obstacles/BarrierObstacle.prefab`: root SphereCollider (isTrigger) + Obstacle; con = Fence_Long_01
-    ///      scale chuẩn theo chiều cao mục tiêu + XOAY 90° quanh Y nếu rào dài theo Z (chắn NGANG lane, không dọc đường)
-    ///    - `Prefabs/Obstacles/DroneObstacle.prefab`: root SphereCollider (isTrigger) + Obstacle; con = Robot_Guardian
-    ///      scale chuẩn theo chiều cao mục tiêu (nhỏ — drone bay giữa lane)
-    /// 2. Gán Barrier vào Ramp.asset, Drone vào DynamicBox.asset qua SerializedObject — giữ obstacleType/spawnWeight.
+    /// Tool làm (idempotent — chạy lại an toàn):
+    /// 1. Tạo prefab wrapper `Prefabs/Obstacles/DroneObstacle.prefab` (nếu chưa có): root SphereCollider
+    ///    (isTrigger) + Obstacle; con = Robot_Guardian, scale chuẩn chiều cao, bù pivot theo bounds thật.
+    /// 2. Gán drone vào CẢ 2 ObstacleData (Ramp + DynamicBox) — giữ nguyên list gán trong scene
+    ///    (không sửa scene tay — R7.6); spawnWeight từng entry vẫn phân biệt mật độ.
     ///
-    /// Material: KHÔNG cần MaterialFixer ở đây — Obstacle.Awake() tự ép URP/Lit lúc spawn (R3.16, fix 2026-08-12).
-    /// ⚠️ KHÔNG sửa file scene tay (R7.6) — tool chạy trong Unity.
+    /// Hiệu ứng drone (đèn đỏ + hạt năng lượng + lơ lửng) do ObstacleFX tạo RUNTIME lúc spawn —
+    /// KHÔNG nướng vào prefab (R3.1: material tạo bằng code lúc edit-time không serialize →
+    /// objectReference {fileID: 0} → null → MÀU TÍM — bug đã gặp ở rào chắn).
     /// </summary>
     public static class SciFiObstacleSetupTool
     {
         private const string MenuRoot = "Tools/Void Runner/";
 
-        // Nguồn model — 2 gói GIỮ LOCAL qua .gitignore (xem .gitignore mục assets 3rd-party)
-        private const string FenceSourcePath = "Assets/Creepy_Cat/3D Scifi Kit Starter Kit_HD/Prefabs/Fences/Fence_Long_01.prefab";
+        // Nguồn model — gói GIỮ LOCAL qua .gitignore (xem .gitignore mục assets 3rd-party)
         private const string DroneSourcePath = "Assets/Sci_fi_Drones/Prefabs/Robot_Guardian.prefab";
 
         // Nơi lưu prefab obstacle (folder COMMIT được — không phụ thuộc gói khi clone)
-        private const string BarrierOutputPath = "Assets/_Project/Prefabs/Obstacles/BarrierObstacle.prefab";
         private const string DroneOutputPath = "Assets/_Project/Prefabs/Obstacles/DroneObstacle.prefab";
 
-        private const float BarrierTargetHeight = 1.6f; // rào chắn lane (vừa đủ chặn tàu, không to quá che đường)
-        private const float BarrierTargetWidth = 4.2f;  // FIX 2026-08-12 v3f (user: "rào dài quá, văng khỏi đường"): ép bề ngang ≤ laneWidth 4.5
-        private const float DroneTargetHeight = 1.2f;   // drone bay giữa lane (nhỏ — né dễ, đọc rõ)
-        // FIX 2026-08-12 v3f.4 (R3.1 — bug màu TÍM/MAGENTA): material tạo bằng code lúc EDIT-TIME
-        // phải lưu thành ASSET — nếu không SaveAsPrefabAsset ghi objectReference {fileID: 0}
-        // (material null) → renderer hiện MAGENTA (đúng bug user thấy ở rào chắn). Material dùng chung.
-        private const string BarrierMatPath = "Assets/_Project/Materials/Obstacles/BarrierWarning.mat";
+        private const float DroneTargetHeight = 1.2f; // drone bay giữa lane (vừa né được, đọc rõ)
 
-        [MenuItem(MenuRoot + "Setup Obstacle = SciFi (Fence + Drone Guardian)")]
+        // Asset CỔNG/RÀO cũ đã bỏ (v3f.5) — Rebuild dọn dẹp nếu còn sót từ bản trước
+        private const string OldBarrierPrefabPath = "Assets/_Project/Prefabs/Obstacles/BarrierObstacle.prefab";
+        private const string OldBarrierMatPath = "Assets/_Project/Materials/Obstacles/BarrierWarning.mat";
+
+        [MenuItem(MenuRoot + "Setup Obstacle = Drone (Robot_Guardian)")]
         public static void Setup()
         {
             SetupCore();
         }
 
-        [MenuItem(MenuRoot + "Rebuild SciFi Obstacles (ép kích thước + màu)")]
+        [MenuItem(MenuRoot + "Rebuild Drone Obstacle (ép kích thước + dọn asset cũ)")]
         public static void Rebuild()
         {
-            // Xóa prefab cũ → dựng lại với kích thước/màu mới (fix 2026-08-12 v3f)
-            AssetDatabase.DeleteAsset(BarrierOutputPath);
+            // Xóa prefab cũ → dựng lại sạch (fix kích thước/pivot)
             AssetDatabase.DeleteAsset(DroneOutputPath);
-            AssetDatabase.DeleteAsset(BarrierMatPath); // material cam cũng dựng lại sạch (R3.1)
+            // Dọn asset cổng/rào cũ nếu còn sót từ bản v3f.4 trở về trước
+            AssetDatabase.DeleteAsset(OldBarrierPrefabPath);
+            AssetDatabase.DeleteAsset(OldBarrierMatPath);
             SetupCore();
         }
 
         private static void SetupCore()
         {
-            // 1. Load 2 model nguồn
-            var fence = AssetDatabase.LoadAssetAtPath<GameObject>(FenceSourcePath);
-            if (fence == null)
-            {
-                EditorUtility.DisplayDialog("Void Runner — SciFi Obstacle",
-                    $"Không tìm thấy Fence_Long_01.\nPath kỳ vọng: {FenceSourcePath}\n\n" +
-                    "Gói '3D Scifi Kit Starter Kit' (Creepy_Cat) giữ LOCAL qua .gitignore. " +
-                    "Tải lại từ Unity Asset Store rồi chạy lại tool.", "OK");
-                return;
-            }
             var drone = AssetDatabase.LoadAssetAtPath<GameObject>(DroneSourcePath);
             if (drone == null)
             {
-                EditorUtility.DisplayDialog("Void Runner — SciFi Obstacle",
+                EditorUtility.DisplayDialog("Void Runner — Drone Obstacle",
                     $"Không tìm thấy Robot_Guardian.\nPath kỳ vọng: {DroneSourcePath}\n\n" +
                     "Gói 'Sci fi Drones' (Lukas Bobor) giữ LOCAL qua .gitignore. " +
                     "Tải lại từ Unity Asset Store rồi chạy lại tool.", "OK");
                 return;
             }
 
-            // 2. Tạo 2 prefab wrapper (idempotent — có rồi thì load)
-            GameObject barrier = LoadOrBuild(BarrierOutputPath, fence, BarrierTargetHeight, "BarrierObstacle", "Model", true);
-            GameObject droneObst = LoadOrBuild(DroneOutputPath, drone, DroneTargetHeight, "DroneObstacle", "Model", false);
-            if (barrier == null || droneObst == null) return;
+            // Tạo prefab wrapper (idempotent — có rồi thì load)
+            GameObject droneObst = LoadOrBuild(DroneOutputPath, drone, DroneTargetHeight);
+            if (droneObst == null) return;
 
-            // 3. Gán vào 2 ObstacleData — Ramp → Barrier, DynamicBox → Drone
-            int updated = AssignPrefab("Assets/_Project/ScriptableObjects/Ramp.asset", barrier);
+            // Gán drone vào CẢ 2 ObstacleData — list scene giữ nguyên (Ramp + DynamicBox đều = drone,
+            // spawnWeight từng entry vẫn điều mật độ). Không sửa scene tay (R7.6).
+            int updated = AssignPrefab("Assets/_Project/ScriptableObjects/Ramp.asset", droneObst);
             updated += AssignPrefab("Assets/_Project/ScriptableObjects/DynamicBox.asset", droneObst);
 
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
 
-            Debug.Log($"[SciFiObstacle] Xong: Ramp→Barrier, DynamicBox→Drone (gán {updated} ObstacleData).");
-            EditorUtility.DisplayDialog("Void Runner — SciFi Obstacle",
-                $"✅ Đã tạo:\n  {BarrierOutputPath} (Fence)\n  {DroneOutputPath} (Drone)\n\n" +
-                $"và gán vào {updated} ObstacleData (Ramp→rào chắn, DynamicBox→drone).\n\n" +
-                "Giờ mở scene Game → PLAY để xem obstacle mới.", "OK");
+            Debug.Log($"[DroneObstacle] Xong: Ramp + DynamicBox → Drone (gán {updated} ObstacleData).");
+            EditorUtility.DisplayDialog("Void Runner — Drone Obstacle",
+                $"✅ Đã tạo: {DroneOutputPath} (Robot_Guardian)\n\n" +
+                $"và gán vào {updated} ObstacleData (Ramp + DynamicBox → drone).\n\n" +
+                "Giờ mở scene Game → PLAY — obstacle duy nhất là drone (đã có hiệu ứng đèn đỏ + hạt năng lượng).", "OK");
         }
 
-        private static GameObject LoadOrBuild(string outputPath, GameObject source, float targetHeight,
-            string rootName, string childName, bool rotateToBlockLane)
-        {
-            return LoadOrBuild(outputPath, source, targetHeight, rotateToBlockLane ? BarrierTargetWidth : 0f,
-                rootName, childName, rotateToBlockLane);
-        }
-
-        private static GameObject LoadOrBuild(string outputPath, GameObject source, float targetHeight, float targetWidth,
-            string rootName, string childName, bool rotateToBlockLane)
+        private static GameObject LoadOrBuild(string outputPath, GameObject source, float targetHeight)
         {
             GameObject existing = AssetDatabase.LoadAssetAtPath<GameObject>(outputPath);
             if (existing != null) return existing;
 
-            var root = new GameObject(rootName);
+            var root = new GameObject("DroneObstacle");
             var col = root.AddComponent<SphereCollider>();
             col.isTrigger = true;
             root.AddComponent<Obstacle>();
 
             var model = (GameObject)PrefabUtility.InstantiatePrefab(source);
-            model.name = childName;
+            model.name = "Model";
             model.transform.SetParent(root.transform, false);
 
             Bounds b = GetRenderBounds(model);
@@ -131,75 +108,34 @@ namespace VoidRunner.EditorTools
                 model.transform.localScale = Vector3.one * s;
             }
 
-            // Rào chắn: xoay 90° quanh Y nếu trục dài theo Z → chắn NGANG lane (X)
-            if (rotateToBlockLane)
-            {
-                Bounds scaled = GetRenderBounds(model);
-                if (scaled.size.z > scaled.size.x)
-                {
-                    model.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
-                }
-            }
-            else
-            {
-                model.transform.localRotation = Quaternion.identity;
-            }
-
-            // FIX 2026-08-12 v3f (user: "rào dài quá + văng khỏi trục đường"): ép bề ngang
-            // (hướng chắn lane) ≤ targetWidth — rào nằm GỌN TRONG 1 lane, không tràn lane khác,
-            // không đè vật thể bên cạnh, không văng ra ngoài road. Pattern NormalizeScale (R4.18).
-            if (targetWidth > 0f)
-            {
-                Bounds sized = GetRenderBounds(model);
-                float widest = Mathf.Max(sized.size.x, sized.size.z);
-                if (widest > targetWidth && widest > 0.001f)
-                {
-                    float sw = targetWidth / widest;
-                    model.transform.localScale *= sw;
-                }
-            }
-
-            // ⚠️ Vô hiệu collider CON (góp ý reviewer 2026-08-12 v3f): prefab Scifi Kit có thể kèm
-            // MeshCollider/BoxCollider solid ở con → ĐẨY VẬT LÝ player thay vì OnTriggerEnter trên
-            // root (pattern giống EnemyChase.BuildEnemyVisual — chỉ root trigger nuốt).
+            // ⚠️ Vô hiệu collider CON (góp ý reviewer 2026-08-12 v3f): prefab có thể kèm MeshCollider
+            // solid → ĐẨY VẬT LÝ player thay vì OnTriggerEnter trên root (pattern EnemyChase.BuildEnemyVisual).
             foreach (var childCol in model.GetComponentsInChildren<Collider>())
             {
                 if (childCol == null) continue;
                 childCol.enabled = false;
             }
 
-            // Collider theo model sau scale — center theo bounds thật (final.center.y chính xác hơn
-            // extents.y nếu pivot model không nằm ở chân — góp ý reviewer)
+            // Collider theo model sau scale — center theo bounds thật
             Bounds final = GetRenderBounds(model);
             float radius = Mathf.Max(final.extents.x, final.extents.z) * 1.05f;
             col.radius = Mathf.Max(radius, 0.5f);
             col.center = new Vector3(0f, final.center.y, 0f);
 
-            // FIX 2026-08-12 v3f.3 (user: "drone ở giữa 2 lane, sát lề bên phải — né trái/phải đều dính"):
-            // model 3rd-party có PIVOT LỆCH (mesh không nằm giữa gốc — Robot_Guardian lệch X≈-1.45).
-            // Bù model.transform.localPosition theo bounds center để mesh nằm ĐÚNG TÂM lane khi
-            // ObstacleManager đặt wrapper ở x=lane. (Root giữ ở localPosition 0 — vị trí lane.)
+            // Bù PIVOT LỆCH theo bounds (Robot_Guardian mesh lệch ~+1.5) — mesh nằm ĐÚNG TÂM lane.
+            // Lưu ý: Obstacle.Awake còn tự căn giữa lại theo bounds thật lúc spawn (v3f.5, self-heal).
             model.transform.localPosition = new Vector3(-final.center.x, -final.center.y, -final.center.z);
 
-            // FIX 2026-08-12 v3f (user: "cùng màu với lề đường, khó nhìn"): ép MÀU CẢNH BÁO cam neon
-            // cho material rào chắn — khác hẳn lane marker cyan (0.2,0.8,1) + nền tối, đọc rõ từ xa.
-            // Chỉ áp cho rào chắn (drone giữ nguyên bản — đã hiển thị đúng). Tạo material INSTANCE
-            // (new Material(src)) → không sửa asset material gốc của gói.
-            if (rotateToBlockLane)
-            {
-                ApplyWarningColor(model);
-            }
-
             EnsureFolder(outputPath);
-            Debug.Log($"[SciFiObstacle] Prefab {outputPath}: bounds={final.size.ToString("F2")} pivotOffset={model.transform.localPosition.ToString("F2")}");
+            Debug.Log($"[DroneObstacle] Prefab {outputPath}: bounds={final.size.ToString(\"F2\")} pivotOffset={model.transform.localPosition.ToString(\"F2\")}");
             bool saved = PrefabUtility.SaveAsPrefabAsset(root, outputPath);
             Object.DestroyImmediate(root); // ⚠️ hủy cả cây con — KHÔNG truy cập model sau dòng này (R7.10)
             if (!saved)
             {
-                Debug.LogError("[SciFiObstacle] Không lưu được prefab: " + outputPath);
+                Debug.LogError("[DroneObstacle] Không lưu được prefab: " + outputPath);
                 return null;
             }
-            Debug.Log($"[SciFiObstacle] Prefab tạo xong: {outputPath}");
+            Debug.Log($"[DroneObstacle] Prefab tạo xong: {outputPath}");
             return AssetDatabase.LoadAssetAtPath<GameObject>(outputPath);
         }
 
@@ -208,7 +144,7 @@ namespace VoidRunner.EditorTools
             var data = AssetDatabase.LoadAssetAtPath<ObstacleData>(dataPath);
             if (data == null)
             {
-                Debug.LogWarning($"[SciFiObstacle] Không tìm thấy ObstacleData: {dataPath}");
+                Debug.LogWarning($"[DroneObstacle] Không tìm thấy ObstacleData: {dataPath}");
                 return 0;
             }
             if (data.prefab == prefab) return 0; // idempotent
@@ -219,53 +155,6 @@ namespace VoidRunner.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(data);
             return 1;
-        }
-
-        /// <summary>
-        /// Ép màu cảnh báo cam neon cho mọi renderer rào chắn — dùng CHUNG 1 material ASSET đã lưu
-        /// (FIX 2026-08-12 v3f.4, R3.1): material runtime `new Material()` không được
-        /// SaveAsPrefabAsset serialize → objectReference {fileID: 0} → renderer null material →
-        /// hiện MÀU TÍM/MAGENTA (bug user thấy). Cùng material asset = đồng màu + 1 draw call.
-        /// </summary>
-        private static void ApplyWarningColor(GameObject go)
-        {
-            Material warningMat = GetOrCreateWarningMaterial();
-
-            Renderer[] renderers = go.GetComponentsInChildren<Renderer>(true);
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                Renderer r = renderers[i];
-                if (r == null) continue;
-                Material[] mats = r.sharedMaterials;
-                for (int m = 0; m < mats.Length; m++)
-                {
-                    if (mats[m] == null) continue;
-                    mats[m] = warningMat;
-                }
-                r.sharedMaterials = mats;
-            }
-        }
-
-        /// <summary>Load hoặc tạo material cam cảnh báo (asset đã lưu — idempotent; ép màu lại mỗi lần chạy).</summary>
-        private static Material GetOrCreateWarningMaterial()
-        {
-            EnsureFolder(BarrierMatPath);
-            Material mat = AssetDatabase.LoadAssetAtPath<Material>(BarrierMatPath);
-            if (mat == null)
-            {
-                Shader urp = Shader.Find("Universal Render Pipeline/Lit");
-                mat = new Material(urp != null ? urp : Shader.Find("Standard"));
-                AssetDatabase.CreateAsset(mat, BarrierMatPath);
-            }
-
-            mat.SetColor("_BaseColor", new Color(1f, 0.45f, 0.05f, 1f)); // cam neon — khác lề cyan (0.2,0.8,1)
-            if (mat.HasProperty("_EmissionColor"))
-            {
-                mat.SetColor("_EmissionColor", new Color(1f, 0.28f, 0f, 1f));
-                mat.EnableKeyword("_EMISSION");
-            }
-            EditorUtility.SetDirty(mat);
-            return mat;
         }
 
         private static Bounds GetRenderBounds(GameObject go)

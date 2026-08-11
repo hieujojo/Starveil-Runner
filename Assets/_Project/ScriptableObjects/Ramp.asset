@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Data.ObstacleData
   obstacleType: 1
   obstacleName: Ramp
-  prefab: {fileID: 6476977314187147924, guid: 2bdde170e2f649849a50326813936011, type: 3}
+  prefab: {fileID: 7065913401751965062, guid: 29242419d336a354081d698fd60b703c, type: 3}
   spawnWeight: 0.5
   isDynamic: 0

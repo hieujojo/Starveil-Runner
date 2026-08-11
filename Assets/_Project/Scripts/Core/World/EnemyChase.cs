@@ -2,6 +2,7 @@ using UnityEngine;
 using VoidRunner.Core;
 using VoidRunner.Core.Player;
 using VoidRunner.Systems.VFX;
+using VoidRunner.Utils;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -35,8 +36,8 @@ namespace VoidRunner.Core.World
         [Header("Khoảng cách")]
         [SerializeField] private Transform player;
 
-        [SerializeField, Tooltip("Khoảng cách nền (nấc 0) sau lưng player — FIX 2026-08-12 v3f.3: 16→5m vì CAMERA cách player 10m; 16m = bọ nằm 6m SAU camera → không bao giờ thấy (chỉ thấy lúc bị bắt lao tới). 5m = bọ ở 5m TRƯỚC camera → thấy cả con, đủ đe dọa")]
-        private float baseDistance = 5f;
+        [SerializeField, Tooltip("Khoảng cách nền (nấc 0) sau lưng player — FIX 2026-08-12 v3f.3: 16→5m (16m = 6m SAU camera → không bao giờ thấy). v3f.5: 5→7m (user: \"cho con bọ xa hơn 1 chút\") — vẫn TRƯỚC camera, thoáng hơn không lấn màn")]
+        private float baseDistance = 7f;
 
         [SerializeField, Tooltip("Khoảng cách khi đụng vật cản lần 1 (nấc 1) — áp sát nhưng vẫn trước camera (fix 2026-08-12 v3f.3: 12→3m — camera cách player 10m nên 3m vẫn trong khung hình)")]
         private float closeDistance = 3f;
@@ -64,8 +65,8 @@ namespace VoidRunner.Core.World
         [Tooltip("Flying Beetle (Assets/Flying Beetle/prefab) — có Animator, instantiate là bay. Tool Setup Enemy tự gán.")]
         [SerializeField] private GameObject enemyPrefab;
 
-        [Tooltip("Chiều cao chuẩn hóa của enemy (đơn vị) — nhỏ hơn nữa để không che tàu player (~1.1).")]
-        [SerializeField] private float enemyTargetHeight = 1.8f;
+        [Tooltip("Chiều cao chuẩn hóa của enemy (đơn vị) — FIX 2026-08-12 v3f.5: 1.8→2.2 (user: \"cho con bọ to thêm nữa\") — vẫn sau player nên không che tàu")]
+        [SerializeField] private float enemyTargetHeight = 2.2f;
 
         [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng (0 = model forward +Z về phía player).")]
         [SerializeField] private float enemyYaw = 0f;
@@ -128,6 +129,11 @@ namespace VoidRunner.Core.World
 
             GameObject enemy = Instantiate(enemyPrefab, transform);
             enemy.name = "Enemy";
+
+            // FIX 2026-08-12 v3f.5 (user: "sao con bọ màu tím vậy — màu gốc đâu phải tím"): model 3rd-party
+            // (Flying Beetle) dùng shader Standard Built-in → TÍM/MAGENTA trong URP. Tàu đã gọi MaterialFixer
+            // (PlayerController), obstacle đã gọi (Obstacle.Awake) — ENEMY bị SÓT → thêm (R3.16 self-heal).
+            MaterialFixer.EnsureURPMaterials(enemy);
 
             // FIX 2026-08-12 v3 (user: "đừng rung con bọ mà cho nó vỗ cánh"): default state của
             // Animator controller là "idle 1" (bọ đứng im) → ép chạy state "flying" (vỗ cánh loop).

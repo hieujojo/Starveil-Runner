@@ -2972,7 +2972,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Core.World.EnemyChase
   player: {fileID: 1348608049}
-  baseDistance: 5
+  baseDistance: 7
   closeDistance: 3
   swallowDistance: 1.6
   relaxWindow: 12
@@ -2981,7 +2981,7 @@ MonoBehaviour:
   baseScale: 1
   closeScale: 1.2
   enemyPrefab: {fileID: 1174681552261998, guid: cda9515b23e2f454b9c8d645acee645e, type: 3}
-  enemyTargetHeight: 1.8
+  enemyTargetHeight: 2.2
   enemyYaw: 0
   hitSpeedUp: 2
   catchDelay: 1.1

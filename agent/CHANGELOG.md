@@ -5,6 +5,15 @@
 
 ---
 
+## 2026-08-12 (v3f.5) — Xóa hẳn cổng/rào; obstacle = drone duy nhất + hiệu ứng; bọ hết tím, xa + to hơn
+
+- **BỌ MÀU TÍM** (user: "màu gốc đâu phải tím") — root cause: `EnemyChase.BuildEnemyVisual` **thiếu `MaterialFixer.EnsureURPMaterials`** (tàu đã gọi, obstacle đã gọi, ENEMY bị sót) → material Standard Built-in của gói Flying Beetle trong URP hiện TÍM/MAGENTA. Fix: thêm 1 dòng sau Instantiate. **Bài học (mở rộng R3.16): MỌI model 3rd-party đưa vào game — tàu, enemy, obstacle, monster — PHẢI đi qua MaterialFixer, không được sót 1 nhánh nào.**
+- **Drone lệch +1.5m sang phải** (log DIAG: lane 4.5 → bounds center 6.0) — root cause: tool bù pivot +1.45 theo bounds EDIT-TIME, nhưng bounds RUNTIME lệch ~+1.5 (sai số 0.05 do đo khác thời điểm). Fix bền: **`Obstacle.Awake` tự căn giữa model con theo renderer bounds THẬT lúc spawn** (CenterModelOnLane — self-heal, không phụ thuộc prefab/tool). **Bài học: đừng tin số liệu bounds tính lúc EDIT-TIME để bù pivot — tự đo lại lúc RUNTIME là chắc chắn.**
+- **XÓA HẲN CỔNG/RÀO** (user: "trông như cái cổng chứ đâu phải bãi mìn → xóa hẳn; chỉ drone + vài hiệu ứng là đủ cho trò chơi vũ trụ") — xóa `BarrierObstacle.prefab` (+meta), `BarrierWarning.mat`, tool bỏ hẳn nhánh Fence (constants/method ApplyWarningColor); xóa luôn 2 prefab mồ côi `Ramp.prefab`/`DynamicBox.prefab` (không ai reference); `Ramp.asset` trỏ lại → **DroneObstacle.prefab** (đúng fileID root 7065913401751965062 — cả 2 ObstacleData = drone, spawnWeight phân mật độ). Scene không cần sửa tay (R7.6).
+- **NEW `ObstacleFX.cs`** — hiệu ứng ambient drone: đèn cảnh báo đỏ + hạt năng lượng cam + lơ lửng (bob) + xoay chậm quanh Y (Robot_Guardian không Animator → an toàn). Tạo **RUNTIME** trong `Obstacle.Awake` — KHÔNG nướng vào prefab (R3.1: material runtime không serialize → {fileID: 0} → màu tím — bug v3f.4).
+- **Bọ xa hơn + to hơn** (user: "cho bọ xa 1 chút + to thêm"): `baseDistance 5→7` (vẫn TRƯỚC camera — camera cách player 10m), `enemyTargetHeight 1.8→2.2`; đồng bộ scene + test (`EnemyChasePlayTests.BaseDist 5→7`).
+- **Lưu ý:** DIAG logs (Enemy/Obstacle/Coin) giữ 1 vòng để user verify drone đã đúng tâm lane — xóa sau xác nhận (R7.11).
+
 ## 2026-08-12 (v3f.4) — Enemy đồng bộ lane + bỏ Credit màn Game Over
 
 - **Enemy trễ ~0.8s khi player đổi lane** (user: "con bọ phải di chuyển cùng lúc, ko thể trễ 0.5s") — root cause: `lateralFollow = 4 m/s` → băng 1 lane 4.5m mất 1.1s, trong khi player `laneChangeSpeed = 16 m/s` → 0.28s/lane. Fix: **`lateralFollow 4 → 20`** (code default + scene serialized `Game.unity` dòng 2980) — enemy đuổi lane đồng bộ player. **Bài học:** khi tăng tốc di chuyển player, phải rà soát MỌI thứ "bám theo" player (enemy, camera, target) — nếu không âm thầm tụt lại thành trễ vô hình.

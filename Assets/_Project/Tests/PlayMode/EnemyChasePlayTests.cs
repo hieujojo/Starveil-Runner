@@ -10,8 +10,8 @@ namespace VoidRunner.Tests
 {
     /// <summary>
     /// Play Mode tests cho cơ chế Enemy 2 NẤC CỐ ĐỊNH (R0.4) — FIX 2026-08-12 v3f.3:
-    /// - NẤC 0: Enemy giữ baseDistance (5m) sau lưng player — camera cách player 10m nên
-    ///   5m = bọ ở 5m TRƯỚC camera → nhìn thấy cả con (16m cũ = 6m SAU camera → không bao giờ thấy).
+    /// - NẤC 0: Enemy giữ baseDistance (7m) sau lưng player — camera cách player 10m nên
+    ///   7m = bọ ở 7m TRƯỚC camera → nhìn thấy cả con (16m cũ = 6m SAU camera → không bao giờ thấy).
     /// - Đụng obstacle lần 1 → NẤC 1: Enemy tiến sát closeDistance (3m) + vỗ cánh nhanh hơn.
     /// - Né sạch hết cửa sổ → Enemy nới về 5m (reset nấc 0).
     /// - Đụng lần 2 trong cửa sổ → Enemy LAO TỚI BẮT (atack) → sau catchDelay → Game Over.
@@ -26,7 +26,7 @@ namespace VoidRunner.Tests
         private bool _gameOverRaised;
         private System.Action _gameOverHandler;
 
-        private const float BaseDist = 5f;
+        private const float BaseDist = 7f;
         private const float CloseDist = 3f;
 
         [SetUp]
@@ -86,7 +86,7 @@ namespace VoidRunner.Tests
         {
             yield return new WaitForSeconds(0.3f);
             Assert.AreEqual(BaseDist, DistanceBehind(), 0.8f,
-                "NẤC 0: Enemy phải giữ ~5m sau lưng player (không tự tăng tốc).");
+                "NẤC 0: Enemy phải giữ ~7m sau lưng player (không tự tăng tốc).");
         }
 
         [UnityTest]
@@ -111,7 +111,7 @@ namespace VoidRunner.Tests
             // Không đụng gì nữa → hết cửa sổ (0.3s) → nới về nấc 0
             yield return new WaitForSeconds(0.8f);
             Assert.AreEqual(BaseDist, DistanceBehind(), 0.8f,
-                "Né sạch hết cửa sổ: Enemy phải nới lại về ~5m (reset nấc 0).");
+                "Né sạch hết cửa sổ: Enemy phải nới lại về ~7m (reset nấc 0).");
         }
 
         [UnityTest]
