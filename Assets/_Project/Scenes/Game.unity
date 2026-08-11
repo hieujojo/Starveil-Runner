@@ -453,7 +453,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Core.GameManager
   player: {fileID: 1348608050}
   tileSpawner: {fileID: 288287878}
-  voidChase: {fileID: 2067106720}
+  enemy: {fileID: 2067106720}
 --- !u!114 &288287878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2307,7 +2307,7 @@ MonoBehaviour:
   shipPrefabs:
   - {fileID: 1152354105411914, guid: cdbec52167efb6a48b63cebb3284c246, type: 3}
   - {fileID: 1008573922842845754, guid: 1c008dfa10dec32449bd4e221be526d6, type: 3}
-  shipTargetHeight: 0.9
+  shipTargetHeight: 1.1
   shipYaw: 0
 --- !u!54 &1348608051
 Rigidbody:
@@ -2953,7 +2953,7 @@ GameObject:
   - component: {fileID: 2067106722}
   - component: {fileID: 2067106720}
   m_Layer: 0
-  m_Name: Void
+  m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2970,22 +2970,19 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 18f016fbe32425846ab06d82960bb71d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Core.World.VoidChase
+  m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Core.World.EnemyChase
   player: {fileID: 1348608049}
   baseDistance: 9
-  closeDistance: 5
+  closeDistance: 7.5
   swallowDistance: 1.6
   relaxWindow: 12
   distanceLerpSpeed: 3
   lateralFollow: 4
   baseScale: 1
-  closeScale: 1.6
-  monsterPrefabs:
-  - {fileID: 9081247891841179449, guid: 937b81db8bd32214a9e53ae8838a83d6, type: 3}
-  - {fileID: 1174681552261998, guid: cda9515b23e2f454b9c8d645acee645e, type: 3}
-  - {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
-  monsterTargetHeight: 2.6
-  monsterYaw: 0
+  closeScale: 1.2
+  enemyPrefab: {fileID: 1174681552261998, guid: cda9515b23e2f454b9c8d645acee645e, type: 3}
+  enemyTargetHeight: 1.8
+  enemyYaw: 0
 --- !u!135 &2067106722
 SphereCollider:
   m_ObjectHideFlags: 0

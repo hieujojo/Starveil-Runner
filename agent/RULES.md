@@ -12,15 +12,16 @@
 > Các rule này là kết quả review của user, được chốt thành định hướng bất biến:
 
 - **R0.1 — Player = TÀU VŨ TRỤ NHỎ (spaceship) — ĐÃ CHỐT 2026-08-11.** Không phải trái banh (tên game gợi "kẻ chạy trốn khỏi Void"). Tàu bay lơ lửng trên đường, tông cyan neon nổi trên nền tối, đổi lane mượt. Dựng bằng primitive (thân cube + cánh) hoặc model Kenney space-kit — không cần model nhân vật phức tạp.
-- **R0.2 — Void là KẺ ĐUỔI THEO ĐÍCH THỰC, không phải "banh tím trôi sau lưng".** Void = khối bóng tối (hư không) phình to, xuất hiện áp sát khi player chạm vật cản.
+- **R0.2 — ENEMY là KẺ ĐUỔI THEO ĐÍCH THỰC, không phải "banh tím trôi sau lưng".** (Đổi tên từ "Void" → "Enemy" 2026-08-12 — user quyết định.) Enemy = **Flying Beetle** (1 kẻ thù DUY NHẤT, user chốt "flying carnivorous") — có Animator flying loop, xuất hiện áp sát khi player chạm vật cản. Model chuyển động: Animator của prefab tự chạy (cánh vỗ bay) — code chỉ điều khiển VỊ TRÍ (bám sau player, đổi lane) + scale phình khi áp sát; KHÔNG ép localRotation mỗi frame (root motion — R4.17).
 - **R0.3 — Track PHẢI vô tận thật sự** (TileSpawner pool recycle). Nếu đường chạy hết → bug hệ thống (Ground tĩnh 400m không được là giới hạn — chỉ là nền, không phải track).
 - **R0.4 — Cơ chế chết kiểu Subway Surfers / Temple Run — 2 NẤC CỐ ĐỊNH (ĐÃ CHỐT 2026-08-11):**
-  - Void giữ khoảng cách nền **9m** sau player (trong tầm camera offset -10 → nhìn thấy).
-  - **NẤC 1**: player đụng vật cản → Void tiến sát còn **5m** (vẫn chưa chết).
-  - **Nới lại**: player né sạch **10–15s** không đụng nữa → Void nới dần về **9m** (reset về nấc 0).
-  - **CHẾT**: player đụng lần 2 TRONG CỬA SỔ 10–15s (khi Void đang ở nấc 5m) → Void nuốt → Game Over.
-  - Mọi vật cản chỉ khiến Void tiến gần — KHÔNG có cơ chế chết do obstacle trực tiếp.
-  - Void KHÔNG tự tăng tốc theo thời gian (bỏ cơ chế co dần 60s cũ — gây chết ở mức điểm cố định).
+  - Enemy giữ khoảng cách nền **9m** sau player (trong tầm camera offset -10 → nhìn thấy).
+  - **NẤC 1**: player đụng vật cản → Enemy tiến sát còn **7.5m** (fix 2026-08-12: cũ 5m → enemy CHE mất tàu player; 7.5m vẫn áp sát đe dọa nhưng tàu thấy rõ).
+  - **Nới lại**: player né sạch **10–15s** không đụng nữa → Enemy nới dần về **9m** (reset về nấc 0).
+  - **CHẾT**: player đụng lần 2 TRONG CỬA SỔ 10–15s (khi Enemy đang ở nấc 1) → Enemy nuốt → Game Over.
+  - Mọi vật cản chỉ khiến Enemy tiến gần — KHÔNG có cơ chế chết do obstacle trực tiếp.
+  - Enemy KHÔNG tự tăng tốc theo thời gian (bỏ cơ chế co dần 60s cũ — gây chết ở mức điểm cố định).
+  - Scale enemy: baseScale 1 / closeScale **1.2** (cũ 1.6 quá to che tàu) / enemyTargetHeight **1.8** — đủ đe dọa, không che tàu (~1.1).
 - **R0.5 — Toàn bộ text trong gameplay = TIẾNG ANH** (SCORE, COMBO, GAME OVER, RETRY, MENU, BEST...). Không lộn xộn Việt/Anh trong scene Game.
 - **R0.6 — MainMenu: Best score chỉ hiển thị khi có dữ liệu thật (BestScore > 0).** Lần đầu chơi = 0 → ẩn (hiển thị vô nghĩa). Sau khi chơi và có điểm → mới hiện.
 - **R0.7 — Game Over panel BẮT BUỘC hiện khi game kết thúc.** Nếu user không thấy màn hình game over → bug nghiêm trọng, ưu tiên fix trước.
@@ -87,6 +88,7 @@
 - **R3.14** — **Khi xóa 1 script (class), PHẢI quét Editor tools tham chiếu nó TRƯỚC** (`grep -rln '<TênClass>' Assets/_Project/Editor/`) — tool tham chiếu class đã xóa = **CS0246 compile fail toàn project**. Nếu tool chỉ phục vụ đúng thứ đã xóa → xóa luôn tool. *(Bug 2026-08-11: xóa AmbientScroller.cs → AmbientSetupTool vỡ; 2026-08-12: RefactorGameplayTool vẫn gọi AmbientScroller → phải sửa.)*
 - **R3.15** — **Editor tool PHẢI idempotent (chạy lại an toàn nhiều lần) — đây là tiêu chí GIỮ tool.** Tool one-shot đã hoàn thành hoặc bị tool khác thay thế (vd HUDUIBuilder/MainMenuUIBuilder tông blue cũ bị UIOverhaulTool thay thế) → XÓA, tránh menu Tools mọc loạn + khó bảo trì. Khi xóa tool: kiểm tra không file khác gọi nó (chỉ comment thì OK), giữ helper dùng chung nếu tool khác còn dùng. *(2026-08-12.)*
 - **R3.16** — **Model 3rd-party (FBX) import thường dùng shader Built-in Standard → trong URP hiện MÀU TÍM/MAGENTA** (shader không compile — không phải lỗi màu, không phải logic). Fix: quét renderer → convert material sang `URP/Lit` giữ màu gốc (`MaterialFixer` — cache static). Kiểm tra material: `grep 'm_Shader:' *.mat` — fileID 45 guid 000... = Standard Built-in.
+- **R3.17** — **Rename class Unity: `git mv` GIỮ `.meta` = GUID KHÔNG đổi → scene/prefab vẫn tham chiếu đúng script** (không cần sửa m_Script guid). Sau rename phải đồng bộ: tên file, tên class, `m_EditorClassIdentifier` trong scene, mọi reference code, tên GameObject, test, docs. KHÔNG tự gõ GUID mới (R6.1). *(2026-08-12: VoidChase → EnemyChase.)*
 
 ## 🎬 NHÓM 4 — Gameplay / World (bài học về game feel)
 

@@ -15,8 +15,8 @@ namespace VoidRunner.Core.Player
     /// Điều khiển qua Rigidbody linearVelocity — mượt, không teleport.
     ///
     /// R0.1: player = TÀU VŨ TRỤ (dựng từ primitive trong Awake — idempotent, tông cyan neon).
-    /// R0.4: đụng obstacle KHÔNG chết — chỉ RaiseObstacleHit (Void tiến sát).
-    ///       Đụng lần 2 trong cửa sổ 10–15s = Void nuốt (VoidChase xử lý → RaiseGameOver).
+    /// R0.4: đụng obstacle KHÔNG chết — chỉ RaiseObstacleHit (Enemy tiến sát).
+    ///       Đụng lần 2 trong cửa sổ 10–15s = Enemy nuốt (EnemyChase xử lý → RaiseGameOver).
     /// Tốc độ chạy do DifficultyManager điều khiển (event-driven) — forwardSpeed là tốc độ nền.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
@@ -42,7 +42,8 @@ namespace VoidRunner.Core.Player
         [Tooltip("2 prefab tàu (SF Fighter / Sparrow) — tool Setup Ship Select tự gán. Rỗng = tàu primitive cũ.")]
         [SerializeField] private GameObject[] shipPrefabs;
         [Tooltip("Chiều cao chuẩn hóa model tàu (đơn vị) — đo bounds thật rồi ép scale.")]
-        [SerializeField] private float shipTargetHeight = 0.9f;
+        [SerializeField, Tooltip("Chiều cao tàu (đơn vị) — 2026-08-12 user: tàu to thêm 1 xíu (0.9 → 1.1)")]
+        private float shipTargetHeight = 1.1f;
         [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng (0 = model forward +Z = hướng chạy).")]
         [SerializeField] private float shipYaw = 0f;
 
@@ -238,8 +239,8 @@ namespace VoidRunner.Core.Player
                     return;
                 }
 
-                // R0.4: đụng obstacle KHÔNG chết — chỉ báo lỗi để Void tiến sát.
-                // Đụng lần 2 trong cửa sổ = Void nuốt (VoidChase.HandleObstacleHit → RaiseGameOver).
+                // R0.4: đụng obstacle KHÔNG chết — chỉ báo lỗi để Enemy tiến sát.
+                // Đụng lần 2 trong cửa sổ = Enemy nuốt (EnemyChase.HandleObstacleHit → RaiseGameOver).
                 GameEvents.RaiseObstacleHit();
             }
         }

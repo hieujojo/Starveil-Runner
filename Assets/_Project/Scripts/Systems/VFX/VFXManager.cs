@@ -13,9 +13,8 @@ namespace VoidRunner.Systems.VFX
     /// <summary>
     /// Hiệu ứng hình ảnh (VFX) — event-driven, không coupling:
     /// - Nhặt coin → burst hạt vàng tại vị trí coin + popup điểm "+10" bay lên
-    /// - Ăn power-up → burst hạt màu theo loại (Shield=xanh, Magnet=đỏ, SlowMo=tím)
-    /// - Va chạm obstacle → screen shake (Cinemachine Impulse)
-    /// - Void luôn có vệt khói tối (TrailRenderer tạo bằng code)
+    /// - Ăn power-up → burst hạt màu theo loại (Shield=xanh, Magnet=đỏ, SlowMo=tím)        /// - Va chạm obstacle → screen shake (Cinemachine Impulse)
+        /// - Enemy luôn có vệt khói tối (TrailRenderer tạo bằng code)
     /// Particle được tạo 100% bằng code (không cần prefab/material asset) — chỉ cần
     /// gắn component này vào scene là chạy. Không GC spike: burst dùng Emit() có giới hạn,
     /// popup dùng object pool, không Instantiate/Destroy giữa chừng.
@@ -50,7 +49,7 @@ namespace VoidRunner.Systems.VFX
         [SerializeField] private float popupDuration = 0.7f;
         [SerializeField] private Color popupColor = new Color(1f, 0.85f, 0.2f, 1f);
 
-        [Header("Void trail")]
+        [Header("Enemy trail")]
         [SerializeField] private float trailTime = 0.6f;
         [SerializeField] private float trailStartWidth = 1.4f;
         [SerializeField] private Color trailColor = new Color(0.05f, 0.05f, 0.1f, 0.55f);
@@ -63,8 +62,8 @@ namespace VoidRunner.Systems.VFX
         private Canvas _canvas;
         private TextMeshProUGUI[] _popups;
         private int _popupIndex;
-        private TrailRenderer _voidTrail;
-        private Transform _voidTransform;
+        private TrailRenderer _enemyTrail;
+        private Transform _enemyTransform;
         private ScoreSystem _scoreSystem;
 
         private void Awake()
@@ -110,15 +109,15 @@ namespace VoidRunner.Systems.VFX
 
             SetupScreenShake();
             SetupPopups();
-            SetupVoidTrail();
+            SetupEnemyTrail();
         }
 
         private void Update()
         {
-            // Vệt khói tự nở rộng theo kích thước Void (scale tăng dần theo độ khó)
-            if (_voidTrail != null && _voidTransform != null)
+            // Vệt khói tự nở rộng theo kích thước enemy (scale tăng dần theo độ khó)
+            if (_enemyTrail != null && _enemyTransform != null)
             {
-                _voidTrail.startWidth = trailStartWidth * _voidTransform.localScale.x;
+                _enemyTrail.startWidth = trailStartWidth * _enemyTransform.localScale.x;
             }
         }
 
@@ -166,8 +165,8 @@ namespace VoidRunner.Systems.VFX
 
         private void HandleRestart()
         {
-            // Void teleport về vị trí ban đầu khi restart — xóa vệt cũ tránh kéo dài xuyên map
-            if (_voidTrail != null) _voidTrail.Clear();
+            // Enemy teleport về vị trí ban đầu khi restart — xóa vệt cũ tránh kéo dài xuyên map
+            if (_enemyTrail != null) _enemyTrail.Clear();
         }
 
         // ---------- Setup ----------
@@ -290,30 +289,30 @@ namespace VoidRunner.Systems.VFX
             seq.OnComplete(() => tmp.gameObject.SetActive(false));
         }
 
-        /// <summary>Tạo vệt khói tối cho Void — TrailRenderer tạo bằng code, nở rộng theo scale Void.</summary>
-        private void SetupVoidTrail()
+        /// <summary>Tạo vệt khói tối cho Enemy — TrailRenderer tạo bằng code, nở rộng theo scale enemy.</summary>
+        private void SetupEnemyTrail()
         {
-            var voidChase = FindAnyObjectByType<VoidChase>();
-            if (voidChase == null) return;
+            var enemyChase = FindAnyObjectByType<EnemyChase>();
+            if (enemyChase == null) return;
 
-            _voidTransform = voidChase.transform;
-            if (_voidTransform.GetComponent<TrailRenderer>() == null)
+            _enemyTransform = enemyChase.transform;
+            if (_enemyTransform.GetComponent<TrailRenderer>() == null)
             {
-                _voidTransform.gameObject.AddComponent<TrailRenderer>();
+                _enemyTransform.gameObject.AddComponent<TrailRenderer>();
             }
 
-            _voidTrail = _voidTransform.GetComponent<TrailRenderer>();
-            _voidTrail.time = trailTime;
-            _voidTrail.startWidth = trailStartWidth * _voidTransform.localScale.x;
-            _voidTrail.endWidth = 0.05f;
-            _voidTrail.minVertexDistance = 0.2f;
-            _voidTrail.numCornerVertices = 4;
-            _voidTrail.numCapVertices = 4;
-            _voidTrail.startColor = trailColor;
-            _voidTrail.endColor = new Color(trailColor.r, trailColor.g, trailColor.b, 0f);
+            _enemyTrail = _enemyTransform.GetComponent<TrailRenderer>();
+            _enemyTrail.time = trailTime;
+            _enemyTrail.startWidth = trailStartWidth * _enemyTransform.localScale.x;
+            _enemyTrail.endWidth = 0.05f;
+            _enemyTrail.minVertexDistance = 0.2f;
+            _enemyTrail.numCornerVertices = 4;
+            _enemyTrail.numCapVertices = 4;
+            _enemyTrail.startColor = trailColor;
+            _enemyTrail.endColor = new Color(trailColor.r, trailColor.g, trailColor.b, 0f);
             // Dùng chung material mềm (Particles/Unlit + texture radial) — đã hoạt động với burst;
             // URP/Unlit mặc định KHÔNG sample vertex color → trail sẽ hiện trắng, nên không dùng.
-            _voidTrail.material = CreateSoftParticleMaterial();
+            _enemyTrail.material = CreateSoftParticleMaterial();
         }
 
         /// <summary>

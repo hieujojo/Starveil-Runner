@@ -34,6 +34,28 @@
 
 ---
 
+## 2026-08-12 — Refactor Void → Enemy + enemy duy nhất Flying Beetle + tàu to + TitleGlow 2 chữ đè nhau
+
+> User: "sao có 2 chữ VOID RUNNER đè nhau; void chỉ nên dùng 1 kẻ thù duy nhất là model flying carnivorous (note cách model chuyển động); tàu to thêm 1 xíu; enemy đuổi gần nhưng KHÔNG che tàu; đổi void thành enemy cho tốt hơn; xóa code thì dọn sạch".
+
+### Root cause từng lỗi + fix (commit `…`)
+
+- **2 chữ "VOID RUNNER" đè nhau (MainMenu)** — `TitleGlow` (text cyan mờ do tool tạo làm hiệu ứng glow) đang render ĐÈ LÊN `TitleText` trắng — cả 2 cùng y=330. Fix: **`m_IsActive: 0`** trên GameObject TitleGlow (ẩn an toàn R0.16 — title trắng đã có Shadow riêng, glow phụ thừa).
+- **Enemy = Flying Beetle DUY NHẤT (bỏ random 3 monster)** — user chốt "chỉ 1 kẻ thù là flying carnivorous" = **Flying Beetle** (prefab CÓ Animator controller flying loop → instantiate là cánh vỗ bay liên tục). **Note cách model chuyển động**: enemy KHÔNG cần code điều khiển animation — Animator của prefab tự chạy (flying loop); EnemyChase chỉ điều khiển VỊ TRÍ (bám sau player, đổi lane) + scale phình khi áp sát. ⚠️ KHÔNG ép `localRotation` mỗi frame — đánh nhau với root motion (R4.17).
+- **Enemy đuổi gần nhưng KHÔNG che tàu** — cũ: closeDistance **5m** + closeScale 1.6 + monster 2.6 cao → khi áp sát enemy phủ kín tàu. Fix: closeDistance **7.5m** + closeScale **1.2** + enemyTargetHeight **1.8** (vẫn đe dọa, tàu thấy rõ).
+- **Tàu to thêm 1 xíu** — `shipTargetHeight` 0.9 → **1.1** (code + scene Game).
+- **Đổi Void → Enemy TRIỆT ĐỂ** (user duyệt): `VoidChase.cs → EnemyChase.cs` (giữ .meta = GUID không đổi → scene không vỡ), `VoidMonsterSetupTool.cs → EnemyMonsterSetupTool.cs`, `VoidChasePlayTests.cs → EnemyChasePlayTests.cs`, field `GameManager.voidChase → enemy`, `VFXManager._voidTrail/_voidTransform/SetupVoidTrail → _enemyTrail/_enemyTransform/SetupEnemyTrail`, GameObject scene "Void" → "Enemy", field scene `monsterPrefabs[] (3) → enemyPrefab (1)` + `monsterTargetHeight/monsterYaw → enemyTargetHeight/enemyYaw`. Scene Component `m_EditorClassIdentifier` cập nhật. Xóa hẳn `BuildBlackHoleVisual` (không cần — enemy có model thật).
+- **Self-heal (R4.18, reviewer)**: `EnemyCatalog.Load()` (editor) — nếu pull code mới chưa chạy tool Setup Enemy → EnemyChase tự tải Flying Beetle. Giống ShipCatalog cho tàu.
+- Reviewer bắt: `monsterYaw: 0` còn sót trong scene sau replace (data chết) → `enemyYaw: 0`.
+
+### Bài học — **QUY TẮC MỚI (R0.2/R0.4 đổi tên, R3.17)**
+
+- **Rename class Unity: `git mv` giữ `.meta` = GUID không đổi → scene/prefab vẫn tham chiếu đúng script** (chỉ đổi tên file + class + m_EditorClassIdentifier trong scene). Không tự tay gõ GUID mới (R6.1). Đồng bộ: field scene, m_EditorClassIdentifier, mọi reference trong code, tên GameObject, test, docs.
+- **Khi thay array (3 prefab) → 1 prefab cố định**: quét data chết trong scene (field cũ như `monsterYaw` không còn trong class) — python replace khớp chuỗi có thể chừa lại field thừa → verify bằng grep tên field cũ.
+- **Model enemy có Animator → KHÔNG ghi đè rotation mỗi frame** (root motion); điều khiển vị trí, để Animator lo động tác. Flying Beetle: instantiate prefab là bay sẵn.
+
+---
+
 ## 2026-08-12 — Fix UI MainMenu vòng 2 (2 ảnh user test): giãn quá + Title 2 dòng + chuột ship + tàu trắng + popup lộ menu
 
 > User: "bạn giãn quá mức cần thiết rồi, chỉ tăng thêm 1 tí so với ban nãy thôi, và đừng xuống dòng chữ VOID RUNNER nữa, cho nó nằm ngang đi; ship bấm phím mũi tên đổi được nhưng bấm CHUỘT thì không đổi; tại sao tàu thành màu TRẮNG; popup how to play có nền đen thì đồng bộ toàn bộ popup còn lại".

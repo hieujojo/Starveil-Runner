@@ -18,7 +18,7 @@ namespace VoidRunner.Core
         [Header("Tham chiếu (kéo thả trong Inspector)")]
         [SerializeField] private PlayerController player;
         [SerializeField] private TileSpawner tileSpawner;
-        [SerializeField] private VoidChase voidChase;
+        [SerializeField] private EnemyChase enemy; // 2026-08-12: đổi tên từ voidChase (Void → Enemy)
 
         public static GameManager Instance { get; private set; }
         public GameState State { get; private set; } = GameState.Menu;
@@ -56,7 +56,7 @@ namespace VoidRunner.Core
         {
             if (player == null) player = FindAnyObjectByType<PlayerController>();
             if (tileSpawner == null) tileSpawner = FindAnyObjectByType<TileSpawner>();
-            if (voidChase == null) voidChase = FindAnyObjectByType<VoidChase>();
+            if (enemy == null) enemy = FindAnyObjectByType<EnemyChase>();
             // Ghi chú 2026-08-11: PlayerController tự đọc InputReader.MoveInput trực tiếp
             // (đè giữ = trượt liên tục) — không còn wiring lane event rời rạc ở đây.
         }
@@ -114,7 +114,7 @@ namespace VoidRunner.Core
             ObstacleManager obstacles = FindAnyObjectByType<ObstacleManager>();
             tileSpawner.Initialize(player.transform, obstacles);
             tileSpawner.StartTrack();
-            voidChase?.Setup(player.transform);
+            enemy?.Setup(player.transform);
             GameEvents.RaiseGameStarted();
         }
 

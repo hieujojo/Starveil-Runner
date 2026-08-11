@@ -43,7 +43,7 @@
 | B7 | Nhặt **Magnet** (đỏ) → hút coin xa về phía player (bụi đỏ) | ☐ |
 | B8 | Nhặt **SlowMo** (tím) → game chậm lại 3s (bụi tím) | ☐ |
 | B9 | Đâm obstacle → **camera rung nhẹ** (screen shake) + SFX death | ☐ |
-| B10 | Sau lưng có **Void tím hồng** đuổi theo + **vệt khói tối** phía sau | ☐ |
+| B10 | Sau lưng có **Enemy = Flying Beetle** đuổi theo (cánh vỗ bay) + **vệt khói tối** phía sau | ☐ |
 | B11 | Coin/player/obstacle **phát sáng** trong bóng tối (Bloom) | ☐ |
 | B12 | Không thấy hộp vật lý lạ, không xuyên sàn, không bay lung tung | ☐ |
 
@@ -52,7 +52,7 @@
 | # | Kiểm tra | Kết quả |
 |---|---|---|
 | C1 | Chết → panel Game Over hiện (fade mượt), hiện **SCORE + BEST** (vàng, tiếng Anh) | ☐ |
-| C2 | Bấm **CHƠI LẠI** → game chạy lại từ đầu, score reset, combo reset, **vệt khói Void không kéo dài xuyên map** | ☐ |
+| C2 | Bấm **CHƠI LẠI** → game chạy lại từ đầu, score reset, combo reset, **vệt khói Enemy không kéo dài xuyên map** | ☐ |
 | C3 | Bấm **MENU** → quay về MainMenu | ☐ |
 | C4 | Vào lại game → **Best score đã lưu** (PlayerPrefs) | ☐ |
 | C5 | Chơi 2 lần liên tiếp → không lỗi singleton (audio không nhân đôi, manager không trùng) | ☐ |
@@ -108,33 +108,33 @@
 
 ---
 
-## 🔄 Cơ chế Void mới — Subway Surfers / Temple Run (sau refactor)
+## 🔄 Cơ chế Enemy mới — Subway Surfers / Temple Run (sau refactor)
 
 > ✅ Refactor gameplay ĐÃ CODE (2026-08-11) — các mục này test được ngay.
-> 🧪 **Test tự động đi kèm**: `VoidChasePlayTests` (PlayMode, 5 test) — đã chạy/validate trước khi test tay.
+> 🧪 **Test tự động đi kèm**: `EnemyChasePlayTests` (PlayMode, 5 test) — đã chạy/validate trước khi test tay.
 
 | # | Kiểm tra | Kết quả |
 |---|---|---|
-| V1 | Đụng vật cản lần 1 → **KHÔNG chết**, Void tiến sát hơn (cảm nhận rõ) | ☐ |
-| V2 | Không chạm vật cản trong **10–15s** → Void NỚI LẠI khoảng cách ban đầu | ☐ |
-| V3 | Đụng **2 lần trong cửa sổ 10–15s** → Void nuốt → Game Over panel hiện | ☐ |
+| V1 | Đụng vật cản lần 1 → **KHÔNG chết**, Enemy tiến sát hơn (cảm nhận rõ) | ☐ |
+| V2 | Không chạm vật cản trong **10–15s** → Enemy NỚI LẠI khoảng cách ban đầu | ☐ |
+| V3 | Đụng **2 lần trong cửa sổ 10–15s** → Enemy nuốt → Game Over panel hiện | ☐ |
 | V4 | Game Over panel **LUÔN hiện** khi chết (không bao giờ "chết mà không thấy màn hình") | ☐ |
-| V5 | Void **không tự tăng tốc** theo thời gian — chỉ tiến sát khi player lỗi | ☐ |
+| V5 | Enemy **không tự tăng tốc** theo thời gian — chỉ tiến sát khi player lỗi | ☐ |
 | V6 | Player = **tàu vũ trụ nhỏ** (không còn banh xanh), banking khi đổi lane, nhìn hợp lý | ☐ |
 | V7 | Track chạy **> 400m không hết đường** (Ground 6000m + tile recycle) | ☐ |
 | V8 | **Toàn bộ text gameplay + menu = tiếng Anh** (RETRY/SCORE/BEST/SOUND ON-OFF/HowToPlay) | ☐ |
 | V9 | Best score **ẩn khi = 0** ở MainMenu; hiện khi đã có điểm | ☐ |
 | V10 | Nút âm thanh: text không thụt vào viền, không quá chật | ☐ |
-| V11 | Void **phình to hơn khi tiến sát** (nấc 1 đe dọa) | ☐ |
+| V11 | Enemy **phình to hơn khi tiến sát** (nấc 1 đe dọa) | ☐ |
 
 ---
 
 ---
 
-## ✨ Task A/B/D (2026-08-11/12 — Credits · Void quái vật · Chọn tàu)
+## ✨ Task A/B/D (2026-08-11/12 — Credits · Enemy quái vật · Chọn tàu)
 
 > ⚠️ **Chạy tool TRƯỚC khi test** (mỗi tool 1 lần, idempotent):
-> 1. Mở scene **Game** → `Tools/Void Runner/Setup Void Monsters` (gán 3 quái vật) + `Setup Ship Select` (gán 2 tàu)
+> 1. Mở scene **Game** → `Tools/Void Runner/Setup Enemys` (gán 3 quái vật) + `Setup Ship Select` (gán 2 tàu)
 > 2. Mở scene **MainMenu** → `Tools/Void Runner/Setup Ship Select` (tạo ShipSelectManager + gán prefab)
 > 3. **Ctrl+S** cả 2 scene. *(Nếu quên: ShipCatalog tự tải khi chưa gán — nhưng build cần tool.)*
 
@@ -146,7 +146,7 @@
 | T4 | MainMenu: nút **SHIP** (bên trái, cùng hàng CREDITS) → panel SELECT SHIP: preview 3D tàu xoay + tên tàu (SF FIGHTER/SPARROW) | ☐ |
 | T5 | Panel chọn tàu: nút **< >** đổi tàu (preview đổi theo), **SELECT** lưu chọn, **CLOSE** đóng | ☐ |
 | T6 | Bấm PLAY → Game: tàu hiển thị = model đã chọn (SF Fighter hoặc Sparrow — KHÔNG phải tàu primitive cũ), có flame đuôi + exhaust | ☐ |
-| T7 | Vào game: Void = **QUÁI VẬT** (1 trong 3: Monster/Flying Beetle/Spider) đuổi theo, không còn banh tím; scale hợp lý | ☐ |
+| T7 | Vào game: Enemy = **QUÁI VẬT** (1 trong 3: Monster/Flying Beetle/Spider) đuổi theo, không còn banh tím; scale hợp lý | ☐ |
 | T8 | Quái vật KHÔNG xoay lung tung (Animator chạy bình thường), không có collider con chặn đường | ☐ |
 | T9 | Chọn tàu khác → về MainMenu → PLAY lại → tàu mới vẫn giữ (SaveSystem.SelectedShip) | ☐ |
 | T10 | Console 0 lỗi đỏ khi mở cả 2 panel + đổi tàu | ☐ |

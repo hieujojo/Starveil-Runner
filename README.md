@@ -1,6 +1,6 @@
-# 🔮 Void Runner — Endless Runner 3-Lane với Cơ Chế "Void Tiến Sát"
+# 🔮 Void Runner — Endless Runner 3-Lane với Cơ Chế "Enemy Tiến Sát"
 
-> **Void Runner** là một endless runner 3-lane được phát triển bằng **Unity 6 + URP**: điều khiển nhân vật lao về phía trước trên đường vô tận trong khi **"Hư Không" (The Void)** đuổi theo phía sau. Cơ chế đặc trưng kiểu **Subway Surfers / Temple Run**: đụng chướng ngại vật → Void **tiến sát** hơn; né sạch 10–15 giây → Void **nới ra**; đụng 2 lần trong cửa sổ đó → bị nuốt chửng = Game Over. Thu coin, nhặt power-up và sống sót càng lâu càng tốt.
+> **Void Runner** là một endless runner 3-lane được phát triển bằng **Unity 6 + URP**: điều khiển nhân vật lao về phía trước trên đường vô tận trong khi **"Enemy" (Flying Beetle)** đuổi theo phía sau. Cơ chế đặc trưng kiểu **Subway Surfers / Temple Run**: đụng chướng ngại vật → Enemy **tiến sát** hơn; né sạch 10–15 giây → Enemy **nới ra**; đụng 2 lần trong cửa sổ đó → bị nuốt chửng = Game Over. Thu coin, nhặt power-up và sống sót càng lâu càng tốt.
 
 [![Unity](https://img.shields.io/badge/Unity-6.x-222222?logo=unity&logoColor=white)](https://unity.com)
 [![C#](https://img.shields.io/badge/C%23-.NET-239120?logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
@@ -11,7 +11,7 @@
 ## 🎮 Gameplay
 
 - **3 lane vô tận, road rộng 18m**: bấm `A`/`D` (hoặc mũi tên) = nhảy ngay 1 lane; **đè giữ** = trượt liên tục qua nhiều lane; nhả = tự về giữa lane — phản hồi tức thì, né chướng ngại vật mượt mà
-- **The Void = HỐ ĐEN đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Void **tiến sát** (phình to, đe dọa); né sạch 10–15s → Void **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Void nuốt chửng = **Game Over**. Đụng obstacle → tàu **nhấp nháy** (feedback rõ ràng)
+- **Enemy = Flying Beetle đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Enemy **tiến sát** (phình to, đe dọa); né sạch 10–15s → Enemy **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Enemy nuốt chửng = **Game Over**. Đụng obstacle → tàu **nhấp nháy** (feedback rõ ràng)
 - **Chướng ngại vật**: Ramp + DynamicBox gắn ngẫu nhiên, **luôn chừa ≥1 lane an toàn** + **safe zone 20m đầu game** (không obstacle — không chết tức thì)
 - **Coin & Power-up**: gom coin tăng điểm (hàng coin **không bao giờ đè lên obstacle** — chọn lane khác), nhặt power-up (Shield / Magnet / Slow-mo)
 - **Cảnh vật 2 bên**: mô hình Kenney Space Kit rải dọc đường, tự tái sinh sau mỗi lần chơi lại
@@ -23,7 +23,7 @@
 
 | Tính năng | Kỹ thuật | Trạng thái |
 |---|---|---|
-| **The Void = HỐ ĐEN — cơ chế tiến sát khi player lỗi** | Chase trực tiếp + **2 nấc cố định** (9m → 5m khi đụng, nới lại sau 12s sạch, đụng lần 2 → Game Over) + visual hố đen (đĩa bồi tụ phát sáng + hạt bị hút) | ✅ |
+| **Enemy = Flying Beetle — cơ chế tiến sát khi player lỗi** | Chase trực tiếp + **2 nấc cố định** (9m → 7.5m khi đụng, nới lại sau 12s sạch, đụng lần 2 → Game Over) + model Flying Beetle (Animator bay) + vệt khói tối | ✅ |
 | Player = **tàu vũ trụ nhỏ** | Dựng từ primitive + material neon (không cần model), banking khi đổi lane | ✅ |
 | Track sinh vô tận | **Object Pool** (`ObjectPool<T>`) + Ground 6000m — chạy mãi không hết đường | ✅ |
 | Obstacle cấu hình được | **ScriptableObject** (`ObstacleData`) + gắn ngẫu nhiên theo weight, luôn chừa ≥1 lane trống, safe zone 20m đầu game | ✅ |
@@ -36,8 +36,8 @@
 | UI (HUD / Menu / Game Over) | `UIManager` + TextMeshPro — **toàn bộ tiếng Anh** | ✅ |
 | Power-up | Shield / Magnet / Slow-mo | ✅ |
 | Audio + Save | `AudioManager` singleton + `SaveSystem` (PlayerPrefs) | ✅ |
-| Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Void, đụng obstacle → tàu nhấp nháy, coin không đè obstacle | ✅ |
-| Test tự động | **Unity Test Framework — 24 test + 5 PlayMode test Void 2 nấc** | ✅ |
+| Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Enemy, đụng obstacle → tàu nhấp nháy, coin không đè obstacle | ✅ |
+| Test tự động | **Unity Test Framework — 24 test + 5 PlayMode test Enemy 2 nấc** | ✅ |
 | Deploy | **WebGL build → itch.io / Unity Play** | ⏳ Giai đoạn 3 |
 
 ---
@@ -77,7 +77,7 @@ Assets/_Project/
 │   ├── Core/          # Gameplay lõi (thuần logic, không phụ thuộc UI)
 │   │   ├── Game/      #   GameManager, GameEvents
 │   │   ├── Player/    #   PlayerController (lane switching)
-│   │   └── World/     #   TileSpawner, Tile, ObstacleManager, VoidChase
+│   │   └── World/     #   TileSpawner, Tile, ObstacleManager, EnemyChase
 │   ├── Systems/       # Input, Score, PowerUp, Audio, Save, Difficulty
 │   ├── UI/            # HUD, Screens, Widgets
 │   ├── Data/          # ScriptableObject definitions
@@ -97,9 +97,9 @@ Assets/_Project/
 | Giai đoạn | Nội dung | Trạng thái |
 |---|---|---|
 | **G0** | Setup: Clean Architecture, Cinemachine, DOTween | ✅ Hoàn thành |
-| **G1** | Core gameplay: lane switching, tile spawner (object pool), Void chase, obstacle | ✅ Code xong |
+| **G1** | Core gameplay: lane switching, tile spawner (object pool), Enemy chase, obstacle | ✅ Code xong |
 | **G2** | Hệ thống: Score (combo), UI, Power-up, Audio, Save, Difficulty | ✅ Code xong |
-| **G2.5** | **Refactor gameplay theo review user** (Void 2 nấc, player tàu vũ trụ, track vô tận, UI English, best score ẩn) | ✅ Hoàn thành (2026-08-11) |
+| **G2.5** | **Refactor gameplay theo review user** (Enemy 2 nấc, player tàu vũ trụ, track vô tận, UI English, best score ẩn) | ✅ Hoàn thành (2026-08-11) |
 | **G3** | Polish & Deploy: VFX, post-processing, WebGL → itch.io / Unity Play, README | ⏳ |
 
 ---
