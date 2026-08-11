@@ -2,7 +2,9 @@ using UnityEngine;
 using VoidRunner.Core;
 using VoidRunner.Core.World;
 using VoidRunner.Systems.Difficulty;
+using VoidRunner.Systems.Input;
 using VoidRunner.Systems.PowerUp;
+using VoidRunner.Systems.VFX;
 
 namespace VoidRunner.Core.Player
 {
@@ -23,6 +25,8 @@ namespace VoidRunner.Core.Player
         private float forwardSpeed = 10f;
         [SerializeField] private float laneWidth = 2f;
         [SerializeField] private float laneChangeSpeed = 8f;
+        [SerializeField, Tooltip("Tốc độ trượt ngang khi ĐÈ GIỮ phím (m/s) — đè lâu băng qua nhiều lane")]
+        private float sweepSpeed = 6f;
         [SerializeField] private int laneCount = 3;
 
         [Header("Tàu vũ trụ (visual)")]
@@ -38,12 +42,19 @@ namespace VoidRunner.Core.Player
         private bool _isDead;
         private float _currentSpeed;
         private Transform _ship;
+        private InputReader _input;
+
+        // Đuôi tàu — ngọn lửa đẩy lập lòe + hạt exhaust (hiệu ứng cảm giác di chuyển)
+        private Transform _flame;
+        private Vector3 _flameBaseScale;
+        private ParticleSystem _exhaust;
 
         // Material dùng chung cho tàu (tạo 1 lần, tông cyan neon — không phụ thuộc asset)
         private static Material _bodyMat;
         private static Material _wingMat;
         private static Material _cockpitMat;
         private static Material _engineMat;
+        private static Material _flameMat;
 
         public float ForwardSpeed => _currentSpeed;
         public bool IsDead => _isDead;
@@ -62,6 +73,12 @@ namespace VoidRunner.Core.Player
             _rb.angularVelocity = Vector3.zero;
 
             BuildSpaceship();
+        }
+
+        private void Start()
+        {
+            // Đọc input trực tiếp (không qua GameManager wiring) — ĐÈ GIỮ = trượt liên tục
+            _input = FindAnyObjectByType<InputReader>();
         }
 
         private void OnEnable()
@@ -96,7 +113,24 @@ namespace VoidRunner.Core.Player
         {
             if (_isDead) return;
 
-            // Tiến về trước + lerp ngang mượt giữa các lane (không overshoot)
+            // ---- ĐÈ GIỮ phím = trượt liên tục (Subway Surfers); nhả phím = snap về lane gần nhất ----
+            float maxX = (laneCount - 1) * 0.5f * laneWidth;
+            float inputX = _input != null ? _input.MoveInput.x : 0f;
+
+            if (Mathf.Abs(inputX) > 0.1f)
+            {
+                // Trượt liên tục theo hướng phím — đè lâu = băng qua nhiều lane (không dừng ở lane kế)
+                _targetX = Mathf.Clamp(_targetX + Mathf.Sign(inputX) * sweepSpeed * Time.fixedDeltaTime, -maxX, maxX);
+            }
+            else
+            {
+                // Không đè → tự về giữa lane gần nhất (không lơ lửng giữa 2 lane)
+                _targetX = Mathf.Clamp(Mathf.Round(_targetX / laneWidth) * laneWidth, -maxX, maxX);
+                // Đồng bộ _currentLane theo vị trí (tránh state cũ lệch — chỉ còn dùng cho MoveLeft/Right & test)
+                _currentLane = Mathf.Clamp(Mathf.RoundToInt(_targetX / laneWidth + (laneCount - 1) * 0.5f), 0, laneCount - 1);
+            }
+
+            // Lerp ngang mượt về target (không overshoot)
             float dx = _targetX - _rb.position.x;
             float maxStep = laneChangeSpeed * Time.fixedDeltaTime;
             float stepX = Mathf.Clamp(dx, -maxStep, maxStep);
@@ -110,6 +144,24 @@ namespace VoidRunner.Core.Player
                 Quaternion target = Quaternion.Euler(0f, 0f, -t * bankAngle);
                 _ship.localRotation = Quaternion.Slerp(_ship.localRotation, target, bankSmooth * Time.fixedDeltaTime);
             }
+        }
+
+        private void Update()
+        {
+            // Ngọn lửa đuôi lập lòe (PerlinNoise) — tắt hẳn khi chết
+            if (_flame == null) return;
+            if (_isDead)
+            {
+                _flame.localScale = Vector3.zero;
+                if (_exhaust != null && _exhaust.isPlaying) _exhaust.Stop();
+                return;
+            }
+
+            float f = 0.7f + 0.3f * Mathf.PerlinNoise(Time.time * 22f, 0f);
+            _flame.localScale = new Vector3(
+                _flameBaseScale.x * (1.4f - f * 0.6f),
+                _flameBaseScale.y * (1.4f - f * 0.6f),
+                _flameBaseScale.z * f);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -145,6 +197,8 @@ namespace VoidRunner.Core.Player
             _rb.angularVelocity = Vector3.zero;
             _rb.position = _startPos;
             if (_ship != null) _ship.localRotation = Quaternion.identity;
+            if (_flame != null) _flame.localScale = _flameBaseScale; // bật lại lửa
+            _exhaust?.Play();
         }
 
         // ---------------------------------------------------------------------
@@ -179,10 +233,49 @@ namespace VoidRunner.Core.Player
             // Động cơ sau đuôi (phát sáng cam)
             CreatePart(ship.transform, "Engine", new Vector3(0f, 0.12f, -0.62f), new Vector3(0.3f, 0.12f, 0.2f), _engineMat);
 
+            // Ngọn lửa đẩy sau đuôi — lập lòe theo thời gian (cảm giác đang bay)
+            _flame = CreatePart(ship.transform, "Thruster", new Vector3(0f, 0.12f, -0.85f), new Vector3(0.18f, 0.18f, 0.55f), _flameMat);
+            _flameBaseScale = _flame.localScale;
+
+            // Hạt exhaust bay ngược (-Z) từ đuôi
+            _exhaust = CreateExhaustSystem(ship.transform);
+
             _ship = ship.transform;
         }
 
-        private static void CreatePart(Transform parent, string name, Vector3 localPos, Vector3 localScale, Material mat)
+        /// <summary>Hệ hạt exhaust liên tục — hạt cam mềm bay về sau đuôi (không cần asset).</summary>
+        private static ParticleSystem CreateExhaustSystem(Transform parent)
+        {
+            var go = new GameObject("Exhaust");
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = new Vector3(0f, 0.12f, -1.05f);
+
+            var ps = go.AddComponent<ParticleSystem>();
+            var main = ps.main;
+            main.loop = true;
+            main.playOnAwake = true;
+            main.startLifetime = 0.35f;
+            main.startSpeed = -7f; // hướng về sau (-Z)
+            main.startSize = 0.22f;
+            main.startColor = new Color(1f, 0.55f, 0.12f, 0.85f);
+            main.maxParticles = 80;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            var emission = ps.emission;
+            emission.rateOverTime = 45f;
+
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 0.1f;
+
+            var renderer = go.GetComponent<ParticleSystemRenderer>();
+            // Tái sử dụng material mềm của VFXManager (không duplicate — bài học code reuse)
+            renderer.material = VFXManager.CreateSoftParticleMaterial();
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+            return ps;
+        }
+
+        private static Transform CreatePart(Transform parent, string name, Vector3 localPos, Vector3 localScale, Material mat)
         {
             GameObject part = GameObject.CreatePrimitive(PrimitiveType.Cube);
             part.name = name;
@@ -201,6 +294,7 @@ namespace VoidRunner.Core.Player
                 mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 mr.receiveShadows = false;
             }
+            return part.transform;
         }
 
         private static void EnsureMaterials()
@@ -210,6 +304,7 @@ namespace VoidRunner.Core.Player
             _wingMat = CreateNeonMaterial(new Color(0.05f, 0.4f, 0.65f), Color.black);
             _cockpitMat = CreateNeonMaterial(new Color(0.85f, 0.97f, 1f), new Color(0.4f, 0.9f, 1f));
             _engineMat = CreateNeonMaterial(new Color(1f, 0.5f, 0.15f), new Color(1f, 0.4f, 0.1f));
+            _flameMat = CreateNeonMaterial(new Color(1f, 0.6f, 0.15f), new Color(1f, 0.4f, 0f));
         }
 
         private static Material CreateNeonMaterial(Color baseColor, Color emission)

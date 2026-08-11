@@ -308,8 +308,11 @@ namespace VoidRunner.Systems.VFX
             _voidTrail.material = CreateSoftParticleMaterial();
         }
 
-        /// <summary>Texture tròn mềm (radial alpha) + material Unlit — không cần asset ngoài.</summary>
-        private Material CreateSoftParticleMaterial()
+        /// <summary>
+        /// Texture tròn mềm (radial alpha) + material Unlit — không cần asset ngoài.
+        /// internal static để các hệ thống khác (PlayerController exhaust...) tái sử dụng, không duplicate.
+        /// </summary>
+        internal static Material CreateSoftParticleMaterial()
         {
             const int size = 32;
             var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);

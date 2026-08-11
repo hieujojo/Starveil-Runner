@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using VoidRunner.Core.Player;
 using VoidRunner.Core.World;
-using VoidRunner.Systems.Input;
 
 namespace VoidRunner.Core
 {
@@ -18,7 +17,6 @@ namespace VoidRunner.Core
         [SerializeField] private PlayerController player;
         [SerializeField] private TileSpawner tileSpawner;
         [SerializeField] private VoidChase voidChase;
-        [SerializeField] private InputReader input;
 
         public static GameManager Instance { get; private set; }
         public GameState State { get; private set; } = GameState.Menu;
@@ -47,7 +45,6 @@ namespace VoidRunner.Core
         private void Start()
         {
             ResolveReferences();
-            WireInput();
             StartRun();
         }
 
@@ -56,14 +53,8 @@ namespace VoidRunner.Core
             if (player == null) player = FindAnyObjectByType<PlayerController>();
             if (tileSpawner == null) tileSpawner = FindAnyObjectByType<TileSpawner>();
             if (voidChase == null) voidChase = FindAnyObjectByType<VoidChase>();
-            if (input == null) input = FindAnyObjectByType<InputReader>();
-        }
-
-        private void WireInput()
-        {
-            if (input == null || player == null) return;
-            input.LaneLeft += player.MoveLeft;
-            input.LaneRight += player.MoveRight;
+            // Ghi chú 2026-08-11: PlayerController tự đọc InputReader.MoveInput trực tiếp
+            // (đè giữ = trượt liên tục) — không còn wiring lane event rời rạc ở đây.
         }
 
         public void StartRun()
