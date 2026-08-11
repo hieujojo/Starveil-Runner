@@ -66,8 +66,8 @@ namespace VoidRunner.EditorTools
             }
 
             // 1b. Road rộng hơn → laneWidth 2 → 3 cho Player / Obstacle / Pickup (khớp road ±9)
-            // + đẩy ambient 2 bên ra ngoài mép road (sideOffset 9.5 → 12.5 — prop hẹp vẫn ra ngoài road 18)
-            WidenRoadAndMoveAmbientOut();
+            // (Ambient props + AmbientScroller đã XÓA HẲN 2026-08-11 — không còn cần đẩy sideOffset)
+            WidenRoad();
 
             // 2. R0.5: English texts trong gameplay
             RewriteTexts(text =>
@@ -136,10 +136,10 @@ namespace VoidRunner.EditorTools
         }
 
         /// <summary>
-        /// Road rộng hơn: laneWidth 2 → 3 (Player/Obstacle/Pickup — khớp road ±7) + ambient đẩy ra
-        /// ngoài mép road (sideOffset 7 → 9.5) để prop không nằm trên đường.
+        /// Road rộng hơn: laneWidth 2 → 3 (Player/Obstacle/Pickup — khớp road ±9).
+        /// Ambient props đã XÓA HẲN (2026-08-11) nên không còn thao tác sideOffset.
         /// </summary>
-        private static void WidenRoadAndMoveAmbientOut()
+        private static void WidenRoad()
         {
             int changed = 0;
 
@@ -152,10 +152,7 @@ namespace VoidRunner.EditorTools
             var ps = UnityEngine.Object.FindAnyObjectByType<PickupSpawner>();
             if (SetSerializedFloat(ps, "laneWidth", 3f)) changed++;
 
-            var ambient = UnityEngine.Object.FindAnyObjectByType<AmbientScroller>();
-            if (SetSerializedFloat(ambient, "sideOffset", 12.5f)) changed++;
-
-            Debug.Log($"[Refactor] Road rộng: laneWidth 2→3 ({changed} component) + ambient sideOffset→12.5 (road ±9).");
+            Debug.Log($"[Refactor] Road rộng: laneWidth 2→3 ({changed} component) (road ±9).");
         }
 
         /// <summary>Set field float trên component qua SerializedObject (không phá prefab).</summary>
@@ -173,7 +170,7 @@ namespace VoidRunner.EditorTools
 
         private static RectTransform FindRectTransform(string name)
         {
-            foreach (RectTransform rt in UnityEngine.Object.FindObjectsByType<RectTransform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (RectTransform rt in UnityEngine.Object.FindObjectsByType<RectTransform>(FindObjectsInactive.Include))
             {
                 if (rt.name == name) return rt;
             }
@@ -182,7 +179,7 @@ namespace VoidRunner.EditorTools
 
         private static TextMeshProUGUI FindText(string name)
         {
-            foreach (TextMeshProUGUI t in UnityEngine.Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (TextMeshProUGUI t in UnityEngine.Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include))
             {
                 if (t.name == name) return t;
             }
@@ -254,7 +251,7 @@ namespace VoidRunner.EditorTools
             // ⚠️ BẮT BUỘC FindObjectsInactive.Include — GameOverPanel / HowToPlayPanel đang ẩn
             // (m_IsActive: 0) nên FindObjectsByType mặc định (Exclude) BỎ QUA → "Đổi 0 text" (bug 2026-08-11).
             TextMeshProUGUI[] all = UnityEngine.Object.FindObjectsByType<TextMeshProUGUI>(
-                FindObjectsInactive.Include, FindObjectsSortMode.None);
+                FindObjectsInactive.Include);
             foreach (TextMeshProUGUI tmp in all)
             {
                 if (tmp == null) continue;

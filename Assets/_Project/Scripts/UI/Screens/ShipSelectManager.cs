@@ -280,7 +280,7 @@ namespace VoidRunner.UI
         private void EnsurePreviewCamera()
         {
             // FindObjectsByType (KHÔNG phải FindAnyObjectByType — cái kia trả 1 object, foreach sẽ lỗi)
-            var existingCams = FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var existingCams = FindObjectsByType<Camera>(FindObjectsInactive.Include);
             foreach (var c in existingCams)
             {
                 if (c != null && c.name == "ShipPreviewCamera")
