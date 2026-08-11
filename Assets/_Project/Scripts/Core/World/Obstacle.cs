@@ -52,7 +52,9 @@ namespace VoidRunner.Core.World
             if (model == null) return;
 
             Bounds b = GetRenderBounds(model.gameObject);
-            if (!b.IsValid()) return; // không có renderer → bỏ qua
+            // FIX 2026-08-12 v3f.5 (lỗi CS1061): Bounds KHÔNG có IsValid() — guard bằng kích thước
+            // (GetRenderBounds trả zero-size khi không có renderer → bỏ qua, không văng model)
+            if (b.size.sqrMagnitude < 0.0001f) return;
 
             // Độ lệch giữa tâm mesh (world) và vị trí root (lane/tile) — dịch ngược để về tâm
             Vector3 offset = b.center - transform.position;
@@ -62,7 +64,7 @@ namespace VoidRunner.Core.World
 
         private static Bounds GetRenderBounds(GameObject go)
         {
-            Bounds bounds = default; // kích thước 0 → IsValid() == false khi không có renderer (góp ý reviewer v3f.5)
+            Bounds bounds = default; // kích thước 0 → guard b.size.sqrMagnitude bỏ qua khi không có renderer (góp ý reviewer v3f.5)
             bool has = false;
             foreach (var r in go.GetComponentsInChildren<Renderer>())
             {

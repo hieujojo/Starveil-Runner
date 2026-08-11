@@ -13,6 +13,7 @@
 - **NEW `ObstacleFX.cs`** — hiệu ứng ambient drone: đèn cảnh báo đỏ + hạt năng lượng cam + lơ lửng (bob) + xoay chậm quanh Y (Robot_Guardian không Animator → an toàn). Tạo **RUNTIME** trong `Obstacle.Awake` — KHÔNG nướng vào prefab (R3.1: material runtime không serialize → {fileID: 0} → màu tím — bug v3f.4).
 - **Bọ xa hơn + to hơn** (user: "cho bọ xa 1 chút + to thêm"): `baseDistance 5→7` (vẫn TRƯỚC camera — camera cách player 10m), `enemyTargetHeight 1.8→2.2`; đồng bộ scene + test (`EnemyChasePlayTests.BaseDist 5→7`).
 - **Lưu ý:** DIAG logs (Enemy/Obstacle/Coin) giữ 1 vòng để user verify drone đã đúng tâm lane — xóa sau xác nhận (R7.11).
+- **`error CS1061: 'Bounds' does not contain a definition for 'IsValid'`** (Obstacle.cs:55) — **`Bounds` KHÔNG có phương thức `IsValid()` trong Unity** (tôi tưởng có khi viết guard). Fix: guard bằng `b.size.sqrMagnitude < 0.0001f` (GetRenderBounds trả zero-size khi không renderer). **Bài học: KHÔNG bao giờ dùng method/API không chắc chắn tồn tại — kiểm tra bằng grep trước khi dùng** (cùng lớp lỗi với `Camera.main.transform` / `rb.linearVelocity` khi chưa rõ API version).
 
 ## 2026-08-12 (v3f.4) — Enemy đồng bộ lane + bỏ Credit màn Game Over
 
