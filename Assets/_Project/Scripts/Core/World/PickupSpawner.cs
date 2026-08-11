@@ -68,12 +68,17 @@ namespace VoidRunner.Core.World
             int lane = Random.Range(0, laneCount);
             float x = (lane - (laneCount - 1) * 0.5f) * laneWidth;
 
+            // [TẠM] chẩn đoán — log WORLD position + tile lossyScale (coin không thấy dù spawn)
+            Debug.Log($"[DiagCoin] TẠO hàng coin lane={x} tileScale={tile.transform.lossyScale} tilePos={tile.transform.position}");
+
             // Hàng coin nằm ở 1 nửa tile, tránh chồng lên obstacle ở đầu tile
             float startZ = tile.Length * 0.25f;
             for (int i = 0; i < coinRowCount; i++)
             {
                 GameObject coin = Instantiate(coinPrefab, tile.transform);
                 coin.transform.localPosition = new Vector3(x, 0.8f, startZ + i * coinSpacing);
+                if (i == 0)
+                    Debug.Log($"[DiagCoin] WORLD {coin.transform.position} scale={coin.transform.lossyScale} renderer={coin.GetComponent<Renderer>()?.enabled}");
             }
         }
 

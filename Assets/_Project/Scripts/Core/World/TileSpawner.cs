@@ -114,7 +114,7 @@ namespace VoidRunner.Core.World
             if (Time.time - _lastDiagLog > 2f)
             {
                 _lastDiagLog = Time.time;
-                Debug.Log($"[DiagSpawn] tile={_activeTiles.Count} obsMgr={(obstacleManager != null)} pickupMgr={(pickupSpawner != null)} nextZ={_nextSpawnZ:F1}");
+                Debug.Log($"[DiagSpawn] tile={_activeTiles.Count} playerZ={player.position.z:F1} nextZ={_nextSpawnZ:F1} pool={_pool != null}");
             }
         }
     }
