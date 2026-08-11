@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using VoidRunner.Core.Player;
 using VoidRunner.Core.World;
+using VoidRunner.Systems.VFX;
 
 namespace VoidRunner.Core
 {
@@ -47,6 +48,7 @@ namespace VoidRunner.Core
         {
             ResolveReferences();
             EnsureCameraRig();
+            EnsureSpaceFX();
             StartRun();
         }
 
@@ -84,6 +86,20 @@ namespace VoidRunner.Core
             {
                 cam.Follow = rig.transform;
             }
+        }
+
+        /// <summary>
+        /// Tạo hiệu ứng vệt sao 2 bên (SpeedLines) lúc Start nếu chưa có — idempotent.
+        /// Thay thế props lề đã ẩn (2026-08-11): skybox vũ trụ rồi thì prop lơ lửng trông giả,
+        /// còn hạt sao vụt ngang tạo cảm giác tốc độ (subway-surfers style).
+        /// </summary>
+        private void EnsureSpaceFX()
+        {
+            if (transform.Find("SpaceFX") != null) return;
+
+            var go = new GameObject("SpaceFX");
+            go.transform.SetParent(transform, false);
+            go.AddComponent<SpeedLines>();
         }
 
         public void StartRun()

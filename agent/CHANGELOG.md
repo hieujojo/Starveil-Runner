@@ -21,6 +21,23 @@
 
 ---
 
+## 2026-08-11 — Task D: Speed-lines thay props lề (vệt sao 2 bên) + chốt asset tàu/void
+
+> User chốt: (1) thực thi cả 3 ý tưởng tận dụng 2 gói (D speed-lines → B nebula theo độ khó → C nền UI cinematic) làm TỪNG task, task nào ổn định 0 bug UI mới qua task tiếp theo; (2) tàu = **Free SF Fighter (CGPitbull)** (bỏ Sci-Fi Space Fighter PBR — research: quá tối giản, chưa đủ rating); (3) Void = tải asset monster free (3 lựa chọn: Level 1 Monster Pack / Free Fantasy Spider / 3D Alien Monster Character codersan).
+
+### Đã xong (Task D — commit `…`)
+
+- **`SpeedLines.cs` (mới, `Systems/VFX`)** — thay props lề (đã ẩn): 2 hệ ParticleSystem (L/R) dọc 2 bên track, renderer **Stretch** (velocityScale 0.14, lengthScale 1.1) → hạt bay ngược -Z thành vệt sáng kéo dài, tốc độ theo `DifficultyManager.CurrentSpeed × 1.15` (càng chơi lâu càng vụt nhanh — cảm giác tăng tốc đúng chất hyperspace). Vị trí `x = ±11.5` (ngoài road ±9, trong tầm FOV 68 — nửa bề ngang thấy ~11.9; góp ý reviewer: 12.5 sát mép màn hình → 11.5). Material mềm tái sử dụng `VFXManager.CreateSoftParticleMaterial` (internal, cùng asmdef).
+- **`GameManager.EnsureSpaceFX()`** — Start tạo GO `SpaceFX` + `AddComponent<SpeedLines>` (idempotent `transform.Find("SpaceFX")`), không cần kéo thả scene. Restart-safe: SpaceFX là con GameManager (tồn tại xuyên restart), player chỉ reset vị trí không destroy → cache ref OK; thêm re-fetch player nếu Start miss (góp ý reviewer).
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Props lề thay bằng hiệu ứng TỐC ĐỘ khi đã có skybox** — game vũ trụ không cần "cột trụ" đứng 2 bên (giả tạo), cần vệt lao nhanh: ParticleSystem + `renderMode = Stretch` + `velocityScale` + `lengthScale` là cách không cần asset. Tốc độ hạt nên theo `DifficultyManager.CurrentSpeed` (đồng bộ nhịp tăng độ khó).
+- **Không cần thêm component vào scene thủ công khi đã có GameManager** — component runtime tạo qua `EnsureXxx()` (Start, idempotent `transform.Find`) giảm 100% thao tác Unity + tránh lỗi "quên gắn". Pattern này giống `EnsureCameraRig` — chuẩn dự án.
+- **Đặt object ở RÌA tầm nhìn (sát visible half-width FOV) = mất hút khi hơi xa** — tính lại: FOV 68, camera y=8 → nửa bề ngang thấy được ~11.9 ở mặt road; nên đặt trong khoảng 11–11.5, không phải 12.5.
+
+---
+
 ## 2026-08-11 — Bản quyền assets: tạo agent/CREDITS.md + README (Nebula/SpaceSkies/Kenney)
 
 > User: "nhớ ghi bản quyền nhé, assets đó không phải của tôi" — 2 gói mới (Nebula, SpaceSkies) không thuộc tác giả.
