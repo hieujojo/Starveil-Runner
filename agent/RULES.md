@@ -32,6 +32,19 @@
 - **R0.13 — Popup/feedback điểm ("+N") KHÔNG đặt tại vị trí world của coin** (WorldToScreenPoint) — chữ nằm trên đường che obstacle/coin → không né kịp. Đặt vị trí CỐ ĐỊNH ngoài vùng gameplay: cạnh HUD, và phải KIỂM TRA sizeDelta panel HUD (panel trải ±180 → offset <180 là đè panel). *(Bug vòng 8 2026-08-11.)*
 - **R0.14 — Popup/overlay bật/tắt PHẢI có nút đóng rõ ràng (CLOSE/X), không chỉ click ra ngoài (dimmer)** — user không biết click đâu. Nút tạo bằng code idempotent (`transform.Find` trước khi tạo). *(Bug vòng 8 2026-08-11.)*
 - **R0.15 — Lane width và vạch chia lane phải KHỚP nhau** — laneWidth 4.5 → vạch đứt chia lane ở ±laneWidth/2 (±2.25, ranh giới lane thật), không phải 1 vạch giữa x=0 khi road đã rộng. Đồng bộ: laneWidth scene ×3 (Player/Obstacle/Pickup) + Tile.laneWidth. *(Bug vòng 8 2026-08-11.)*
+- **R0.16 — Khi user muốn "xóa" thứ gì nhưng còn do dự: ẨN BẰNG `m_IsActive: 0` trên GameObject CHA, KHÔNG xóa object/file/code.** 100% reversible (tích lại checkbox là có lại), review xong mới quyết định xóa hẳn. Đã áp dụng cho `Ambient` (cha 28 prop) 2026-08-11. *(Bug 2026-08-11.)*
+- **R0.17 — Cảnh vật lề dạng "cột trụ/trạm" KHÔNG hợp khi đã có skybox vũ trụ** — prop đứng lơ lửng 2 bên trông giả tạo. Hướng thay thế đúng thể loại endless runner vũ trụ: **speed-lines / hạt sao vụt ngang / parallax** (xem FEATURES.md). Nếu giữ props: phải là vật thể "thuộc vũ trụ" (thiên thạch, mảnh vỡ, đài radar) chứ không phải cột đứng.
+
+---
+
+## 🌌 NHÓM 0b — TẬN DỤNG 2 GÓI ASSET ĐÃ TẢI (Nebula + SpaceSkies) — 2026-08-11
+
+> User import 2 gói (Nebula Skyboxes: 4 cubemap .exr — SpaceSkies Free: 3 bộ Pink/Green/Purple × 6 mặt × 3 độ phân giải). Cả 2 gói CHỈ chứa skybox/background — không có model/sprites.
+
+- **R0b.1 — Skybox có thể đổi theo scene/mood:** Game scene dùng Nebula (sâu, tinh vân), MainMenu dùng SpaceSkies Purple (nhẹ, tông hư không). Tool `SkyboxSetupTool` đã hỗ trợ cả 2 (menu `Tools/Void Runner/Setup Skybox ...`).
+- **R0b.2 — Nebula có 4 cubemap (01–04): đổi dần theo độ khó / mốc điểm** — càng vào sâu (DifficultyManager tăng) càng chuyển nebula đậm hơn → cảm giác "đi sâu vào hư không".
+- **R0b.3 — Tận dụng texture mặt (SpaceSkies) làm nền UI**: Game Over / MainMenu background có thể dùng 1 mặt texture skybox làm ảnh nền (cinematic) thay vì nền trơn.
+- **R0b.4 — Khi có skybox rồi: bỏ ý tưởng "props lề" — thay bằng hiệu ứng không gian** (xem FEATURES.md — starfield parallax / speed lines) cho hợp lý.
 
 ---
 

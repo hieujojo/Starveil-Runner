@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-11 — Ẩn TẠM cảnh vật 2 bên lề (Ambient props) — chờ user review UI
+
+> User: "có background rồi thì cảnh vật 2 bên lề trông lơ lửng ở giữa vũ trụ không hợp lý — xóa cảnh vật 2 bên, nhưng để an toàn hãy ẩn/xóa tạm thời — tôi sẽ review UI trực tiếp rồi mới quyết định xóa hẳn hay không".
+
+### Đã xong (không commit gì nặng — 1 dòng scene)
+
+- **Không xóa, không sửa code AmbientScroller** — chỉ set GameObject **`Ambient`** (cha của 28 prop, fileID 2079828960) sang **`m_IsActive: 0`** trong `Assets/_Project/Scenes/Game.unity`. Đây là cách ẩn AN TOÀN NHẤT: 28 prop vẫn nguyên trong file scene, mọi code recycle/self-heal vẫn còn, khôi phục = **tích lại checkbox "Ambient" trong Hierarchy** (hoặc sửa `m_IsActive: 0 → 1`).
+- Giữ nguyên: LaneMarker (vạch neon do Tile tạo runtime — là phần đường, không phải cảnh vật lề), skybox đã gắn.
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Khi user muốn "xóa" một thứ nhưng chưa chắc: ẩn bằng `m_IsActive: 0` trên GameObject CHA thay vì xóa object/file/code** — 100% reversible, review xong tích lại là có lại. Không bao giờ delete object/props trong scene khi user chỉ nói "để tôi review trước". (Không có tiến trình "undo" cho scene khi đã lưu.)
+- **Cảnh vật lề kiểu "cột trụ/trạm vũ trụ" KHÔNG hợp với game có skybox vũ trụ thật** — có nền tinh vân rồi, prop đứng lơ lửng 2 bên trông giả tạo. Hướng thay thế đúng thể loại: speed-lines / hạt sao vụt ngang / các khối thiên thạch ở xa (parallax) — chờ user chốt.
+
+---
+
 ## 2026-08-11 — Bản quyền assets: tạo agent/CREDITS.md + README (Nebula/SpaceSkies/Kenney)
 
 > User: "nhớ ghi bản quyền nhé, assets đó không phải của tôi" — 2 gói mới (Nebula, SpaceSkies) không thuộc tác giả.
