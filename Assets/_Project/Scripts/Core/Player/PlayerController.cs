@@ -290,9 +290,13 @@ namespace VoidRunner.Core.Player
 
             // Task D (2026-08-11): ưu tiên model tàu đã chọn ở MainMenu (SaveSystem.SelectedShip)
             int idx = SaveSystem.SelectedShip;
-            if (shipPrefabs != null && shipPrefabs.Length > 0 && idx >= 0 && idx < shipPrefabs.Length && shipPrefabs[idx] != null)
+            GameObject prefab = null;
+            if (shipPrefabs != null && idx >= 0 && idx < shipPrefabs.Length) prefab = shipPrefabs[idx];
+            // Self-heal (R4.18): chưa gán prefab trong scene (tool chưa chạy) → tự tải qua ShipCatalog
+            if (prefab == null) prefab = ShipCatalog.Load(idx);
+            if (prefab != null)
             {
-                BuildModelShip(shipPrefabs[idx]);
+                BuildModelShip(prefab);
                 return;
             }
 

@@ -135,3 +135,6 @@ InitTestScene*.unity*
 /Assets/Monster.meta
 /Assets/Flying Beetle.meta
 /Assets/fantasySpider.meta
+
+# ===== Config tool khác (kilo CLI) =====
+/.kilo/

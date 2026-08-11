@@ -337,9 +337,13 @@ namespace VoidRunner.UI
 
             _nameText.text = _selected < ShipNames.Length ? ShipNames[_selected] : "SHIP";
 
-            if (shipPrefabs == null || _selected >= shipPrefabs.Length || shipPrefabs[_selected] == null) return;
+            // Self-heal (R4.18): nếu chưa gán prefab trong scene (tool chưa chạy) → tự tải qua ShipCatalog
+            GameObject prefab = null;
+            if (shipPrefabs != null && _selected < shipPrefabs.Length) prefab = shipPrefabs[_selected];
+            if (prefab == null) prefab = ShipCatalog.Load(_selected);
+            if (prefab == null) return;
 
-            GameObject model = Instantiate(shipPrefabs[_selected], _previewRoot);
+            GameObject model = Instantiate(prefab, _previewRoot);
             SetLayerRecursively(model, 6); // layer ShipPreview
 
             // Chuẩn hóa scale — vừa khung camera (bounds cao ~1.2)

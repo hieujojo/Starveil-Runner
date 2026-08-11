@@ -4,6 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VoidRunner.Core.Player;
+using VoidRunner.Systems.Save;
 using VoidRunner.UI;
 
 namespace VoidRunner.EditorTools
@@ -18,11 +19,8 @@ namespace VoidRunner.EditorTools
     {
         private const string MenuRoot = "Tools/Void Runner/";
 
-        private static readonly string[] ShipPaths =
-        {
-            "Assets/SF_Fighter/SF_Free-Fighter.prefab",
-            "Assets/Sparrow_Fighter/Prefabs/Sparrow_blue Variant.prefab",
-        };
+        // Một nguồn sự thật duy nhất — dùng ShipCatalog (tránh lệch path giữa tool và self-heal)
+        private static readonly string[] ShipPaths = ShipCatalog.ShipPaths;
 
         [MenuItem(MenuRoot + "Setup Ship Select (Task D — 2 fighter)")]
         public static void Setup()
