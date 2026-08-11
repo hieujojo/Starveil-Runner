@@ -52,21 +52,21 @@ namespace VoidRunner.EditorTools
 
             // 1. Ground tĩnh 400m chỉ đủ chơi ~15-30s rồi "đường hết" → kéo dài 6000m
             // (track thật là tile recycle vô tận — Ground chỉ là nền dưới, không được giới hạn)
-            // Road cũng RỘNG HƠN: scale x 10 → 14 (fix "đường quá nhỏ" 2026-08-11)
+            // Road RỘNG: scale x 18 (bán kính 9) — đồng bộ Tile.roadHalfWidth=9 + AmbientScroller (2026-08-11 v2)
             GameObject ground = GameObject.Find("Ground");
             if (ground != null)
             {
                 ground.transform.localPosition = new Vector3(0f, -0.5f, 100f);
-                ground.transform.localScale = new Vector3(14f, 1f, 6000f);
-                Debug.Log("[Refactor] Ground: 400m → 6000m, rộng 10 → 14 — track không còn 'chạy hết' + road rộng.");
+                ground.transform.localScale = new Vector3(18f, 1f, 6000f);
+                Debug.Log("[Refactor] Ground: 400m → 6000m, rộng x=18 (bán kính 9) — track vô tận + road rộng.");
             }
             else
             {
                 Debug.LogWarning("[Refactor] Không tìm thấy Ground trong Game scene — bỏ qua track.");
             }
 
-            // 1b. Road rộng hơn → laneWidth 2 → 3 cho Player / Obstacle / Pickup (khớp road ±7)
-            // + đẩy ambient 2 bên ra ngoài mép road (sideOffset 7 → 9.5)
+            // 1b. Road rộng hơn → laneWidth 2 → 3 cho Player / Obstacle / Pickup (khớp road ±9)
+            // + đẩy ambient 2 bên ra ngoài mép road (sideOffset 9.5 → 12.5 — prop hẹp vẫn ra ngoài road 18)
             WidenRoadAndMoveAmbientOut();
 
             // 2. R0.5: English texts trong gameplay
@@ -153,9 +153,9 @@ namespace VoidRunner.EditorTools
             if (SetSerializedFloat(ps, "laneWidth", 3f)) changed++;
 
             var ambient = UnityEngine.Object.FindAnyObjectByType<AmbientScroller>();
-            if (SetSerializedFloat(ambient, "sideOffset", 9.5f)) changed++;
+            if (SetSerializedFloat(ambient, "sideOffset", 12.5f)) changed++;
 
-            Debug.Log($"[Refactor] Road rộng: laneWidth 2→3 ({changed} component) + ambient sideOffset→9.5.");
+            Debug.Log($"[Refactor] Road rộng: laneWidth 2→3 ({changed} component) + ambient sideOffset→12.5 (road ±9).");
         }
 
         /// <summary>Set field float trên component qua SerializedObject (không phá prefab).</summary>

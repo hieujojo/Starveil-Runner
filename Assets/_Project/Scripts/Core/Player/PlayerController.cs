@@ -24,9 +24,10 @@ namespace VoidRunner.Core.Player
         [SerializeField, Tooltip("Tốc độ nền — DifficultyManager có thể tăng dần lên tới maxSpeed")]
         private float forwardSpeed = 10f;
         [SerializeField] private float laneWidth = 2f;
-        [SerializeField] private float laneChangeSpeed = 8f;
+        [SerializeField, Tooltip("Tốc độ trượt tới vị trí lane đích (m/s) — cao = phản hồi tức thì")]
+        private float laneChangeSpeed = 16f;
         [SerializeField, Tooltip("Tốc độ trượt ngang khi ĐÈ GIỮ phím (m/s) — đè lâu băng qua nhiều lane")]
-        private float sweepSpeed = 6f;
+        private float sweepSpeed = 9f;
         [SerializeField] private int laneCount = 3;
 
         [Header("Tàu vũ trụ (visual)")]
@@ -43,6 +44,7 @@ namespace VoidRunner.Core.Player
         private float _currentSpeed;
         private Transform _ship;
         private InputReader _input;
+        private float _lastInputX; // phát hiện CẠNH LÊN của phím (0→±1) để nhảy 1 lane ngay lập tức
 
         // Đuôi tàu — ngọn lửa đẩy lập lòe + hạt exhaust (hiệu ứng cảm giác di chuyển)
         private Transform _flame;
@@ -149,13 +151,28 @@ namespace VoidRunner.Core.Player
         {
             if (_isDead) return;
 
-            // ---- ĐÈ GIỮ phím = trượt liên tục (Subway Surfers); nhả phím = snap về lane gần nhất ----
+            // ---- Cơ chế (fix 2026-08-11 vòng 2, user: "bấm/đè phải phản hồi ngay"):
+            //   • CẠNH LÊN (vừa bấm)   → nhảy NGAY 1 lane theo hướng phím (tap = di chuyển 1 tí)
+            //   • ĐÈ GIỮ              → trượt liên tục qua nhiều lane (đè càng lâu càng rẽ sang)
+            //   • Nhả phím            → snap về lane gần nhất (không lơ lửng giữa 2 lane)
+            // Trước đây chỉ sweep 6 m/s (0.5s/lane) → bấm-nhả nhanh gần như không đi đâu
+            // (phải bấm 2 lần), đè giữ thì quá chậm. ----
             float maxX = (laneCount - 1) * 0.5f * laneWidth;
             float inputX = _input != null ? _input.MoveInput.x : 0f;
 
-            if (Mathf.Abs(inputX) > 0.1f)
+            bool risingEdge = Mathf.Abs(inputX) > 0.1f && Mathf.Abs(_lastInputX) <= 0.1f;
+            _lastInputX = inputX;
+
+            if (risingEdge)
             {
-                // Trượt liên tục theo hướng phím — đè lâu = băng qua nhiều lane (không dừng ở lane kế)
+                // Bấm mới: nhảy đúng 1 lane theo hướng (phản hồi TỨC THÌ)
+                _targetX = Mathf.Clamp(_targetX + Mathf.Sign(inputX) * laneWidth, -maxX, maxX);
+                // Đồng bộ _currentLane NGAY (tránh stale — MoveLeft/MoveRight/test đọc từ _currentLane)
+                _currentLane = Mathf.Clamp(Mathf.RoundToInt(_targetX / laneWidth + (laneCount - 1) * 0.5f), 0, laneCount - 1);
+            }
+            else if (Mathf.Abs(inputX) > 0.1f)
+            {
+                // Đè giữ: trượt liên tục theo hướng phím — đè lâu = băng qua nhiều lane
                 _targetX = Mathf.Clamp(_targetX + Mathf.Sign(inputX) * sweepSpeed * Time.fixedDeltaTime, -maxX, maxX);
             }
             else

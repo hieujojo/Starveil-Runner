@@ -2134,7 +2134,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.5, z: 100}
-  m_LocalScale: {x: 14, y: 1, z: 6000}
+  m_LocalScale: {x: 18, y: 1, z: 6000}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -4244,8 +4244,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Core.Player.PlayerController
   forwardSpeed: 10
   laneWidth: 3
-  laneChangeSpeed: 8
-  sweepSpeed: 6
+  laneChangeSpeed: 16
+  sweepSpeed: 9
   laneCount: 3
   bankAngle: 14
   bankSmooth: 10

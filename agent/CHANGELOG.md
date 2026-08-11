@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-11 — Vòng 7: HowToPlay vẫn khó đọc + road rộng 18m + di chuyển phản hồi tức thì
+
+> User test kỹ (400+ log), báo: HowToPlay chưa được fix, cảnh vật 2 bên vô hồn (đề xuất tải background), road vẫn nhỏ, di chuyển chưa mượt (muốn bấm = đi 1 tí, đè lâu = rẽ sang).
+
+### Root cause & fix (commit `…`)
+
+- **HowToPlay "chưa được fix"** — vòng trước đã thêm dimmer nhưng panel nền **alpha 0.92 vẫn trong suốt 8%** + các nút menu (PlayButton y=60, BestScore y=-230) nằm TRONG vùng panel 720×480 → **lộ xuyên qua panel** → vẫn đọc rối. Fix: `MainMenuManager.ToggleHowToPlay` khi mở → ép `panel Image alpha = 1.0` (đục hoàn toàn, che kín menu sau) + dimmer 0.72 → **0.85** (menu tối sâu hơn).
+- **Road vẫn nhỏ** — roadHalfWidth 7 (road 14m) so với khung hình FOV 68 vẫn hẹp. Fix đồng bộ 4 chỗ (bài học R: road rộng phải đồng bộ): `Tile.roadHalfWidth` 7→**9** (road 18m), `AmbientScroller` 2 const roadHalfWidth 7→**9** (props tự đẩy ra ngoài mép road mới qua `HealProp`/`BuildProps`), scene `Ground scale x 14→18`, tool `RefactorGameplayTool` Ground 18 + ambient sideOffset 9.5→12.5 (đồng bộ — chạy lại tool không phá road mới). laneWidth giữ 3 (lane ở ±3, road rộng thoáng hơn).
+- **Di chuyển chưa mượt** — cơ chế cũ chỉ sweep 6 m/s (0.5s/lane): bấm-nhả nhanh gần như không đi, đè giữ thì chậm. Fix `PlayerController`: **cạnh lên (rising edge) → nhảy NGAY 1 laneWidth** (tap = đi 1 lane tức thì) + đè giữ → trượt liên tục (sweepSpeed 6→**9**) + nhả → snap lane gần nhất; `laneChangeSpeed` 8→**16** (phản hồi nhanh hơn); đồng bộ `_currentLane` ngay ở nhánh edge (tránh stale cho MoveLeft/Right/test — góp ý reviewer). Scene: laneChangeSpeed 16 / sweepSpeed 9.
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Panel popup phải ĐỤC hoàn toàn (alpha 1.0), không chỉ "gần đục"** — alpha 0.92 vẫn để element menu nằm trong vùng panel lộ xuyên qua (PlayButton/BestScore nằm ngay trong 720×480) → "đã fix mà vẫn khó đọc". Kiểm tra: element menu nào có tọa độ nằm trong vùng panel → phải che kín hoặc di chuyển.
+- **Sửa hằng số road width: quét TOÀN BỘ chỗ hardcode** (Tile, AmbientScroller const ×2, scene Ground scale, Editor tool Refactor — tool cũ hardcode 14 sẽ PHÁ road mới nếu chạy lại). Đồng bộ kèm cả `sideOffset` của ambient.
+- **Cơ chế di chuyển chuẩn hyper-casual: rising edge = nhảy 1 lane, đè giữ = sweep, nhả = snap** — cần phát hiện cạnh lên của phím (so sánh input frame trước), không chỉ trạng thái giữ. Đồng bộ state lane ngay khi nhảy.
+
+---
+
 ## 2026-08-11 — Fix nhanh sau vòng 5 vấn đề: 1 error + 2 warning (commit `307d10c`)
 
 > User báo 1 log đỏ + 2 warning trước khi test. Đọc log → đúng trúng 2 chỗ vừa sửa.

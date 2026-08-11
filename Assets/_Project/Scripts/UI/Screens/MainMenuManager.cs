@@ -67,9 +67,20 @@ namespace VoidRunner.UI
             howToPlayPanel.SetActive(show);
             if (_dimmer != null) _dimmer.SetActive(show);
 
-            // Panel luôn vẽ TRÊN dimmer (SetAsLastSibling) — menu phía sau tối lại, text đọc rõ
             if (show)
             {
+                // Panel phải ĐỤC HOÀN TOÀN (fix vòng 2 2026-08-11): alpha 0.92 vẫn để các nút menu
+                // phía sau (PlayButton y=60, BestScore y=-230 nằm TRONG vùng panel 720×480) lộ xuyên
+                // qua → đọc rối. Ép alpha=1 để panel che kín mọi thứ đằng sau.
+                var panelImg = howToPlayPanel.GetComponent<Image>();
+                if (panelImg != null)
+                {
+                    var c = panelImg.color;
+                    c.a = 1f;
+                    panelImg.color = c;
+                }
+
+                // Panel luôn vẽ TRÊN dimmer (SetAsLastSibling) — menu phía sau tối lại, text đọc rõ
                 howToPlayPanel.transform.SetAsLastSibling();
                 if (_dimmer != null) _dimmer.transform.SetAsFirstSibling();
             }
@@ -94,7 +105,8 @@ namespace VoidRunner.UI
             rt.offsetMax = Vector2.zero;
 
             var img = go.GetComponent<Image>();
-            img.color = new Color(0f, 0f, 0f, 0.72f);
+            // 0.72 → 0.85 (fix vòng 2): menu phía sau tối sâu hơn, popup nổi bật hơn hẳn
+            img.color = new Color(0f, 0f, 0f, 0.85f);
             img.raycastTarget = true; // chặn click xuyên xuống nút menu phía sau
 
             // Click vào vùng tối (ngoài popup) = đóng popup — dimmer phải là Button, nếu không

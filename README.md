@@ -10,7 +10,7 @@
 
 ## 🎮 Gameplay
 
-- **3 lane vô tận**: đè giữ `A`/`D` (hoặc mũi tên) để trượt qua nhiều lane, nhả = tự về giữa lane — né chướng ngại vật
+- **3 lane vô tận, road rộng 18m**: bấm `A`/`D` (hoặc mũi tên) = nhảy ngay 1 lane; **đè giữ** = trượt liên tục qua nhiều lane; nhả = tự về giữa lane — phản hồi tức thì, né chướng ngại vật mượt mà
 - **The Void = HỐ ĐEN đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Void **tiến sát** (phình to, đe dọa); né sạch 10–15s → Void **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Void nuốt chửng = **Game Over**. Đụng obstacle → tàu **nhấp nháy** (feedback rõ ràng)
 - **Chướng ngại vật**: Ramp + DynamicBox gắn ngẫu nhiên, **luôn chừa ≥1 lane an toàn** + **safe zone 20m đầu game** (không obstacle — không chết tức thì)
 - **Coin & Power-up**: gom coin tăng điểm (hàng coin **không bao giờ đè lên obstacle** — chọn lane khác), nhặt power-up (Shield / Magnet / Slow-mo)
@@ -29,7 +29,7 @@
 | Obstacle cấu hình được | **ScriptableObject** (`ObstacleData`) + gắn ngẫu nhiên theo weight, luôn chừa ≥1 lane trống, safe zone 20m đầu game | ✅ |
 | Giao tiếp hệ thống | **C# Event-driven** (`GameEvents`) — decoupled, không coupling trực tiếp | ✅ |
 | State machine | `GameManager` (Menu / Playing / GameOver / Restart) | ✅ |
-| Input hiện đại | **Unity Input System** — đè giữ trượt liên tục (kiểu Subway Surfers), hỗ trợ A/D + mũi tên | ✅ |
+| Input hiện đại | **Unity Input System** — bấm = nhảy 1 lane tức thì, đè giữ = trượt liên tục (Subway Surfers), A/D + mũi tên | ✅ |
 | Camera điện ảnh | **Cinemachine** (Framing Transposer) | ✅ |
 | Kiến trúc | **Clean Architecture**: `UI → Systems → Core`, folder `Assets/_Project/` | ✅ |
 | Điểm số / combo | event-driven `ScoreSystem` | ✅ |
@@ -46,8 +46,8 @@
 
 | Phím | Hành động |
 |---|---|
-| `A` / `←` | Chuyển lane trái |
-| `D` / `→` | Chuyển lane phải |
+| `A` / `←` | Bấm: nhảy 1 lane trái · Đè giữ: trượt trái liên tục |
+| `D` / `→` | Bấm: nhảy 1 lane phải · Đè giữ: trượt phải liên tục |
 | `R` | Restart (khi Game Over) |
 
 > 🌐 **Ngôn ngữ UI:** toàn bộ text in-game (SCORE, COMBO, GAME OVER, RETRY...) dùng **tiếng Anh**.

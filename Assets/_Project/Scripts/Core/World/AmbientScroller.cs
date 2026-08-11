@@ -92,7 +92,7 @@ namespace VoidRunner.Core.World
         /// </summary>
         private void HealProp(Transform prop)
         {
-            const float roadHalfWidth = 7f;  // road rộng 14 (bán kính = 7)
+            const float roadHalfWidth = 9f;  // road rộng 18 (bán kính = 9) — đồng bộ Tile.roadHalfWidth
             const float roadMargin = 1.5f;   // mép prop cách mép road tối thiểu 1.5m
 
             float scale = NormalizeScale(prop.gameObject);
@@ -144,7 +144,7 @@ namespace VoidRunner.Core.World
 
             if (propPrefabs.Count == 0 || player == null) return;
 
-            const float roadHalfWidth = 7f;   // road rộng 14 (bán kính = 7)
+            const float roadHalfWidth = 9f;   // road rộng 18 (bán kính = 9) — đồng bộ Tile.roadHalfWidth
             const float roadMargin = 1.5f;    // mép prop cách mép road tối thiểu 1.5m
 
             float startZ = player.position.z - countPerSide * spacing * 0.5f;

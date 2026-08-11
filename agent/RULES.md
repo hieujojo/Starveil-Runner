@@ -25,6 +25,9 @@
 - **R0.6 — MainMenu: Best score chỉ hiển thị khi có dữ liệu thật (BestScore > 0).** Lần đầu chơi = 0 → ẩn (hiển thị vô nghĩa). Sau khi chơi và có điểm → mới hiện.
 - **R0.7 — Game Over panel BẮT BUỘC hiện khi game kết thúc.** Nếu user không thấy màn hình game over → bug nghiêm trọng, ưu tiên fix trước.
 - **R0.8 — UI nút phải có padding đủ — text không bị thụt vào viền / quá chật.** Layout phải thoáng, đọc rõ.
+- **R0.9 — Panel popup/overlay PHẢI ĐỤC HOÀN TOÀN (alpha = 1.0), không chỉ "gần đục".** Alpha 0.92 vẫn để element menu nằm trong vùng panel (tọa độ nằm trong sizeDelta) lộ xuyên qua → "fix rồi mà vẫn khó đọc". Khi mở popup: ép alpha=1 + dimmer ≥0.8 + `SetAsLastSibling`. Kiểm tra: element menu nào có anchoredPosition nằm trong vùng panel? → che kín hoặc di chuyển. *(Bug vòng 7 2026-08-11.)*
+- **R0.10 — Road width (roadHalfWidth) là hằng số ĐỒNG BỘ TOÀN CỤC — sửa phải quét MỌI chỗ hardcode:** `Tile.roadHalfWidth`, `AmbientScroller` (2 const: HealProp + BuildProps), scene `Ground scale x`, Editor tool `RefactorGameplayTool` (Ground + ambient `sideOffset`), `laneWidth` (Player/Obstacle/Pickup). Bỏ sót 1 chỗ (đặc biệt tool Editor hardcode giá trị CŨ) → chạy lại tool "phá" road mới, props đè road tái phát. *(Bug vòng 7 2026-08-11: road 14 → 18.)*
+- **R0.11 — Di chuyển hyper-casual chuẩn: CẠNH LÊN = nhảy 1 lane tức thì, ĐÈ GIỮ = sweep liên tục, NHẢ = snap về lane gần nhất.** Cần phát hiện rising edge (so `_lastInputX` frame trước) chứ không chỉ trạng thái giữ; `_currentLane` phải đồng bộ NGAY ở nhánh edge (tránh stale cho MoveLeft/Right/test). Chỉ sweep (như cũ) = bấm-nhả nhanh gần như không đi → cảm giác "phải bấm 2 lần". *(Bug vòng 7 2026-08-11.)*
 
 ---
 
