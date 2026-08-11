@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-08-11 — ROOT CAUSE "không thấy vật cản/xu" — tile scale nhân vào con (bug 3 tuần)
+
+> User hỏi "fix lỗi ko hiển thị xu (coin) và vật cản" — bug dai dẳng nhiều vòng. Lần này tìm ra gốc rễ thật.
+
+### Root cause (đã xác minh bằng đọc file prefab/scene)
+
+- **`Tile.Awake` ép `localScale = (14, 0.1, 10)` trên ROOT tile** → Unity nhân scale parent vào **VỊ TRÍ lẫn KÍCH THƯỚC** của mọi con: obstacle/coin spawn ở lane x=3 thực tế ở **world x=42** (xa ngoài đường ±7) và bị **dẹt cao 0.1** → chúng VẪN spawn (log `ĐÃ TẠO` có) nhưng vô hình. Lane marker cũng ra x=±92 → đường trống trơn. Triệu chứng "không thấy vật cản/xu" đúng 100%.
+- Kèm theo: **DynamicBox.prefab** có `Rigidbody + m_UseGravity:1 + collider solid (IsTrigger:0)` → obstacle rơi + player `OnTriggerEnter` không bao giờ fire (solid-solid = OnCollision). **Ramp.prefab** cũng solid.
+
+### Đã fix (commit `3d1a794`)
+
+- **Tile.cs**: `localScale = (1,1,1)` (KHÔNG scale root); road visual chuyển sang **child "Road"** (cube 14×0.1×10, di chuyển mesh/material từ root, bỏ collider root 1×1×1); `Deactivate` giữ cả LaneMarker lẫn Road khi recycle (nếu xóa Road → tile mất mặt đường sau vòng đầu).
+- **DynamicBox.prefab**: collider → **trigger** + `UseGravity:0` + `IsKinematic:1` (không rơi, không bị đẩy, vẫn trigger với player dynamic RB).
+- **Ramp.prefab**: collider → **trigger** + sửa `m_Size (1,1,1)` → `(2,0.5,2)` khớp mesh (hit đúng tầm nhìn).
+- **ObstacleManager**: spawn y 0 → **0.5** (nằm trên mặt road; trigger nên không cần vật lý đặt xuống).
+- Coin prefab vốn đã trigger + spawn y=0.8 — sau khi parent scale = 1 thì hiện đúng (vị trí world = local).
+
+### Bài học — **QUY TẮC MỚI (NHÓM 4)**
+
+- **KHÔNG BAO GIỜ scale ROOT của container chứa con được đặt vị trí (tile/chunk/spawner)** — scale parent nhân vào cả vị trí và kích thước con (`world = parentScale × local`). Container scale = (1,1,1); muốn to nhỏ thì scale CHILD (mesh/con tạo visual). Dấu hiệu bug: "spawn đúng (log có) nhưng không thấy" → kiểm tra scale parent. *(Bug 3 tuần 2026-08-11.)*
+- **OnTriggerEnter chỉ fire khi ≥1 collider là trigger** (solid-solid = OnCollisionEnter) — obstacle nên là trigger + không gravity (hoặc kinematic) để player solid sphere detect được mà không bị bump/đẩy.
+- **Collider phải khớp mesh** — Ramp collider (1,1,1) nhưng mesh (2,0.5,2): hit nhỏ hơn tầm nhìn. `m_Size` collider = scale mesh.
+
+---
+
 ## 2026-08-11 — Fix API sai khi sửa font (5 lỗi đỏ → safe mode): FontImporter KHÔNG còn trong Unity 6
 
 > User báo 5 log đỏ sau khi clear → đều trong `UIBuilderHelpers.cs` (do fix font vòng trước dùng API cũ).

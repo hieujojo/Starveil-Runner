@@ -76,6 +76,8 @@
 - **R4.12** — TrailRenderer + URP/Unlit hiện TRẮNG (shader không sample vertex color) → dùng `Particles/Unlit`.
 - **R4.13** — `ParticleSystem.Emit()` bypass emission module → bỏ dead config.
 - **R4.14** — `[UnityTest] IEnumerator` bắt buộc có ≥1 `yield return` (CS0161).
+- **R4.15** — **KHÔNG scale ROOT của container chứa con đặt vị trí (tile/chunk/spawner)** — Unity nhân scale parent vào CẢ vị trí lẫn kích thước con (`world = parentScale × local`) → obstacle/coin bay ra ngoài đường + dẹt vô hình. Container scale = (1,1,1); muốn to/nhỏ thì scale CHILD visual. Dấu hiệu: "log spawn ĐÃ TẠO nhưng không thấy gì" → nghi scale parent. *(Bug 3 tuần 2026-08-11.)*
+- **R4.16** — **OnTriggerEnter chỉ fire khi ≥1 collider là trigger** — obstacle phải `IsTrigger:1` (+ bỏ gravity/kinematic) để player solid sphere detect được; solid-solid = OnCollisionEnter (không chạy code OnTriggerEnter). **Collider `m_Size` phải khớp mesh** (Ramp mesh 2×0.5×2 → collider size 2×0.5×2). *(Fix 2026-08-11.)*
 
 ## 🎨 NHÓM 5 — UI / TMP / Visual
 
