@@ -221,6 +221,8 @@ namespace VoidRunner.Core.Player
         {
             _isDead = true;
             _rb.linearVelocity = Vector3.zero;
+            // Nếu đang blink dở (tàu đang ẩn) mà chết → ép hiện lại, không để tàu biến mất ở game over
+            SetShipRenderersVisible(true);
         }
 
         private void HandleRestart()
@@ -232,6 +234,7 @@ namespace VoidRunner.Core.Player
             _rb.linearVelocity = Vector3.zero;
             _rb.angularVelocity = Vector3.zero;
             _rb.position = _startPos;
+            SetShipRenderersVisible(true); // tàu phải hiện đầy đủ khi chơi lại (có thể đang ẩn do blink dở)
             if (_ship != null) _ship.localRotation = Quaternion.identity;
             if (_flame != null) _flame.localScale = _flameBaseScale; // bật lại lửa
             _exhaust?.Play();

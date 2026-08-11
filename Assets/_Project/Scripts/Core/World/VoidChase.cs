@@ -160,7 +160,7 @@ namespace VoidRunner.Core.World
             main.loop = true;
             main.playOnAwake = true;
             main.startLifetime = 0.5f;
-            main.startSpeed = -2f;
+            main.startSpeed = 0f; // chỉ dựa vào radial âm kéo về tâm — không phóng hạt ra ngoài lúc sinh
             main.startSize = 0.08f;
             main.startColor = new Color(0.7f, 0.4f, 1f, 0.6f);
             main.maxParticles = 40;

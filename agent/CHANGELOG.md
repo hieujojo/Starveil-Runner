@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-08-11 — Vòng fix sau khi thấy obstacle/coin: props đè road + hết props + void không hố đen + không hiệu ứng va chạm
+
+> User chơi thấy obstacle/coin hiện đúng (fix Rotator thành công) nhưng báo 4 vấn đề mới. Đọc 89 log → xử 3 code + xác nhận 1 đã đúng.
+
+### Đã xác nhận ĐÚNG (không sửa)
+
+- **Vật cản luôn chừa ≥1 lane trống** — `ObstacleManager.TrySpawn`: `blockedLanes = Random.Range(1, laneCount)` (=1 hoặc 2 khi laneCount=3) + `HashSet` (không trùng lane) → mọi tile luôn còn ít nhất 1 lane an toàn. Log chứng minh: tile 160 chặn ±3 (giữa trống), tile 180 chặn 0/-3 (lane +3 trống)... ✓
+
+### Đã fix (commit `5b7bec9` + `sửa reviewer`)
+
+- **Props đè lên road + chỉ phần đầu có cảnh vật — 2 ROOT CAUSE:**
+  1. Props trong scene là bản dựng bằng code CŨ (chỉ chuẩn chiều cao, `x=±9.5` cố định, bề ngang khổng lồ tràn vào road). Fix: `AmbientScroller.HealProp()` — tự ép từng prop về scale chặn cả chiều cao lẫn bề ngang (`NormalizeScale = min(targetHeight/cao, targetWidth/ngang)`) + đặt x theo bounds THỰC (`x = side × max(sideOffset, roadHalfWidth + halfWidth + margin)`).
+  2. **`GameManager` KHÔNG gọi `AmbientScroller.Initialize`** (chỉ Editor tool gọi) → `_props` rỗng lúc runtime → `Update` recycle return sớm → props dừng cách ~105m → "chỉ đầu render". Fix: `Start()` self-heal — tự nạp toàn bộ con có sẵn trong scene vào `_props` (kèm HealProp) + tự tìm player qua `FindAnyObjectByType<PlayerController>` nếu null. Không cần chạy lại tool.
+- **Không có hiệu ứng va chạm** — `OnObstacleHit` trước chỉ có screen shake. Fix: `PlayerController` subscribe `OnObstacleHit` → coroutine `BlinkShip` nhấp nháy toàn bộ renderer thân tàu 4 lần (cache `_shipRenderers` ở cả 2 nhánh BuildSpaceship; `HandleGameOver`/`HandleRestart` ép hiện lại phòng trường hợp chết/restart giữa lúc blink — góp ý reviewer).
+- **Void = banh tím, không giống hố đen** — `VoidChase.BuildBlackHoleVisual()` idempotent: ẩn mesh banh tím, dựng lõi đen (sphere đen tuyệt đối, phát tím nhẹ) + **đĩa bồi tụ** (cylinder dẹt phát sáng tím neon, nghiêng 75°, quay 40°/s) + **hạt bị hút vào tâm** (ParticleSystem, `velocityOverLifetime.radial = -1.5` kéo về tâm, material mềm tái sử dụng `VFXManager.CreateSoftParticleMaterial`). Void phình to khi áp sát → đĩa to theo (đe dọa rõ).
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Không bao giờ tin "props/scene đã đúng vì tool đã dựng"** — props dựng cứng trong scene bằng tool KHÔNG tự cập nhật khi code đổi (tool đã chạy với code cũ). Nếu sửa code spawn/build: (a) chạy lại tool, HOẶC (b) thêm self-heal runtime (Start nạp con có sẵn + ép lại chuẩn). Self-heal mạnh hơn — không phụ thuộc user chạy tool.
+- **Manager gọi Initialize của hệ thống con: phải gọi cho TẤT CẢ** — GameManager gọi `tileSpawner.Initialize` nhưng quên `ambient.Initialize` → ambient chết âm thầm (no error, chỉ không recycle). Khi 1 hệ thống "hoạt động sai một nửa" (spawn đúng nhưng recycle không chạy), check xem Initialize/Start có được gọi ở runtime không.
+- **Hiệu ứng va chạm phải có visual feedback trên CHÍNH PLAYER** (blink/flash) chứ không chỉ screen shake — người chơi cần thấy "mình vừa bị đụng" ngay trên nhân vật.
+- **"Hố đen" = lõi đen + đĩa bồi tụ phát sáng + hạt bị hút** — visual bằng primitive + emission + particle (không cần asset); đĩa nghiêng quay chậm tạo cảm giác hút vật chất.
+
+---
+
 ## 2026-08-11 — ROOT CAUSE CUỐI CÙNG: obstacle/coin "văng lung tung" = Rotator gắn nhầm lên Managers (cha của mọi tile)
 
 > User chạy lại với diag mới (113 log): fix scale đã chạy (`tileScale=(1,1,1)`) nhưng obstacle/coin WORLD position vẫn lệch X/Y lung tung.
