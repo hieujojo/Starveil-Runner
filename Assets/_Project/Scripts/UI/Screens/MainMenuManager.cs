@@ -30,6 +30,10 @@ namespace VoidRunner.UI
         [SerializeField, Tooltip("Tên scene Game (khớp tên file .unity)")]
         private string gameSceneName = "Game";
 
+        // Dimmer toàn màn hình — làm tối main menu khi mở HowToPlay (fix 2026-08-11:
+        // trước đây panel hiện đè lên menu sáng → rất khó đọc)
+        private GameObject _dimmer;
+
         private void Start()
         {
             howToPlayPanel?.SetActive(false);
@@ -57,7 +61,44 @@ namespace VoidRunner.UI
         private void ToggleHowToPlay()
         {
             if (howToPlayPanel == null) return;
-            howToPlayPanel.SetActive(!howToPlayPanel.activeSelf);
+            bool show = !howToPlayPanel.activeSelf;
+
+            if (show) EnsureDimmer();
+            howToPlayPanel.SetActive(show);
+            if (_dimmer != null) _dimmer.SetActive(show);
+
+            // Panel luôn vẽ TRÊN dimmer (SetAsLastSibling) — menu phía sau tối lại, text đọc rõ
+            if (show)
+            {
+                howToPlayPanel.transform.SetAsLastSibling();
+                if (_dimmer != null) _dimmer.transform.SetAsFirstSibling();
+            }
+        }
+
+        /// <summary>Tạo 1 Image đen alpha 0.72 phủ toàn màn hình, nằm DƯỚI panel (idempotent).</summary>
+        private void EnsureDimmer()
+        {
+            if (_dimmer != null) return;
+            if (howToPlayPanel == null) return;
+
+            Canvas canvas = howToPlayPanel.GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+
+            var go = new GameObject("HowToPlayDimmer", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.transform.SetParent(canvas.transform, false);
+
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            var img = go.GetComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0.72f);
+            img.raycastTarget = true; // chặn click xuyên xuống nút menu phía sau
+
+            go.SetActive(false);
+            _dimmer = go;
         }
 
         /// <summary>Bật/tắt âm thanh (0 hoặc 1) — lưu qua SaveSystem, áp ngay qua AudioManager.</summary>

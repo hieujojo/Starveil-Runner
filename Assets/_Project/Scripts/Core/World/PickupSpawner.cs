@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using VoidRunner.Data;
 
@@ -39,6 +40,11 @@ namespace VoidRunner.Core.World
 
         private float _lastDiagLog; // tạm — chẩn đoán không có xu (2026-08-11)
 
+        private ObstacleManager _obstacleManager; // để biết lane nào đã bị obstacle chặn ở tile này
+
+        /// <summary>TileSpawner truyền vào lúc Initialize — coin chọn lane KHÔNG trùng obstacle (fix 2026-08-11).</summary>
+        public void BindObstacleManager(ObstacleManager om) => _obstacleManager = om;
+
         /// <summary>Gọi từ TileSpawner khi tile được spawn.</summary>
         public void TrySpawn(Tile tile)
         {
@@ -64,8 +70,9 @@ namespace VoidRunner.Core.World
 
         private void SpawnCoinRow(Tile tile)
         {
-            // Chọn ngẫu nhiên 1 lane có coin (không cần biết obstacle ở lane nào — obstacle thường rải lane khác)
-            int lane = Random.Range(0, laneCount);
+            // Chọn lane coin KHÁC các lane obstacle đã chặn trên tile này (fix 2026-08-11:
+            // trước đây chọn ngẫu nhiên độc lập → obstacle đè lên hàng xu). Fallback ngẫu nhiên nếu kẹt.
+            int lane = PickLaneAvoidingObstacles();
             float x = (lane - (laneCount - 1) * 0.5f) * laneWidth;
 
             // [TẠM] chẩn đoán — log WORLD position + tile lossyScale (coin không thấy dù spawn)
@@ -87,7 +94,7 @@ namespace VoidRunner.Core.World
             PowerUpData data = PickRandomType();
             if (data == null || data.prefab == null) return;
 
-            int lane = Random.Range(0, laneCount);
+            int lane = PickLaneAvoidingObstacles();
             float x = (lane - (laneCount - 1) * 0.5f) * laneWidth;
 
             GameObject pickup = Instantiate(data.prefab, tile.transform);
@@ -95,6 +102,22 @@ namespace VoidRunner.Core.World
 
             PowerUpPickup comp = pickup.GetComponent<PowerUpPickup>();
             if (comp != null) comp.SetData(data);
+        }
+
+        /// <summary>Chọn lane ngẫu nhiên KHÔNG nằm trong danh sách lane obstacle đã chặn của tile này.</summary>
+        private int PickLaneAvoidingObstacles()
+        {
+            if (_obstacleManager == null || _obstacleManager.BlockedLanes.Count == 0)
+            {
+                return Random.Range(0, laneCount);
+            }
+
+            List<int> free = new List<int>();
+            for (int i = 0; i < laneCount; i++)
+            {
+                if (!_obstacleManager.BlockedLanes.Contains(i)) free.Add(i);
+            }
+            return free.Count > 0 ? free[Random.Range(0, free.Count)] : Random.Range(0, laneCount);
         }
 
         private PowerUpData PickRandomType()

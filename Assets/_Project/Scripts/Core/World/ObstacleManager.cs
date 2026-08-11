@@ -34,8 +34,16 @@ namespace VoidRunner.Core.World
 
         private float _lastDiagLog; // tạm — chẩn đoán không có vật cản (2026-08-11)
 
+        /// <summary>
+        /// Các lane đã chặn ở tile gần nhất (reset mỗi TrySpawn) — PickupSpawner đọc để đặt hàng coin
+        /// sang lane KHÁC, tránh obstacle đè lên xu (fix 2026-08-11).
+        /// </summary>
+        private readonly HashSet<int> _blockedLanes = new HashSet<int>();
+        public IReadOnlyCollection<int> BlockedLanes => _blockedLanes;
+
         public void TrySpawn(Tile tile)
         {
+            _blockedLanes.Clear();
             // [TẠM] chẩn đoán — log trạng thái mỗi 2s
             if (Time.time - _lastDiagLog > 2f)
             {
@@ -63,6 +71,7 @@ namespace VoidRunner.Core.World
 
             foreach (int lane in chosen)
             {
+                _blockedLanes.Add(lane);
                 float x = (lane - (laneCount - 1) * 0.5f) * laneWidth;
                 SpawnOnTile(data, tile, x);
             }

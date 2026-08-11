@@ -17,6 +17,10 @@ namespace VoidRunner.Core.World
         [SerializeField] private int poolSize = 12;
         [SerializeField] private float recycleDistance = 15f;
 
+        [Header("An toàn đầu game")]
+        [Tooltip("Đoạn đầu sau khi (re)start KHÔNG có obstacle — player có thời gian làm quen, không chết ngay. (fix 2026-08-11)")]
+        [SerializeField] private float safeZoneAhead = 20f;
+
         [Header("Tham chiếu (tự gán qua Initialize)")]
         [SerializeField] private Transform player;
         [SerializeField] private ObstacleManager obstacleManager;
@@ -70,6 +74,8 @@ namespace VoidRunner.Core.World
             player = playerRef;
             obstacleManager = obstacles;
             if (pickupSpawner == null) pickupSpawner = FindAnyObjectByType<PickupSpawner>();
+            // Coin phải chọn lane KHÁC obstacle (fix 2026-08-11: obstacle đè lên xu)
+            if (pickupSpawner != null) pickupSpawner.BindObstacleManager(obstacles);
             _initialized = true;
         }
 
@@ -88,7 +94,8 @@ namespace VoidRunner.Core.World
             }
             _activeTiles.Clear();
 
-            // Xếp lại track bắt đầu từ sau lưng player
+            // Xếp lại track bắt đầu từ sau lưng player (fix 2026-08-11: player đã được GameManager
+            // ResetToStart về điểm cố định TRƯỚC khi gọi đây → track luôn dựng từ cùng 1 chỗ)
             _nextSpawnZ = player.position.z - tileLength;
         }
 
@@ -121,7 +128,11 @@ namespace VoidRunner.Core.World
             Tile tile = _pool.Get();
             tile.Activate(new Vector3(0f, 0f, z));
             _activeTiles.Add(tile);
-            obstacleManager?.TrySpawn(tile);
+
+            // Safe zone: tile trong đoạn đầu (so với vị trí player hiện tại) KHÔNG spawn obstacle
+            // (coin vẫn có — vô hại). Trước đây obstacle spawn ngay tile đầu (z≈1.7) → chết tức thì.
+            bool inSafeZone = z < player.position.z + safeZoneAhead;
+            if (!inSafeZone) obstacleManager?.TrySpawn(tile);
             pickupSpawner?.TrySpawn(tile);
 
             // [TẠM] chẩn đoán — user báo không có vật cản/xu dù wiring đúng

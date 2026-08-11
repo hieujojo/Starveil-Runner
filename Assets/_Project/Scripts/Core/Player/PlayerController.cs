@@ -225,7 +225,14 @@ namespace VoidRunner.Core.Player
             SetShipRenderersVisible(true);
         }
 
-        private void HandleRestart()
+        private void HandleRestart() => ResetToStart();
+
+        /// <summary>
+        /// Đưa player về ĐIỂM BẮT ĐẦU CỐ ĐỊNH (_startPos = vị trí scene) — set cả transform + rigidbody
+        /// (fix 2026-08-11: restart trước đây chỉ set _rb.position nhưng thứ tự event làm player vẫn
+        /// đứng nguyên ở z=148 → mỗi lần chơi lại vị trí khác nhau). GameManager gọi TRỰC TIẾP method này.
+        /// </summary>
+        public void ResetToStart()
         {
             _isDead = false;
             _currentLane = laneCount / 2;
@@ -233,6 +240,7 @@ namespace VoidRunner.Core.Player
             _currentSpeed = forwardSpeed; // DifficultyManager sẽ gửi lại tốc độ mới qua event
             _rb.linearVelocity = Vector3.zero;
             _rb.angularVelocity = Vector3.zero;
+            transform.position = _startPos; // teleport transform — rigidbody không có interpolation nên không lag
             _rb.position = _startPos;
             SetShipRenderersVisible(true); // tàu phải hiện đầy đủ khi chơi lại (có thể đang ẩn do blink dở)
             if (_ship != null) _ship.localRotation = Quaternion.identity;

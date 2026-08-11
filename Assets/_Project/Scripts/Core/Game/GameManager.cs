@@ -77,8 +77,14 @@ namespace VoidRunner.Core
         {
             if (tileSpawner == null) return;
             State = GameState.Playing;
-            GameEvents.RaiseRestart();   // player + void tự reset qua event
-            tileSpawner.StartTrack();    // reset track
+
+            // Fix 2026-08-11: reset player VỀ ĐIỂM BẮT ĐẦU CỐ ĐỊNH TRƯỚC (không phụ thuộc thứ tự
+            // subscriber event) — trước đây chỉ dựa RaiseRestart, player vẫn đứng nguyên z=148
+            // → mỗi lần chơi lại vị trí khác nhau + track dựng quanh vị trí cũ.
+            if (player != null) player.ResetToStart();
+
+            GameEvents.RaiseRestart();   // các hệ thống khác reset qua event
+            tileSpawner.StartTrack();    // reset track — giờ đọc player.position = vị trí bắt đầu cố định
         }
 
         private void Update()

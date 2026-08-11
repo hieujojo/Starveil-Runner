@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VoidRunner.Core;
 using VoidRunner.Core.Player;
 
 namespace VoidRunner.Core.World
@@ -108,11 +109,36 @@ namespace VoidRunner.Core.World
         }
 
         /// <summary>Dựng lại toàn bộ prop 2 bên (gọi khi tool chạy / restart).</summary>
+        private void OnEnable()
+        {
+            // Restart: props phải dựng lại quanh vị trí player mới (fix 2026-08-11: trước đây props
+            // chỉ dựng 1 lần lúc Start → chơi lại props nằm quanh vị trí cũ, lúc có lúc không thấy)
+            GameEvents.OnRestart += HandleRestart;
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.OnRestart -= HandleRestart;
+        }
+
+        private void HandleRestart()
+        {
+            if (player == null) return;
+            BuildProps();
+        }
+
         public void BuildProps()
         {
             for (int i = transform.childCount - 1; i >= 0; i--)
             {
-                DestroyImmediate(transform.GetChild(i).gameObject);
+                if (Application.isPlaying)
+                {
+                    Destroy(transform.GetChild(i).gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(transform.GetChild(i).gameObject);
+                }
             }
             _props.Clear();
 
