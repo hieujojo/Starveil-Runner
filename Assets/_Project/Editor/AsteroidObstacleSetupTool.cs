@@ -129,8 +129,13 @@ namespace VoidRunner.EditorTools
             col.radius = Mathf.Max(radius, 0.5f);
             col.center = new Vector3(0f, scaled.extents.y, 0f);
 
+            // ⚠️ Capture scale TRƯỚC khi destroy — DestroyImmediate(root) hủy luôn con Model,
+            // truy cập model.transform sau đó = MissingReferenceException (bug 2026-08-12, xem CHANGELOG)
+            float modelScale = model.transform.localScale.x;
+
             // Lưu thành prefab asset (folder commit được)
             EnsureFolder(OutputPrefabPath);
+            Debug.Log($"[Asteroid] Prefab tạo xong: {OutputPrefabPath} (model bounds={b.size} → scale={modelScale:F2})");
             bool saved = PrefabUtility.SaveAsPrefabAsset(root, OutputPrefabPath);
             Object.DestroyImmediate(root);
 
@@ -140,7 +145,6 @@ namespace VoidRunner.EditorTools
                 return null;
             }
 
-            Debug.Log($"[Asteroid] Prefab tạo xong: {OutputPrefabPath} (model bounds={b.size} → scale={model.transform.localScale.x:F2})");
             return AssetDatabase.LoadAssetAtPath<GameObject>(OutputPrefabPath);
         }
 

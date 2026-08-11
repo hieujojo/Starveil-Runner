@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-12 (v3d) — Fix tool Asteroid: MissingReferenceException (gameObject destroyed)
+
+> User: "đọc log, hiện tại không chạy tool được" — tool `Setup Obstacle = Asteroid (OlegWER thiên thạch)` crash ngay sau khi tạo prefab.
+
+### Nguyên nhân (chính xác)
+
+- `BuildAsteroidPrefab()`: `PrefabUtility.SaveAsPrefabAsset(root, ...)` **thành công** (log có dòng `Start importing .../AsteroidObstacle.prefab`) → `Object.DestroyImmediate(root)` — **destroy cha = destroy luôn con `Model`** (asteroid) → dòng `Debug.Log` cuối vẫn truy cập `model.transform.localScale` trên object ĐÃ BỊ HỦY → `MissingReferenceException: GameObject has been destroyed` (stack: line 143 `get_transform` ← line 63 `Setup`).
+- Hệ quả: prefab ĐÃ tạo xong (5.2KB) nhưng bước 3 (gán prefab vào 2 ObstacleData) **chưa chạy** → tool chưa hoàn thành.
+
+### Cách fix
+
+- **Capture scale TRƯỚC khi destroy**: `float modelScale = model.transform.localScale.x;` → `Debug.Log` dùng `modelScale` (không còn chạm `model.transform`) + dời `Debug.Log` lên TRƯỚC `DestroyImmediate(root)`.
+- Idempotent giữ nguyên: lần chạy tới thấy prefab đã tồn tại → BỎ QUA bước build → chỉ gán vào 2 ObstacleData → **chạy lại an toàn, không cần xóa gì**.
+
+### Bài học — QUY TẮC MỚI (R7.10)
+
+- **`Object.DestroyImmediate(parent)` hủy luôn cả CÂY CON** — mọi tham chiếu tới child (Transform/Renderer...) sau đó = MissingReferenceException. Nếu cần giá trị từ child: **capture trước**, log sau khi destroy phải dùng biến đã lưu. Dấu hiệu: exception ở dòng `get_transform`/`get_renderer` NGAY SAU `DestroyImmediate`.
+
+---
+
 ## 2026-08-12 (v3c) — Tích hợp obstacle = Asteroid (OlegWER thiên thạch)
 
 > User: "cứ thực thi từng việc đi, làm từ việc obstacle trước" (sau khi tải OlegWER Asteroid thay obstacle kenney).

@@ -122,6 +122,7 @@
 - **R7.7** — **Model 3rd-party có Animator controller — phải kiểm tra DEFAULT STATE** (controller có thể mặc định `idle` thay vì `flying`/`run` → nhân vật đứng im dù có Animator). Sau khi instantiate: `animator.Play("tên state mong muốn")` để ép trạng thái đúng (bug 2026-08-12: Flying Beetle default = `idle 1` → bọ không vỗ cánh).
 - **R7.8** — **ScriptableObject data (ObstacleData/PowerUpData) nằm ở `Assets/_Project/ScriptableObjects/`** (Ramp.asset, DynamicBox.asset...) — namespace `VoidRunner.Data` chỉ là tên C#, KHÔNG phải thư mục `Data/`. Trước khi sửa data asset: định vị bằng `git ls-files | grep <tên>` + đối chiếu GUID trong scene, không đoán theo namespace (bug 2026-08-12: tưởng ObstacleData ở `Data/` — thực tế không có folder đó).
 - **R7.9** — **Model 3rd-party FBX có scale kỳ lạ (vd scale 100)** — luôn đo `Renderer.bounds` thật sau instantiate rồi chuẩn hóa về kích thước mục tiêu (pattern giống ShipCatalog/EnemyCatalog, R4.18). Không hardcode scale từ file prefab import.
+- **R7.10** — **`Object.DestroyImmediate(parent)` hủy luôn CẢ CÂY CON** — mọi tham chiếu tới child (`transform`/`renderer`...) sau đó = `MissingReferenceException: GameObject has been destroyed`. Nếu cần giá trị từ child: **capture trước** (`float s = child.transform.localScale.x;`) và chỉ log/dùng biến đã lưu sau destroy. Dấu hiệu: exception ở dòng `get_transform()`/`get_renderer()` NGAY SAU lệnh `DestroyImmediate`. *(Bug 2026-08-12: AsteroidObstacleSetupTool.)*
 
 ---
 
