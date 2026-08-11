@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Data.ObstacleData
   obstacleType: 2
   obstacleName: DynamicBox
-  prefab: {fileID: 3635599722297551011, guid: 217d4a91b8f9e9b4e9690a1d883ce6ad, type: 3}
+  prefab: {fileID: 872109381032845649, guid: 29242419d336a354081d698fd60b703c, type: 3}
   spawnWeight: 0.5
   isDynamic: 0
