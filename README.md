@@ -112,7 +112,10 @@ Assets/_Project/
 
 ---
 
-## 📄 Giấy phép
+## 📄 Giấy phép & Credits
 
 - **Code:** Toàn bộ code viết tay thuộc về tác giả.
-- **Assets:** UI & âm thanh từ [Kenney.nl](https://kenney.nl) — giấy phép **CC0 (Public Domain)**, dùng thoải mái không cần ghi công. Xem `License.txt` kèm theo từng gói.
+- **Assets bên thứ ba** (KHÔNG thuộc về tác giả — xem đầy đủ tại [`agent/CREDITS.md`](./agent/CREDITS.md)):
+  - **Nebula Skyboxes** (skybox tinh vân) — Unity Asset Store EULA
+  - **SpaceSkies Free** by **PULSAR BYTES** — Unity Asset Store EULA
+  - **Kenney** (UI Pack, Space Kit, Fonts, Particle, Game Icons, Audio) — giấy phép **CC0 (Public Domain)**, dùng thoải mái không cần ghi công. Xem `License.txt` kèm theo từng gói.

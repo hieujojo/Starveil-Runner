@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-11 — Bản quyền assets: tạo agent/CREDITS.md + README (Nebula/SpaceSkies/Kenney)
+
+> User: "nhớ ghi bản quyền nhé, assets đó không phải của tôi" — 2 gói mới (Nebula, SpaceSkies) không thuộc tác giả.
+
+### Đã xong
+
+- Tạo **`agent/CREDITS.md`** — bảng đầy đủ mọi third-party asset: Nebula Skyboxes (Unity Asset Store EULA), SpaceSkies Free (PULSAR BYTES — Standard Unity EULA), toàn bộ Kenney packs (CC0 Public Domain). Ghi rõ: tác giả, license, link, lưu ý (cấm redistribute standalone / dùng AI training / logo Kenney không CC0).
+- **README.md** — phần Giấy phép mở rộng: Code (tác giả) + link CREDITS.md + liệt kê 2 gói mới + Kenney CC0.
+- Có kèm mẫu ghi công (THIRD-PARTY ASSETS) để dán vào màn hình Credits / khi publish.
+
+### Bài học
+
+- **Mọi asset bên thứ ba phải có file CREDITS riêng** (tác giả + license + link) — đặc biệt khi import gói từ itch.io/Asset Store; không bao giờ coi asset nhập về là của mình. Unity Asset Store dùng Standard EULA (không bắt buộc ghi công nhưng cấm redistribute/AI); Kenney = CC0.
+
+---
+
 ## 2026-08-11 — Skybox: gắn Nebula/SpaceSkies (user import 2 gói) + fix camera ClearFlags Solid Color
 
 > User import 2 gói: 'Nebula Skyboxes' (4 cubemap .exr, chưa có material) + 'SpaceSkies Free' (3 bộ Pink/Green/Purple, material sẵn). Yêu cầu: gắn vào game cho hết "bầu trời trống/vô hồn".
