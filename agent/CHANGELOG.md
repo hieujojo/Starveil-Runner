@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-08-12 (v3f.5.3) — Bọ áp sát quá gần + to hơn + animation nhìn không rõ
+
+- **Bọ áp sát quá gần khi chạm obstacle 1 lần** (DIAG: stage 1 → dist 3.0m) — user: "đang gần quá, chỉ cần chạm 1 lần trong thời gian quy định, cho ra xa 2-3m nữa". Fix: `closeDistance 3 → 5.5m` (code + scene + test `CloseDist`). Cơ chế 2 nấc GIỮ NGUYÊN: chạm 1 lần → bọ tiến sát 5.5m; chạm lần 2 trong cửa sổ → bắt.
+- **Bọ to thêm lần 2** (user: "cho con bọ to lên"): `enemyTargetHeight 2.2 → 2.6` (code + scene).
+- **Animation vỗ cánh nhìn không rõ** (user: "có animation gì mà nhìn ko rõ") — state `flying` chạy đúng (đã verify: KHÔNG có warning 'State not found'), nhưng clip vỗ cánh của model quá nhẹ ở khoảng cách xa → tăng `Animator.speed 1 → 1.25` (BuildEnemyVisual + ResetEnemy).
+- **Bọ CHUYỂN MÀU** — đã xác minh: **KHÔNG có logic nào trong code đổi màu enemy**. 2 nguyên nhân có thể: (1) clip animation `flying` của model tự có keyframe màu/emissive (model free thường pulsing), (2) đèn đỏ của drone chiếu vào khi bọ bay ngang. Đang chờ user xác nhận hiện tượng thực tế để xử lý đúng (nếu là animation → cân nhắc thay material tĩnh; nếu là đèn → giảm range/intensity đèn drone).
+- **Lưu ý:** log còn thấy `error CS` cũ của tool/test (trước commit `e76c2d8`) — tool là assembly Editor riêng nên không chặn gameplay; recompile lại sẽ sạch.
+
 ## 2026-08-12 (v3f.5) — Xóa hẳn cổng/rào; obstacle = drone duy nhất + hiệu ứng; bọ hết tím, xa + to hơn
 
 - **BỌ MÀU TÍM** (user: "màu gốc đâu phải tím") — root cause: `EnemyChase.BuildEnemyVisual` **thiếu `MaterialFixer.EnsureURPMaterials`** (tàu đã gọi, obstacle đã gọi, ENEMY bị sót) → material Standard Built-in của gói Flying Beetle trong URP hiện TÍM/MAGENTA. Fix: thêm 1 dòng sau Instantiate. **Bài học (mở rộng R3.16): MỌI model 3rd-party đưa vào game — tàu, enemy, obstacle, monster — PHẢI đi qua MaterialFixer, không được sót 1 nhánh nào.**

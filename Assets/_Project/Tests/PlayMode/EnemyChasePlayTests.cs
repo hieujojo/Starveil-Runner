@@ -12,7 +12,7 @@ namespace VoidRunner.Tests
     /// Play Mode tests cho cơ chế Enemy 2 NẤC CỐ ĐỊNH (R0.4) — FIX 2026-08-12 v3f.3:
     /// - NẤC 0: Enemy giữ baseDistance (7m) sau lưng player — camera cách player 10m nên
     ///   7m = bọ ở 7m TRƯỚC camera → nhìn thấy cả con (16m cũ = 6m SAU camera → không bao giờ thấy).
-    /// - Đụng obstacle lần 1 → NẤC 1: Enemy tiến sát closeDistance (3m) + vỗ cánh nhanh hơn.
+    /// - Đụng obstacle lần 1 → NẤC 1: Enemy tiến sát closeDistance (5.5m) + vỗ cánh nhanh hơn.
     /// - Né sạch hết cửa sổ → Enemy nới về 5m (reset nấc 0).
     /// - Đụng lần 2 trong cửa sổ → Enemy LAO TỚI BẮT (atack) → sau catchDelay → Game Over.
     /// GameManager chỉ dùng để có Instance + State=Playing (disable để chặn Start noise).
@@ -27,7 +27,7 @@ namespace VoidRunner.Tests
         private System.Action _gameOverHandler;
 
         private const float BaseDist = 7f;
-        private const float CloseDist = 3f;
+        private const float CloseDist = 5.5f;
 
         [SetUp]
         public void SetUp()
@@ -97,7 +97,7 @@ namespace VoidRunner.Tests
 
             yield return new WaitForSeconds(0.2f);
             Assert.AreEqual(CloseDist, DistanceBehind(), 0.8f,
-                "Đụng lần 1: Enemy phải tiến sát còn ~3m (nấc 1) nhưng chưa chết.");
+                "Đụng lần 1: Enemy phải tiến sát còn ~5.5m (nấc 1) nhưng chưa chết.");
             Assert.IsFalse(_gameOverRaised, "Nấc 1 không được Game Over.");
         }
 
