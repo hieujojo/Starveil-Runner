@@ -56,6 +56,7 @@
 - **R3.7** — `Image` không tự convert sang `GameObject` — phải `.gameObject` khi gán field kiểu GameObject.
 - **R3.8** — Editor script dùng class runtime phải `using` đúng namespace (`VoidRunner.UI`...).
 - **R3.9** — Bỏ tham số method không dùng (dead parameter) — reviewer bắt.
+- **R3.10** — **Unity BCL KHÔNG có `Regex.Replace(string, string, string, int count)`** — chỉ 3-arg hoặc variant `RegexOptions` (lỗi `CS1503: Argument 3: cannot convert from 'string' to 'int'`). Muốn giới hạn số lần replace: bỏ count (pattern xuất hiện 1 lần thì 3-arg vẫn ổn) hoặc **dùng string ops** (`IndexOf`/`Substring`/`Replace`). `.meta` luôn có đúng 1 dòng `guid:` → thao tác GUID trong Editor tool dùng IndexOf+Substring, không cần Regex. *(Bug 2026-08-11.)*
 
 ## 🎬 NHÓM 4 — Gameplay / World (bài học về game feel)
 

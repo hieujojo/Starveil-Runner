@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-11 — Compile error: Regex.Replace overload 4 tham số với `count` KHÔNG tồn tại trong BCL Unity 6
+
+> User báo 1 log đỏ trước khi chạy tool → `UIBuilderHelpers.cs(120,45): error CS1503: Argument 3: cannot convert from 'string' to 'int'`.
+
+### Đã xong
+
+- **Root cause:** dòng `System.Text.RegularExpressions.Regex.Replace(text, "guid: [0-9a-f]{32}", "guid: " + oldGuid, 1)` — overload `(string, string, string, int count)` **KHÔNG có trong BCL mà Unity 6 biên dịch** (chỉ có `(input, pattern, replacement)` 3 tham số + `(input, pattern, replacement, RegexOptions)`), trình biên dịch không tìm được overload phù hợp → báo lỗi Argument 3. Đây là lỗi phát sinh từ chính fix font trước đó (thêm `RestoreGuid`).
+- **Fix:** bỏ Regex hoàn toàn, dùng **string ops thuần** — `text.IndexOf("guid: ")` + `Substring` chèn guid cũ (`.meta` luôn có ĐÚNG 1 dòng `guid:` đầu file → an toàn, không cần Regex + count).
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Unity 6 BCL không có `Regex.Replace(string, string, string, int count)`** — chỉ 3-arg hoặc `RegexOptions` variant. Muốn replace có số lần giới hạn: bỏ count (pattern xuất hiện đúng 1 lần thì 3-arg vẫn ổn) hoặc dùng string ops. Kiểm tra nhanh API BCL trước khi viết: nếu không chắc overload tồn tại → chọn cách đơn giản nhất (IndexOf/Substring/Replace).
+- **Mọi file `.meta` có đúng 1 dòng `guid: <32hex>`** — thao tác GUID trong Editor tool nên dùng IndexOf+Substring, không cần Regex.
+
+---
+
 ## 2026-08-11 — Font Kenney Future SDF THIẾU GLYPH — combo "x2" hiện lỗi "H2" (đã fix, chờ user regenerate)
 
 > User chơi thấy text lạ "H2" màu cam góc trái, trông bị mirror/glitch = **ComboText "x2"** đang render qua **fallback font**.

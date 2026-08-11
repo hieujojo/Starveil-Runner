@@ -116,8 +116,16 @@ namespace VoidRunner.EditorTools
             string text = File.ReadAllText(meta);
             if (text.Contains(oldGuid)) return; // guid vẫn giữ nguyên — không cần làm gì
 
-            string updated = System.Text.RegularExpressions.Regex.Replace(
-                text, "guid: [0-9a-f]{32}", "guid: " + oldGuid, 1);
+            // ⚠️ KHÔNG dùng Regex.Replace(text, pattern, replacement, count): overload 4 tham số với
+            // 'count' KHÔNG có trong BCL của Unity 6 → error CS1503 (Argument 3: string → int).
+            // Dùng string ops thuần: .meta luôn có ĐÚNG 1 dòng 'guid: ' ở đầu → an toàn mọi phiên bản.
+            const string marker = "guid: ";
+            int idx = text.IndexOf(marker, System.StringComparison.Ordinal);
+            if (idx < 0) return;
+            int start = idx + marker.Length;
+            if (text.Length < start + 32) return;
+
+            string updated = text.Substring(0, start) + oldGuid + text.Substring(start + 32);
             if (updated != text)
             {
                 File.WriteAllText(meta, updated);
