@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-11 — Skybox: gắn Nebula/SpaceSkies (user import 2 gói) + fix camera ClearFlags Solid Color
+
+> User import 2 gói: 'Nebula Skyboxes' (4 cubemap .exr, chưa có material) + 'SpaceSkies Free' (3 bộ Pink/Green/Purple, material sẵn). Yêu cầu: gắn vào game cho hết "bầu trời trống/vô hồn".
+
+### Root cause & fix (commit `…`)
+
+- **Skybox không hiện dù gán material** — Game scene camera đang `m_ClearFlags: 2` (Solid Color) → **skybox CHỈ vẽ khi camera clear = Skybox** (m_ClearFlags: 1). Gán `RenderSettings.skyboxMaterial` mà camera vẫn Solid Color = vô ích. Fix: đổi Game camera `2 → 1` trực tiếp trong scene (MainMenu đã là 1 sẵn).
+- **Nebula chưa có material** — gói chỉ có 4 file `.exr` cubemap (import sẵn dạng Cube, 2048px). Fix: `Editor/SkyboxSetupTool.cs` (mới) — menu `Tools/Void Runner/Setup Skybox (Nebula)` tự tạo material `Skybox/Cubemap` (`_Tex = Nebula_02_Cubemap.exr`) tại `Assets/_Project/Materials/Skybox/NebulaSkybox.mat` (idempotent — có rồi thì load); menu `Setup Skybox (SpaceSkies Purple)` dùng material sẵn của gói (tông tím khớp hư không, nhẹ hơn). Cả 2 menu: gán `RenderSettings.skybox` + ép MỌI camera `ClearFlags = Skybox` (kể cả camera ẩn — FindObjectsInactive.Include) + MarkSceneDirty. Chạy cho cả Game + MainMenu.
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Skybox không hiện = kiểm tra camera ClearFlags TRƯỚC** — gán material vào RenderSettings là chưa đủ: camera phải `ClearFlags = Skybox` (1), nếu `Solid Color` (2) thì skybox không bao giờ được vẽ. Tool gán skybox PHẢI ép luôn camera clearFlags.
+- **Gói "skybox" dạng `.exr` cubemap thường KHÔNG kèm material** — phải tự tạo `Material(Shader.Find("Skybox/Cubemap"))` + `SetTexture("_Tex", cubemap)`. Kiểm tra `.meta` texture: `textureShape: 2` = Cube, `maxTextureSize` = độ phân giải import (exr này đã 2048 sẵn).
+
+---
+
 ## 2026-08-11 — Vòng 8: nút CLOSE HowToPlay + camera trôi ngang theo tàu + popup +N che đường + lane rộng 4.5
 
 > User: HowToPlay ổn nhưng KHÔNG có nút tắt; road rộng rồi thì dải 3 lane xanh cũng phải rộng theo (ko vượt road); bấm di chuyển mà cảnh vật di chuyển theo tàu; popup điểm "+10" chèn thẳng vào UI che obstacle/coin → phải ra khỏi trục đường.
