@@ -106,16 +106,16 @@ Assets/_Project/
 
 ## 🛠️ Quy ước phát triển
 
-- **Commit convention:** Conventional Commits (xem [`agent/COMMIT_TEMPLATES.md`](./agent/COMMIT_TEMPLATES.md))
+- **Commit convention:** Conventional Commits (xem [`agent/REFERENCE.md`](./agent/REFERENCE.md) (PART 4 — Commit))
 - **Changelog & bài học:** [`agent/CHANGELOG.md`](./agent/CHANGELOG.md)
-- **Kế hoạch chi tiết:** [`agent/void-runner-plan.md`](./agent/void-runner-plan.md)
+- **Kế hoạch chi tiết:** [`agent/PLAN.md`](./agent/PLAN.md)
 
 ---
 
 ## 📄 Giấy phép & Credits
 
 - **Code:** Toàn bộ code viết tay thuộc về tác giả.
-- **Assets bên thứ ba** (KHÔNG thuộc về tác giả — xem đầy đủ tại [`agent/CREDITS.md`](./agent/CREDITS.md)):
+- **Assets bên thứ ba** (KHÔNG thuộc về tác giả — xem đầy đủ tại [`agent/REFERENCE.md`](./agent/REFERENCE.md) (PART 3 — Credits)):
   - **Nebula Skyboxes** (skybox tinh vân) — Unity Asset Store EULA
   - **SpaceSkies Free** by **PULSAR BYTES** — Unity Asset Store EULA
   - **Kenney** (UI Pack, Space Kit, Fonts, Particle, Game Icons, Audio) — giấy phép **CC0 (Public Domain)**, dùng thoải mái không cần ghi công. Xem `License.txt` kèm theo từng gói.

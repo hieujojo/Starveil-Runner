@@ -41,8 +41,7 @@ namespace VoidRunner.Core.Player
         [Header("Tàu MODEL (Task D — chọn ở MainMenu)")]
         [Tooltip("2 prefab tàu (SF Fighter / Sparrow) — tool Setup Ship Select tự gán. Rỗng = tàu primitive cũ.")]
         [SerializeField] private GameObject[] shipPrefabs;
-        [Tooltip("Chiều cao chuẩn hóa model tàu (đơn vị) — đo bounds thật rồi ép scale.")]
-        [SerializeField, Tooltip("Chiều cao tàu (đơn vị) — 2026-08-12 user: tàu to thêm 1 xíu (0.9 → 1.1)")]
+        [SerializeField, Tooltip("Chiều cao tàu (đơn vị) — đo bounds thật rồi ép scale; 2026-08-12 user: tàu to thêm 1 xíu (0.9 → 1.1)")]
         private float shipTargetHeight = 1.1f;
         [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng (0 = model forward +Z = hướng chạy).")]
         [SerializeField] private float shipYaw = 0f;

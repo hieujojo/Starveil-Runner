@@ -198,7 +198,7 @@ Assets/
 - [x] Material PBR tối giản đồng bộ (tông "hư không": tím/đen phát sáng); lighting + skybox nhất quán — ✅ tool `MaterialLightingSetupTool` (5 material phát sáng + Light lạnh + ambient/fog tím), đã chạy 2 scene
 - [x] **Unity Test Framework** — 24 test (EditMode 16 + PlayMode 8), **kết quả 24/24 xanh**; asmdef `VoidRunner.Core` (code chính) + `DOTween.Modules` (bài học predefined assembly)
 - [x] **Kenney assets 6 bộ** (ui-pack, space-expansion, game-icons, particle-pack, space-kit, space-station-kit — CC0) — ✅ đã copy vào `Art/kenney_*`, đang convert + dựng HUD đẹp + ambient 2 bên đường
-- [x] **Task A — Credits thiết kế lại đẹp** (MainMenu + Game Over): `CreditsPanelBuilder` dùng chung — panel tím/đen + viền cyan + tiêu đề vàng + danh sách third-party assets (khớp CREDITS.md); nút CREDITS + GameOverCreditsButton (ẩn cùng gameOverPanel); fix double-subscribe — ✅ commit `faed21f`
+- [x] **Task A — Credits thiết kế lại đẹp** (MainMenu + Game Over): `CreditsPanelBuilder` dùng chung — panel tím/đen + viền cyan + tiêu đề vàng + danh sách third-party assets (khớp REFERENCE.md PART 3 — Credits); nút CREDITS + GameOverCreditsButton (ẩn cùng gameOverPanel); fix double-subscribe — ✅ commit `faed21f`
 - [x] **Task B — Enemy = QUÁI VẬT** (đã random 1 trong 3 — ĐỔI 2026-08-12: còn 1 enemy DUY NHẤT Flying Beetle, tool `Setup Enemy` gán 1 prefab) — ✅ commit `cd42fa9`
 - [x] **Task D — CHỌN TÀU ở MainMenu có preview 3D**: SaveSystem.SelectedShip; PlayerController.shipPrefabs (model SF Fighter/Sparrow thay primitive); ShipSelectManager (panel preview RenderTexture 256 + camera layer ShipPreview(6), nút < > SELECT CLOSE, tên tàu); tool `Setup Ship Select`; ShipCatalog (1 nguồn path + self-heal khi chưa gán prefab) — ✅ commit `decaa0e` + `de329c7`
 - [ ] **Task C — VẬT CẢN = asteroid/rock pack**: thay cube primitive (Dynamic Obstacle material) bằng model thiên thạch/đá có nhiều biến thể — CHỜ user tải pack (đã có sẵn meteor/rock trong Kenney Space Kit CC0 nếu muốn dùng luôn)
@@ -322,7 +322,7 @@ Unity 6 · URP · C# · Cinemachine · DOTween · TextMesh Pro · NavMesh
 
 ## 10. Commit convention
 
-> Quy ước đầy đủ (type, scope, quy tắc, validation): xem **[`COMMIT_TEMPLATES.md`](COMMIT_TEMPLATES.md)**.
+> Quy ước đầy đủ (type, scope, quy tắc, validation): xem **[`REFERENCE.md`](REFERENCE.md) (PART 4 — Commit)**.
 
 ```
 feat(player): viết lại điều khiển chuyển lane 3 làn
