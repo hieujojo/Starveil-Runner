@@ -110,6 +110,8 @@
 - **R6.11** — Warning `Assembly ... not valid. Loading skipped` khi mở lại Unity = vô hại (DLL cũ) → Clear Console.
 - **R6.12** — **GIT: KHÔNG chạy nhiều `git commit` song song (spawn_agents parallel)** — tranh chấp `.git/index.lock` (`fatal: Unable to create index.lock`) + `git add` của tiến trình này có thể bị `git commit` của tiến trình khác cuốn vào (commit dính file lạ). Luôn chạy git tuần tự — 1 lệnh git/lần spawn. *(Tái phạm được 2026-08-11.)*
 - **R6.13** — **`MonoBehaviour.enabled = false` TRONG TEST gọi `OnDisable()` ĐỒNG BỘ** — nếu singleton có `OnDisable` set `Instance = null`, test sẽ mất Instance ngay. Muốn "có Instance nhưng Start không chạy": disable xong khôi phục `Instance` (reflection `<Instance>k__BackingField`, `BindingFlags.NonPublic|Static`) + State qua `GetSetMethod(true)`. *(Gặp khi fix 4 test VoidChase 2026-08-11.)*
+- **R6.14** — **Cache Unity Asset Store hardcode ở `%APPDATA%\Unity\Asset Store-5.x` (ổ C — KHÔNG có setting đổi)** — các gói `.unitypackage` tải về chiếm nhiều GB trên ổ C dù project nằm ổ khác; file tải DỞ tạo thêm `.tmp` (gấp ~2 lần) → nghẽn đĩa → Import lỗi `Couldn't decompress`. Giải pháp chuẩn: **Junction** — `robocopy "<nguồn>" "D:\UnityCache\AssetStore" /E /MOVE` (an toàn) → `rmdir "<nguồn>"` → `mklink /J "<nguồn>" "D:\UnityCache\AssetStore"` → verify `dir` thấy `<JUNCTION>`. Khi tải lại gói: xóa cache hỏng (file .unitypackage + .tmp) rồi Download lại, đợi 100% trước khi Import. *(2026-08-12: ổ C 6.4GB + Scifi Kit tải hỏng.)*
+- **R6.15** — **Unity tự tạo `Assets/_Recovery/` khi editor crash — KHÔNG phải asset thật, PHẢI thêm vào `.gitignore`** (nếu commit sẽ đẩy rác + file .meta lạ lên repo). Kiểm tra khi thấy untracked lạ trong Assets.
 
 ## 📝 NHÓM 7 — Commit / Docs
 

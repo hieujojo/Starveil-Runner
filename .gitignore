@@ -136,17 +136,30 @@ InitTestScene*.unity*
 /Assets/Flying Beetle.meta
 /Assets/fantasySpider.meta
 
-# ===== 3rd-party VFX/Obstacle packs (giữ LOCAL — tổng ~235MB, import 2026-08-12 v3b) =====
-# ⚠️ Khi clone lại project: tự tải lại 3 gói (link trong agent/REFERENCE.md PART 3), Unity sinh .meta mới:
-#   • OlegWER High-Poly Asteroid (obstacle) /Assets/OlegWER/
+# ===== 3rd-party VFX/Obstacle packs (giữ LOCAL — import 2026-08-12) =====
+# ⚠️ Khi clone lại project: tự tải lại (link trong agent/REFERENCE.md PART 3), Unity sinh .meta mới:
+#   • OlegWER High-Poly Asteroid (obstacle cũ — thay bằng SciFi 2026-08-12 v3f) /Assets/OlegWER/
 #   • Eric VFX Studio Free Game VFX /Assets/Eric VFX Studio/
 #   • JMO Assets Cartoon FX Remaster /Assets/JMO Assets/
+#   • Creepy_Cat 3D Scifi Kit Starter Kit (obstacle chính — Fence) /Assets/Creepy_Cat/
+#   • Sci_fi_Drones (obstacle phụ — Robot_Guardian) /Assets/Sci_fi_Drones/
+#   • G-spot_Lab Magic Energy Seamless Textures (VFX tàu) /Assets/G-spot_Lab/
 /Assets/OlegWER/
 /Assets/Eric VFX Studio/
 /Assets/JMO Assets/
+/Assets/Creepy_Cat/
+/Assets/Sci_fi_Drones/
+/Assets/G-spot_Lab/
 /Assets/OlegWER.meta
 /Assets/Eric VFX Studio.meta
 /Assets/JMO Assets.meta
+/Assets/Creepy_Cat.meta
+/Assets/Sci_fi_Drones.meta
+/Assets/G-spot_Lab.meta
+
+# ===== Unity recovery folder (tự tạo khi editor crash) =====
+/Assets/_Recovery/
+/Assets/_Recovery.meta
 
 # ===== Config tool khác (kilo CLI) =====
 /.kilo/

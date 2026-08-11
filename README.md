@@ -12,9 +12,9 @@
 
 - **3 lane vô tận, road rộng 18m**: bấm `A`/`D` (hoặc mũi tên) = nhảy ngay 1 lane; **đè giữ** = trượt liên tục qua nhiều lane; nhả = tự về giữa lane — phản hồi tức thì, né chướng ngại vật mượt mà
 - **Enemy = Flying Beetle đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Enemy **tiến sát** (phình to, đe dọa); né sạch 10–15s → Enemy **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Enemy nuốt chửng = **Game Over**. Đụng obstacle → tàu **nhấp nháy** (feedback rõ ràng)
-- **Chướng ngại vật**: Ramp + DynamicBox gắn ngẫu nhiên, **luôn chừa ≥1 lane an toàn** + **safe zone 20m đầu game** (không obstacle — không chết tức thì)
+- **Chướng ngại vật**: **rào chắn trạm (Fence)** + **drone bảo vệ (Robot_Guardian)** gắn ngẫu nhiên theo weight, **luôn chừa ≥1 lane an toàn** + **safe zone 20m đầu game** (không obstacle — không chết tức thì)
 - **Coin & Power-up**: gom coin tăng điểm (hàng coin **không bao giờ đè lên obstacle** — chọn lane khác), nhặt power-up (Shield / Magnet / Slow-mo)
-- **Obstacle**: **thiên thạch Asteroid** (OlegWER High-Poly Asteroid) — chạy tool `Tools/Void Runner/Setup Obstacle = Asteroid` để tạo prefab + gán vào ObstacleData
+- **Obstacle**: **rào chắn trạm vũ trụ** (Fence — 3D Scifi Kit Starter Kit) + **drone Guardian** (Sci fi Drones) — chạy tool `Tools/Void Runner/Setup Obstacle = SciFi (Fence + Drone Guardian)` để tạo prefab + gán vào 2 ObstacleData (Ramp → Barrier, DynamicBox → Drone)
 - **Độ khó công bằng**: tốc độ nền tăng dần + combo multiplier — cái chết do **lỗi của bạn**, không phải ngẫu nhiên
 
 ---

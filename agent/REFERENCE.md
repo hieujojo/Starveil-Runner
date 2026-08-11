@@ -33,7 +33,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | 2 | Object pool tile | `Core/World/TileSpawner.cs` + `Tile.cs` | Pool sẵn tile, spawn trước + recycle sau lưng | Không GC spike giữa chừng |
 | 3 | AI đuổi theo (Enemy) | `Core/World/EnemyChase.cs` | **Cơ chế 2 nấc cố định + BẮT** (không NavMeshAgent — track vô tận không bake được): nấc 0 giữ 16m (fix 2026-08-12 v3: 9m bị camera cắt — camera cách player 10m) → đụng obstacle lần 1 → nấc 1 áp sát 12m + **vỗ cánh nhanh hơn** (Animator.speed 2x) → né sạch 12s → nới về 16m → đụng lần 2 trong cửa sổ → **Enemy LAO TỚI BẮT** (clip `atack 1`) → chờ 1.1s → Game Over mượt | Điểm khác biệt so với runner thường — Enemy phản ánh lỗi của player, không tự tăng tốc |
 | 4 | State machine | `Core/Game/GameManager.cs` | Menu → Playing → GameOver; phím R restart (tạm) | Event-driven |
-| 5 | Obstacle weighted | `Core/World/ObstacleManager.cs` + `Data/ObstacleData.cs` | Spawn theo tỉ lệ, luôn chừa ≥1 lane an toàn. **Visual 2026-08-12 v3c: Asteroid (OlegWER)** — prefab `Prefabs/Obstacles/AsteroidObstacle.prefab` (tool `Setup Obstacle = Asteroid`); data nằm ở `ScriptableObjects/Ramp.asset` + `DynamicBox.asset` | ScriptableObject |
+| 5 | Obstacle weighted | `Core/World/ObstacleManager.cs` + `Data/ObstacleData.cs` | Spawn theo tỉ lệ, luôn chừa ≥1 lane an toàn. **Visual 2026-08-12 v3f: SciFi** — `BarrierObstacle.prefab` = Fence_Long_01 (3D Scifi Kit Starter Kit — rào chắn trạm, chính) + `DroneObstacle.prefab` = Robot_Guardian (Sci fi Drones — phụ); tool `Setup Obstacle = SciFi (Fence + Drone Guardian)`; data: `Ramp.asset → Barrier`, `DynamicBox.asset → Drone` | ScriptableObject |
 
 ### G2 — Hệ thống game
 
@@ -130,10 +130,10 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | B6 | Nhặt **Shield** (xanh) → vòng hạt xanh, trong 3s đâm obstacle **không chết** | ☐ |
 | B7 | Nhặt **Magnet** (đỏ) → hút coin xa về phía player (bụi đỏ) | ☐ |
 | B8 | Nhặt **SlowMo** (tím) → game chậm lại 3s (bụi tím) | ☐ |
-| B9 | Đâm obstacle (**thiên thạch Asteroid**) → **camera rung nhẹ** (screen shake) + SFX death | ☐ |
+| B9 | Đâm obstacle (**rào chắn Fence / drone Guardian**) → **camera rung nhẹ** (screen shake) + SFX death | ☐ |
 | B10 | Sau lưng có **Enemy = Flying Beetle** đuổi theo (cánh vỗ bay) + **vệt khói tối** phía sau | ☐ |
 | B11 | Coin/player/obstacle **phát sáng** trong bóng tối (Bloom) | ☐ |
-| B12 | Không thấy hộp vật lý lạ, không xuyên sàn, không bay lung tung — Asteroid đứng yên trên đường, không quay lộn xộn | ☐ |
+| B12 | Không thấy hộp vật lý lạ, không xuyên sàn, không bay lung tung — Fence/drone đứng yên chặn lane (Fence chắn NGANG — không chắn dọc đường), không quay lộn xộn | ☐ |
 
 ## C. Game Over + restart
 
@@ -274,7 +274,10 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | **SpaceSkies Free** | PULSAR BYTES | **Standard Unity Asset Store EULA** | [SpaceSkies Free — Unity Asset Store](https://assetstore.unity.com/packages/2d/textures-materials/sky/spaceskies-free-80503) | Skybox sao (Pink/Green/Purple) — fallback nhẹ |
 | **Kenney UI Pack** | Kenney (kenney.nl) | **CC0 1.0 (Public Domain)** | [kenney.nl/assets/ui-pack](https://kenney.nl/assets/ui-pack) | Sprite UI chính |
 | **Kenney UI Pack — Space Expansion** | Kenney | **CC0 1.0** | [kenney.nl/assets/ui-pack-space-expansion](https://kenney.nl/assets/ui-pack-space-expansion) | Sprite UI mở rộng |
-| **OlegWER — High-Poly Asteroid** | OlegWER | Standard Unity Asset Store EULA (theo nguồn tải) | Tìm "High-Poly Asteroid" trên Unity Asset Store | ⭐ Thay obstacle code-drawn bằng thiên thạch (import 2026-08-12) |
+| **OlegWER — High-Poly Asteroid** | OlegWER | Standard Unity Asset Store EULA (theo nguồn tải) | Tìm "High-Poly Asteroid" trên Unity Asset Store | ⚠️ obstacle cũ — **thay bằng SciFi Kit 2026-08-12 v3f** (vẫn còn trong máy, không dùng) |
+| **Creepy Cat — 3D Scifi Kit Starter Kit** | Creepy Cat | Standard Unity Asset Store EULA | assetstore.unity.com/packages/3d/environments/3d-scifi-kit-starter-kit-92152 | ⭐ **obstacle CHÍNH**: Fence_Long_01 → `BarrierObstacle.prefab` (import 2026-08-12 v3f) |
+| **Lukas Bobor — Sci fi Drones** | Lukas Bobor | Standard Unity Asset Store EULA | assetstore.unity.com/packages/3d/characters/robots/sci-fi-drones-90326 | ⭐ **obstacle PHỤ**: Robot_Guardian → `DroneObstacle.prefab` (import 2026-08-12 v3f) |
+| **G-spot Lab — Magic Energy Seamless Textures Free** | G-spot Lab | Standard Unity Asset Store EULA | tìm trên Unity Asset Store | Texture magic cho VFX (import 2026-08-12) |
 | **Eric VFX Studio — Free Game VFX** | Eric VFX Studio | Standard Unity Asset Store EULA | [assetstore.unity.com](https://assetstore.unity.com) | ⭐ Thay particle code bằng prefab VFX (FX_Fireball, FX_Green_Hit...) (import 2026-08-12) |
 | **JMO Assets — Cartoon FX Remaster** | JMO Assets | Standard Unity Asset Store EULA | [assetstore.unity.com/packages/vfx/particles/cartoon-fx-remaster-free-109565](https://assetstore.unity.com/packages/vfx/particles/cartoon-fx-remaster-free-109565) | ⭐ VFX tàu (Explosions, Fire, Impacts...) (import 2026-08-12) |
 | **Kenney Fonts (Kenney Future)** | Kenney | **CC0 1.0** | [kenney.nl/assets/kenney-fonts](https://kenney.nl/assets/kenney-fonts) | Font UI / HUD |
@@ -294,7 +297,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 > **không bắt buộc ghi công**. File `License.txt` nằm kèm trong từng thư mục gói.
 > ⚠️ Logo Kenney KHÔNG thuộc CC0 — không dùng logo trong game.
 > ℹ️ **Đã xóa 2026-08-12 v3b** (~58MB, không được tham chiếu): Kenney Space Kit, Space Station Kit,
-> Game Icons, Particle Pack — thay bằng OlegWER Asteroid + Eric VFX Studio + JMO Cartoon FX.
+> Game Icons, Particle Pack — thay bằng OlegWER Asteroid + Eric VFX Studio + JMO Cartoon FX + **Creepy Cat Scifi Kit + Lukas Bobor Drones + G-spot Lab Magic (v3f)**.
 
 ---
 
@@ -323,7 +326,10 @@ THIRD-PARTY ASSETS
 - SpaceSkies Free by PULSAR BYTES (Unity Asset Store EULA)
 - Nebula Skyboxes (Unity Asset Store EULA)
 - UI Pack + Font "Kenney Future" + Audio by Kenney (CC0 Public Domain)
-- High-Poly Asteroid by OlegWER (Unity Asset Store EULA)
+- High-Poly Asteroid by OlegWER (Unity Asset Store EULA) — obstacle cũ
+- 3D Scifi Kit Starter Kit by Creepy Cat (Unity Asset Store EULA) — obstacle Fence
+- Sci fi Drones by Lukas Bobor (Unity Asset Store EULA) — obstacle Drone Guardian
+- Magic Energy Seamless Textures by G-spot Lab (Unity Asset Store EULA)
 - Free Game VFX by Eric VFX Studio (Unity Asset Store EULA)
 - Cartoon FX Remaster by JMO Assets (Unity Asset Store EULA)
 - SF Fighter by CGPitbull · Sparrow by Ebal Studios · Flying Beetle · Monster Pack · Fantasy Spider (Unity Asset Store EULA)

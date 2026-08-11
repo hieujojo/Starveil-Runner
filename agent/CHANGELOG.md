@@ -25,6 +25,27 @@
 
 ---
 
+## 2026-08-12 (v3f) — Obstacle = SciFi (Fence + Drone) thay Asteroid + cache chuyển sang ổ D
+
+> User: "trong 1 game vũ trụ thì tự nhiên có cục thiên thạch giữa đường có kì quá ko, bạn đề xuất vài giải pháp tối ưu; tôi ko muốn vẽ bằng code, muốn dùng chính các assets có sẵn (giống dùng thư viện icon thay vì tự vẽ)". → Chốt: **Fence_Long_01 (3D Scifi Kit Starter Kit — Creepy_Cat) + Robot_Guardian (Sci fi Drones — Lukas Bobor)**.
+
+### Việc đã làm
+
+- **NEW `Editor/SciFiObstacleSetupTool.cs`** (idempotent): tạo 2 prefab wrapper (root SphereCollider trigger + `Obstacle` + con model scale chuẩn theo bounds thật — pattern giống AsteroidObstacleSetupTool, R7.9):
+  - `BarrierObstacle.prefab` = Fence_Long_01 (rào chắn trạm), targetHeight 1.6, **tự xoay 90° quanh Y nếu trục dài theo Z → chắn NGANG lane** (không chắn dọc đường)
+  - `DroneObstacle.prefab` = Robot_Guardian, targetHeight 1.2 (drone bay giữa lane — né dễ)
+  - Gán **Ramp.asset → Barrier, DynamicBox.asset → Drone** (giữ obstacleType/spawnWeight; 2 ObstacleData trước đó đều trỏ Asteroid — giờ tách 2 loại)
+- Material tím: không cần MaterialFixer trong tool — `Obstacle.Awake()` tự ép URP/Lit lúc spawn (R3.16, fix v3e).
+- `.gitignore`: thêm 3 gói mới (Creepy_Cat ~1.15GB, Sci_fi_Drones 0.22GB, G-spot_Lab 0.34GB) + `Assets/_Recovery/` (Unity tự tạo khi crash — KHÔNG commit).
+- **Cache Unity Asset Store chuyển ổ C → D** (ổ C chỉ còn 6.4GB): junction `C:\Users\Admin\AppData\Roaming\Unity\Asset Store-5.x → D:\UnityCache\AssetStore` (robocopy /MOVE + mklink /J). Verify: `<JUNCTION>` + đủ 13 gói.
+
+### Bài học — QUY TẮC MỚI (R6.14)
+
+- **Cache Unity Asset Store luôn ở `%APPDATA%\Unity\Asset Store-5.x` (ổ C — hardcode, không có setting đổi)** — gói tải về (bản .unitypackage) chiếm nhiều GB trên ổ C dù project nằm ổ khác. Giải pháp chuẩn: **Junction (symlink)**: `robocopy "<nguồn>" "D:\..." /E /MOVE` (an toàn — có lỗi không mất dữ liệu) → `rmdir` thư mục cũ → `mklink /J "<đường dẫn cũ>" "D:\..."` → verify bằng `dir` (thấy `<JUNCTION>`). Khi Unity đang MỞ: junction vẫn OK nhưng KHÔNG move khi đang tải/import.
+- **Unity tạo `Assets/_Recovery/` khi editor crash — folder này KHÔNG phải asset thật, PHẢI ignore** (không commit lên repo).
+
+---
+
 ## 2026-08-12 (v3e) — Dọn log diag tạm + fix material tím OBSTACLE (lỗi R3.16 tái phạm) + Select Ship to
 
 > User: "cho select ship to thêm, đừng quá tiết kiệm UI; đọc toàn bộ log, ngoài các log in ra thì có hàng loạt log đỏ, xóa bớt mấy log cũ; vật thể màu tím chứ ko phải màu nguyên bản — tưởng tuân theo rule rồi mà sao lại lặp lại lỗi này".
