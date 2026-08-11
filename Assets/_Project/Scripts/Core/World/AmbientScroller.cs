@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VoidRunner.Core.Player;
 
 namespace VoidRunner.Core.World
 {
@@ -56,6 +57,54 @@ namespace VoidRunner.Core.World
                 propPrefabs.AddRange(prefabs);
             }
             BuildProps();
+        }
+
+        private void Start()
+        {
+            // GameManager KHÔNG gọi Initialize ở runtime (chỉ Editor tool) → props được tool dựng cứng
+            // trong scene KHÔNG nằm trong _props → Update recycle return sớm → hết props sau 1 quãng
+            // đường (triệu chứng "chỉ phần đầu có cảnh vật"). Tự heal:
+            // 1) nạp các con hiện có vào pool; 2) ép lại scale/vị trí chuẩn (chặn bề ngang + ngoài road).
+            if (player == null)
+            {
+                var pc = FindAnyObjectByType<PlayerController>();
+                if (pc != null) player = pc.transform;
+            }
+
+            if (_props.Count == 0 && transform.childCount > 0)
+            {
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    Transform child = transform.GetChild(i);
+                    if (child.GetComponentInChildren<Renderer>() == null) continue;
+                    HealProp(child);
+                    _props.Add(child);
+                }
+                Debug.Log($"[DiagProp] Start-heal: nạp {_props.Count} prop có sẵn trong scene (scale + vị trí chuẩn)");
+            }
+        }
+
+        /// <summary>
+        /// Ép 1 prop (đã dựng cứng trong scene bằng tool) về đúng chuẩn:
+        /// scale chặn cả chiều cao lẫn bề ngang + đặt x ngoài road theo bounds THỰC.
+        /// (Props bản cũ dùng code chỉ chuẩn chiều cao → bề ngang khổng lồ đè lên road.)
+        /// </summary>
+        private void HealProp(Transform prop)
+        {
+            const float roadHalfWidth = 7f;  // road rộng 14 (bán kính = 7)
+            const float roadMargin = 1.5f;   // mép prop cách mép road tối thiểu 1.5m
+
+            float scale = NormalizeScale(prop.gameObject);
+            prop.localScale = Vector3.one * scale;
+
+            Vector3 size = GetRenderBoundsSize(prop.gameObject);
+            float halfWidth = Mathf.Max(size.x, 1f) * 0.5f;
+            float side = prop.position.x >= 0f ? 1f : -1f;
+            float x = side * Mathf.Max(sideOffset, roadHalfWidth + halfWidth + roadMargin);
+
+            Vector3 pos = prop.position;
+            pos.x = x;
+            prop.position = pos;
         }
 
         /// <summary>Dựng lại toàn bộ prop 2 bên (gọi khi tool chạy / restart).</summary>

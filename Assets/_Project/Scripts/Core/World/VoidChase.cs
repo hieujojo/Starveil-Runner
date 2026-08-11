@@ -1,6 +1,7 @@
 using UnityEngine;
 using VoidRunner.Core;
 using VoidRunner.Core.Player;
+using VoidRunner.Systems.VFX;
 
 namespace VoidRunner.Core.World
 {
@@ -55,6 +56,9 @@ namespace VoidRunner.Core.World
         private float _currentDistance;
         private float _relaxTimer;
 
+        // Visual hố đen (build bằng code — thay quả banh tím cũ): lõi đen + đĩa bồi tụ quay + hạt bị hút
+        private Transform _disk;
+
         public void Setup(Transform playerRef) => player = playerRef;
 
         private void Awake()
@@ -65,6 +69,117 @@ namespace VoidRunner.Core.World
             // Collider là trigger — player đi vào là bị nuốt (không đẩy vật lý)
             Collider col = GetComponent<Collider>();
             if (col != null) col.isTrigger = true;
+
+            // R0.2: Void = HỐ ĐEN thực thụ (không phải banh tím) — dựng visual bằng code, idempotent
+            BuildBlackHoleVisual();
+        }
+
+        /// <summary>
+        /// Dựng visual hố đen: lõi đen (nuốt ánh sáng) + đĩa bồi tụ phát sáng tím quay + hạt bị hút vào tâm.
+        /// Ẩn mesh renderer quả banh tím cũ trên root. Idempotent — chạy lại không nhân đôi.
+        /// </summary>
+        private void BuildBlackHoleVisual()
+        {
+            Transform existing = transform.Find("BlackHole");
+            if (existing != null)
+            {
+                _disk = existing.Find("AccretionDisk");
+                return;
+            }
+
+            // Ẩn quả banh tím cũ (mesh renderer gốc) — hố đen thay thế hình ảnh
+            MeshRenderer rootMr = GetComponent<MeshRenderer>();
+            if (rootMr != null) rootMr.enabled = false;
+
+            var bh = new GameObject("BlackHole");
+            bh.transform.SetParent(transform, false);
+
+            // Lõi đen — sphere đen tuyệt đối (nuốt ánh sáng), nhỏ hơn collider trigger
+            GameObject core = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            core.name = "Core";
+            core.transform.SetParent(bh.transform, false);
+            core.transform.localScale = Vector3.one * 0.45f;
+            Collider coreCol = core.GetComponent<Collider>();
+            if (coreCol != null) Destroy(coreCol);
+            MeshRenderer coreMr = core.GetComponent<MeshRenderer>();
+            coreMr.sharedMaterial = CreateBlackHoleMaterial();
+            coreMr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            coreMr.receiveShadows = false;
+
+            // Đĩa bồi tụ — cylinder dẹt phát sáng tím neon, nghiêng nhẹ, quay chậm (xem như vành sáng hút vật chất)
+            GameObject disk = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            disk.name = "AccretionDisk";
+            disk.transform.SetParent(bh.transform, false);
+            disk.transform.localPosition = Vector3.zero;
+            disk.transform.localRotation = Quaternion.Euler(75f, 0f, 0f);
+            disk.transform.localScale = new Vector3(1.15f, 0.03f, 1.15f);
+            Collider diskCol = disk.GetComponent<Collider>();
+            if (diskCol != null) Destroy(diskCol);
+            MeshRenderer diskMr = disk.GetComponent<MeshRenderer>();
+            diskMr.sharedMaterial = CreateAccretionMaterial();
+            diskMr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            diskMr.receiveShadows = false;
+            _disk = disk.transform;
+
+            // Hạt bị hút vào tâm — cảm giác hố đen đang "nuốt"
+            CreateSuckParticles(bh.transform);
+        }
+
+        private static Material CreateBlackHoleMaterial()
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            Material mat = shader != null ? new Material(shader) : new Material(Shader.Find("Standard"));
+            mat.color = new Color(0.01f, 0.005f, 0.02f, 1f); // đen tím gần tuyệt đối
+            mat.SetFloat("_Metallic", 0f);
+            mat.SetFloat("_Smoothness", 0.2f);
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", new Color(0.05f, 0.02f, 0.12f, 1f)); // hơi phát tím
+            return mat;
+        }
+
+        private static Material CreateAccretionMaterial()
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            Material mat = shader != null ? new Material(shader) : new Material(Shader.Find("Standard"));
+            mat.color = new Color(0.65f, 0.35f, 0.95f, 1f); // tím sáng
+            mat.SetFloat("_Metallic", 0f);
+            mat.SetFloat("_Smoothness", 0.7f);
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", new Color(0.75f, 0.4f, 1f, 1f)); // tím neon
+            return mat;
+        }
+
+        /// <summary>Hạt nhỏ bị hút vào tâm hố đen (velocityOverLifetime radial âm = hút vào).</summary>
+        private static void CreateSuckParticles(Transform parent)
+        {
+            var go = new GameObject("SuckParticles");
+            go.transform.SetParent(parent, false);
+
+            var ps = go.AddComponent<ParticleSystem>();
+            var main = ps.main;
+            main.loop = true;
+            main.playOnAwake = true;
+            main.startLifetime = 0.5f;
+            main.startSpeed = -2f;
+            main.startSize = 0.08f;
+            main.startColor = new Color(0.7f, 0.4f, 1f, 0.6f);
+            main.maxParticles = 40;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            var emission = ps.emission;
+            emission.rateOverTime = 60f;
+
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 0.9f;
+
+            var vel = ps.velocityOverLifetime;
+            vel.enabled = true;
+            vel.radial = -1.5f; // âm = kéo về tâm
+
+            var renderer = go.GetComponent<ParticleSystemRenderer>();
+            renderer.material = VFXManager.CreateSoftParticleMaterial();
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
         }
 
         private void OnEnable()
@@ -139,6 +254,12 @@ namespace VoidRunner.Core.World
             // Phình to hơn khi áp sát — mức độ đe dọa nhìn thấy được
             float closeness = Mathf.InverseLerp(baseDistance, closeDistance, _currentDistance);
             transform.localScale = Vector3.one * Mathf.Lerp(baseScale, closeScale, closeness);
+
+            // Đĩa bồi tụ quay chậm — hiệu ứng hố đen hút vật chất
+            if (_disk != null)
+            {
+                _disk.Rotate(0f, 40f * Time.deltaTime, 0f, Space.Self);
+            }
 
             // Safety net: khoảng cách z thực tế dưới ngưỡng → Void nuốt player (cơ chế chết chắc chắn
             // chạy kể cả khi collider chưa kịp overlap do player đổi lane)

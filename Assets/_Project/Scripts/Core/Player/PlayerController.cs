@@ -56,6 +56,10 @@ namespace VoidRunner.Core.Player
         private static Material _engineMat;
         private static Material _flameMat;
 
+        // Hiệu ứng va chạm: nhấp nháy thân tàu khi đụng obstacle (R: "chạm vào là người nhấp nháy")
+        private Renderer[] _shipRenderers;
+        private Coroutine _blinkRoutine;
+
         public float ForwardSpeed => _currentSpeed;
         public bool IsDead => _isDead;
 
@@ -85,6 +89,7 @@ namespace VoidRunner.Core.Player
         {
             GameEvents.OnGameOver += HandleGameOver;
             GameEvents.OnRestart += HandleRestart;
+            GameEvents.OnObstacleHit += HandleObstacleHitBlink;
             DifficultyManager.OnDifficultyChanged += HandleDifficultyChanged;
         }
 
@@ -92,7 +97,38 @@ namespace VoidRunner.Core.Player
         {
             GameEvents.OnGameOver -= HandleGameOver;
             GameEvents.OnRestart -= HandleRestart;
+            GameEvents.OnObstacleHit -= HandleObstacleHitBlink;
             DifficultyManager.OnDifficultyChanged -= HandleDifficultyChanged;
+        }
+
+        /// <summary>Đụng obstacle → thân tàu nhấp nháy vài nhịp (hiệu ứng va chạm rõ ràng).</summary>
+        private void HandleObstacleHitBlink()
+        {
+            if (_isDead || _shipRenderers == null || _shipRenderers.Length == 0) return;
+            if (_blinkRoutine != null) StopCoroutine(_blinkRoutine);
+            _blinkRoutine = StartCoroutine(BlinkShip());
+        }
+
+        private System.Collections.IEnumerator BlinkShip()
+        {
+            const float blinkStep = 0.09f;
+            const int blinks = 4; // 4 lần tắt/bật = nhấp nháy rõ mà không quá lâu
+            for (int i = 0; i < blinks * 2; i++)
+            {
+                bool visible = i % 2 == 0;
+                SetShipRenderersVisible(visible);
+                yield return new WaitForSeconds(blinkStep);
+            }
+            SetShipRenderersVisible(true);
+            _blinkRoutine = null;
+        }
+
+        private void SetShipRenderersVisible(bool visible)
+        {
+            for (int i = 0; i < _shipRenderers.Length; i++)
+            {
+                if (_shipRenderers[i] != null) _shipRenderers[i].enabled = visible;
+            }
         }
 
         /// <summary>Nhận tốc độ mới từ DifficultyManager (khi game đang chơi).</summary>
@@ -211,6 +247,7 @@ namespace VoidRunner.Core.Player
             if (existing != null)
             {
                 _ship = existing;
+                _shipRenderers = _ship.GetComponentsInChildren<MeshRenderer>();
                 return;
             }
 
@@ -241,6 +278,9 @@ namespace VoidRunner.Core.Player
             _exhaust = CreateExhaustSystem(ship.transform);
 
             _ship = ship.transform;
+
+            // Cache renderer của toàn bộ thân tàu (cho hiệu ứng nhấp nháy khi đụng obstacle)
+            _shipRenderers = _ship.GetComponentsInChildren<MeshRenderer>();
         }
 
         /// <summary>Hệ hạt exhaust liên tục — hạt cam mềm bay về sau đuôi (không cần asset).</summary>
