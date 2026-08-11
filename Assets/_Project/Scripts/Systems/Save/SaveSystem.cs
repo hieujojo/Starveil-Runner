@@ -10,6 +10,7 @@ namespace VoidRunner.Systems.Save
     {
         private const string BestScoreKey = "VoidRunner_BestScore";
         private const string VolumeKey = "VoidRunner_Volume";
+        private const string SelectedShipKey = "VoidRunner_SelectedShip";
 
         /// <summary>Best score đã đạt (chỉ ghi khi cao hơn — tự động lưu).</summary>
         public static int BestScore
@@ -32,6 +33,17 @@ namespace VoidRunner.Systems.Save
             set
             {
                 PlayerPrefs.SetFloat(VolumeKey, Mathf.Clamp01(value));
+                PlayerPrefs.Save();
+            }
+        }
+
+        /// <summary>Tàu đã chọn (index vào PlayerController.shipPrefabs — 0 = SF Fighter, 1 = Sparrow).</summary>
+        public static int SelectedShip
+        {
+            get => Mathf.Clamp(PlayerPrefs.GetInt(SelectedShipKey, 0), 0, 3);
+            set
+            {
+                PlayerPrefs.SetInt(SelectedShipKey, Mathf.Clamp(value, 0, 3));
                 PlayerPrefs.Save();
             }
         }

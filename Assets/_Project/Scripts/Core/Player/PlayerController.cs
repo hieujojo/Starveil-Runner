@@ -4,6 +4,7 @@ using VoidRunner.Core.World;
 using VoidRunner.Systems.Difficulty;
 using VoidRunner.Systems.Input;
 using VoidRunner.Systems.PowerUp;
+using VoidRunner.Systems.Save;
 using VoidRunner.Systems.VFX;
 
 namespace VoidRunner.Core.Player
@@ -35,6 +36,14 @@ namespace VoidRunner.Core.Player
         private float bankAngle = 14f;
         [SerializeField, Tooltip("Tốc độ nghiêng về cân bằng (càng cao càng nhanh)")]
         private float bankSmooth = 10f;
+
+        [Header("Tàu MODEL (Task D — chọn ở MainMenu)")]
+        [Tooltip("2 prefab tàu (SF Fighter / Sparrow) — tool Setup Ship Select tự gán. Rỗng = tàu primitive cũ.")]
+        [SerializeField] private GameObject[] shipPrefabs;
+        [Tooltip("Chiều cao chuẩn hóa model tàu (đơn vị) — đo bounds thật rồi ép scale.")]
+        [SerializeField] private float shipTargetHeight = 0.9f;
+        [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng (0 = model forward +Z = hướng chạy).")]
+        [SerializeField] private float shipYaw = 0f;
 
         private Rigidbody _rb;
         private Vector3 _startPos;
@@ -279,6 +288,14 @@ namespace VoidRunner.Core.Player
                 return;
             }
 
+            // Task D (2026-08-11): ưu tiên model tàu đã chọn ở MainMenu (SaveSystem.SelectedShip)
+            int idx = SaveSystem.SelectedShip;
+            if (shipPrefabs != null && shipPrefabs.Length > 0 && idx >= 0 && idx < shipPrefabs.Length && shipPrefabs[idx] != null)
+            {
+                BuildModelShip(shipPrefabs[idx]);
+                return;
+            }
+
             // Ẩn trái banh cũ (MeshRenderer trên root) — tàu thay thế hình ảnh
             MeshRenderer ball = GetComponent<MeshRenderer>();
             if (ball != null) ball.enabled = false;
@@ -309,6 +326,67 @@ namespace VoidRunner.Core.Player
 
             // Cache renderer của toàn bộ thân tàu (cho hiệu ứng nhấp nháy khi đụng obstacle)
             _shipRenderers = _ship.GetComponentsInChildren<MeshRenderer>();
+        }
+
+        /// <summary>
+        /// Task D: dựng tàu từ MODEL (prefab FBX — SF Fighter / Sparrow) thay vì primitive.
+        /// Scale chuẩn theo chiều cao thật, vô hiệu hóa collider con (chỉ root sphere collider
+        /// quản lý va chạm), gắn flame + exhaust ngay sau đuôi model (đo bounds).
+        /// </summary>
+        private void BuildModelShip(GameObject prefab)
+        {
+            // Ẩn trái banh cũ
+            MeshRenderer ball = GetComponent<MeshRenderer>();
+            if (ball != null) ball.enabled = false;
+
+            EnsureMaterials(); // flame/exhaust vẫn dùng material neon code
+
+            GameObject ship = Instantiate(prefab, transform);
+            ship.name = "Ship";
+
+            // Vô hiệu hóa collider con — không đụng vật lý, chỉ render
+            foreach (var col in ship.GetComponentsInChildren<Collider>())
+            {
+                col.enabled = false;
+            }
+
+            // Chuẩn hóa scale theo chiều cao thật
+            Bounds b = GetRenderBounds(ship);
+            if (b.size.y > 0.001f)
+            {
+                ship.transform.localScale = Vector3.one * (shipTargetHeight / b.size.y);
+            }
+            // Quay mặt về hướng chạy (+Z) — model forward +Z là chuẩn; sai hướng thì chỉnh shipYaw
+            ship.transform.localRotation = Quaternion.Euler(0f, shipYaw, 0f);
+
+            // Flame + exhaust gắn SAU đuôi model (tính lại bounds sau scale)
+            Bounds scaled = GetRenderBounds(ship);
+            float rearZ = -scaled.size.z * 0.5f - 0.15f;
+            float liftY = scaled.size.y * 0.35f;
+
+            _flame = CreatePart(ship.transform, "Thruster", new Vector3(0f, liftY, rearZ), new Vector3(0.18f, 0.18f, 0.55f), _flameMat);
+            _flameBaseScale = _flame.localScale;
+
+            _exhaust = CreateExhaustSystem(ship.transform);
+            _exhaust.transform.localPosition = new Vector3(0f, liftY, rearZ - 0.25f);
+
+            _ship = ship.transform;
+            _shipRenderers = _ship.GetComponentsInChildren<MeshRenderer>();
+
+            Debug.Log($"[Ship] Model: {prefab.name} (scale={ship.transform.localScale.x:F2}, size={scaled.size})");
+        }
+
+        private static Bounds GetRenderBounds(GameObject go)
+        {
+            Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
+            bool has = false;
+            foreach (var r in go.GetComponentsInChildren<Renderer>())
+            {
+                if (r == null || !r.enabled) continue;
+                if (has) bounds.Encapsulate(r.bounds);
+                else { bounds = r.bounds; has = true; }
+            }
+            return has ? bounds : new Bounds(Vector3.zero, Vector3.one);
         }
 
         /// <summary>Hệ hạt exhaust liên tục — hạt cam mềm bay về sau đuôi (không cần asset).</summary>

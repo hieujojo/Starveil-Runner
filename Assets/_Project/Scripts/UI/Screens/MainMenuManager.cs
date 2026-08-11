@@ -42,6 +42,7 @@ namespace VoidRunner.UI
             RefreshSoundLabel();
             EnsureCloseButton(); // nút CLOSE trên panel — đóng popup rõ ràng (không chỉ click dimmer)
             EnsureCredits();    // nút CREDITS + panel credits (tạo bằng code, idempotent)
+            EnsureShipSelect(); // Task D: panel chọn ship (preview 3D, lưu SaveSystem.SelectedShip)
 
             if (playButton != null) playButton.onClick.AddListener(PlayGame);
             if (howToPlayButton != null) howToPlayButton.onClick.AddListener(ToggleHowToPlay);
@@ -155,10 +156,10 @@ namespace VoidRunner.UI
             Canvas canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null) return;
 
-            // Nút CREDITS — dưới BestScore (-230), an toàn màn hình nhỏ.
-            // ⚠️ KHÔNG subscribe onClick ở đây — Start() đã subscribe (nếu subscribe 2 lần
-            // thì 1 click = toggle 2 lần = panel bật-tắt liền nhau, nhìn như hỏng — góp ý reviewer).
-            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(0f, -280f), new Vector2(280f, 56f));
+            // Nút CREDITS — CÙNG HÀNG với nút SHIP (y=-280): CREDITS bên PHẢI (160), SHIP bên TRÁI (-160)
+            // (tránh chồng nhau — user thêm chọn ship Task D). KHÔNG subscribe onClick ở đây —
+            // Start() đã subscribe (subscribe 2 lần = 1 click toggle 2 lần = nhìn như hỏng — góp ý reviewer).
+            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(160f, -280f), new Vector2(300f, 56f));
 
             // Panel credits + nút CLOSE
             GameObject panel = CreditsPanelBuilder.EnsurePanel(canvas);
@@ -171,6 +172,13 @@ namespace VoidRunner.UI
                     if (closeBtn != null) closeBtn.onClick.AddListener(ToggleCredits);
                 }
             }
+        }
+
+        /// <summary>Task D: gắn ShipSelectManager (tạo panel chọn ship) — idempotent.</summary>
+        private void EnsureShipSelect()
+        {
+            if (FindAnyObjectByType<ShipSelectManager>() != null) return;
+            gameObject.AddComponent<ShipSelectManager>();
         }
 
         /// <summary>Bật/tắt panel credits (có dimmer giống HowToPlay).</summary>
