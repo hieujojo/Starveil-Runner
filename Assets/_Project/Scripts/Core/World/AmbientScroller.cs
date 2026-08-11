@@ -21,6 +21,9 @@ namespace VoidRunner.Core.World
         [Tooltip("Chiều cao chuẩn hóa của prop (đơn vị) — nhỏ = prop nhỏ, không đè lên road.")]
         [SerializeField] private float targetHeight = 3.2f;
 
+        [Tooltip("Bề ngang tối đa chuẩn hóa của prop (đơn vị) — chặn model bề ngang khổng lồ (gate/pipe) đè lên road.")]
+        [SerializeField] private float targetWidth = 3.5f;
+
         [Tooltip("Khoảng cách giữa 2 prop liên tiếp trên cùng 1 bên.")]
         [SerializeField] private float spacing = 9f;
 
@@ -66,11 +69,13 @@ namespace VoidRunner.Core.World
 
             if (propPrefabs.Count == 0 || player == null) return;
 
+            const float roadHalfWidth = 7f;   // road rộng 14 (bán kính = 7)
+            const float roadMargin = 1.5f;    // mép prop cách mép road tối thiểu 1.5m
+
             float startZ = player.position.z - countPerSide * spacing * 0.5f;
 
             for (int side = 0; side < 2; side++)
             {
-                float x = side == 0 ? -sideOffset : sideOffset;
                 for (int i = 0; i < countPerSide; i++)
                 {
                     GameObject prefab = propPrefabs[Random.Range(0, propPrefabs.Count)];
@@ -82,18 +87,32 @@ namespace VoidRunner.Core.World
 
                     GameObject prop = Instantiate(prefab, transform);
                     prop.name = $"{prefab.name} ({(side == 0 ? "L" : "R")}{i})";
-                    prop.transform.position = new Vector3(x, 0f, z + jitterZ);
                     prop.transform.rotation = Quaternion.Euler(0f, rotY, 0f);
 
-                    // Scale ĐỒNG NHẤT theo kích thước thật của model (không văng lung tung:
-                    // chimney to thì nhỏ lại, craft nhỏ thì to lên — tất cả ~targetHeight đơn vị)
-                    float baseScale = NormalizeScale(prop, targetHeight);
-                    float scale = baseScale * (1f + (scaleVariation > 0f ? Random.Range(-scaleVariation, scaleVariation) : 0f));
+                    // Scale: chặn CẢ chiều cao lẫn bề ngang (model bề ngang khổng lồ bị thu nhỏ
+                    // — gốc rễ "prop đè lên road": NormalizeScale cũ chỉ chuẩn theo chiều cao)
+                    float scale = NormalizeScale(prop);
+                    scale *= 1f + (scaleVariation > 0f ? Random.Range(-scaleVariation, scaleVariation) : 0f);
                     prop.transform.localScale = Vector3.one * scale;
+
+                    // Đo bề ngang THỰC sau scale → đặt x sao cho prop nằm hẳn NGOÀI road
+                    Vector3 size = GetRenderBoundsSize(prop);
+                    float halfWidth = Mathf.Max(size.x, 1f) * 0.5f;
+                    float x = side == 0
+                        ? -(roadHalfWidth + halfWidth + roadMargin)
+                        : (roadHalfWidth + halfWidth + roadMargin);
+                    // Prop hẹp thì giữ mức sideOffset quen thuộc — không đẩy xa hơn cần thiết
+                    x = side == 0 ? Mathf.Min(x, -sideOffset) : Mathf.Max(x, sideOffset);
+
+                    prop.transform.position = new Vector3(x, 0f, z + jitterZ);
 
                     // FBX Kenney có material trắng sáng → đổi sang material tối tím để không chói mắt
                     // + không bị Bloom thổi phồng (bài học: FBX trắng + Bloom = chói)
                     ApplyDarkMaterial(prop);
+
+                    // [TẠM] chẩn đoán — xác nhận prop không đè lên road (bỏ khi đã chuẩn)
+                    float innerEdge = side == 0 ? x + halfWidth : x - halfWidth;
+                    Debug.Log($"[DiagProp] {prop.name} side={(side == 0 ? "L" : "R")} x={x:F2} scale={scale:F2} size=({size.x:F2},{size.y:F2},{size.z:F2}) halfW={halfWidth:F2} innerEdge={innerEdge:F2} roadEdge=±{roadHalfWidth}");
 
                     _props.Add(prop.transform);
                 }
@@ -101,10 +120,20 @@ namespace VoidRunner.Core.World
         }
 
         /// <summary>
-        /// Tính scale để model có chiều cao gần targetHeight (đồng nhất kích thước giữa các prop
-        /// — tránh "văng lung tung" do FBX Kenney có kích thước rất khác nhau).
+        /// Tính scale để model có chiều cao ~targetHeight VÀ bề ngang ≤ targetWidth
+        /// (đồng nhất kích thước giữa các prop + chặn model bề ngang khổng lồ đè lên road).
         /// </summary>
-        private float NormalizeScale(GameObject prop, float targetHeight)
+        private float NormalizeScale(GameObject prop)
+        {
+            Vector3 size = GetRenderBoundsSize(prop);
+            if (size.sqrMagnitude <= 0.001f) return 1f;
+            float heightScale = targetHeight / Mathf.Max(size.y, 0.001f);
+            float widthScale = targetWidth / Mathf.Max(size.x, 0.001f);
+            return Mathf.Min(heightScale, widthScale);
+        }
+
+        /// <summary>Bounds world-space gộp mọi renderer của prop (world == local vì AmbientScroller ở gốc, không scale).</summary>
+        private Bounds GetRenderBounds(GameObject prop)
         {
             Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
             bool hasBounds = false;
@@ -120,10 +149,12 @@ namespace VoidRunner.Core.World
                     hasBounds = true;
                 }
             }
+            return hasBounds ? bounds : new Bounds(Vector3.zero, Vector3.one);
+        }
 
-            if (!hasBounds) return 1f;
-            float height = bounds.size.y;
-            return height > 0.001f ? targetHeight / height : 1f;
+        private Vector3 GetRenderBoundsSize(GameObject prop)
+        {
+            return GetRenderBounds(prop).size;
         }
 
         /// <summary>Đổi toàn bộ renderer của prop sang material tối tím (URP Lit, không phát sáng).</summary>
