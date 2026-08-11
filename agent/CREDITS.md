@@ -20,6 +20,16 @@
 | **Kenney Particle Pack** | Kenney | **CC0 1.0** | [kenney.nl/assets/particle-pack](https://kenney.nl/assets/particle-pack) | Texture particle (burst, exhaust) |
 | **Kenney Fonts (Kenney Future)** | Kenney | **CC0 1.0** | [kenney.nl/assets/kenney-fonts](https://kenney.nl/assets/kenney-fonts) | Font UI / HUD |
 | **Kenney Audio Packs** (music/sfx) | Kenney | **CC0 1.0** | [kenney.nl/assets](https://kenney.nl/assets) | Nhạc nền + hiệu ứng âm thanh |
+| **Free SF Fighter** | CGPitbull | **Standard Unity Asset Store EULA** | [assetstore.unity.com/packages/3d/vehicles/space/free-sf-fighter-11711](https://assetstore.unity.com/packages/3d/vehicles/space/free-sf-fighter-11711) | Tàu player tùy chọn #1 (Ship Select) |
+| **Star Sparrow Modular Spaceship** | Ebal Studios | **Standard Unity Asset Store EULA** | [assetstore.unity.com/packages/3d/vehicles/space/star-sparrow-modular-spaceship-73167](https://assetstore.unity.com/packages/3d/vehicles/space/star-sparrow-modular-spaceship-73167) | Tàu player tùy chọn #2 (Ship Select) |
+| **Level 1 Monster Pack** | — | **Standard Unity Asset Store EULA** | [assetstore.unity.com/packages/3d/characters/creatures/level-1-monster-pack-77703](https://assetstore.unity.com/packages/3d/characters/creatures/level-1-monster-pack-77703) | Void monster #1 (Monster Skin1) |
+| **Free Fantasy Spider** | — | **Standard Unity Asset Store EULA** | [assetstore.unity.com/packages/3d/characters/creatures/free-fantasy-spider-10104](https://assetstore.unity.com/packages/3d/characters/creatures/free-fantasy-spider-10104) | Void monster #3 (spider) |
+| **Flying Beetle** | — | **Standard Unity Asset Store EULA** | Tải free trên Unity Asset Store (tìm "Flying Beetle") | Void monster #2 — có animation bay |
+
+> ℹ️ **5 gói model trên (SF_Fighter / Sparrow_Fighter / Monster / Flying Beetle / fantasySpider)
+> KHÔNG nằm trong repo** (tổng ~2.5GB — GitHub chặn file >100MB, xem `.gitignore`).
+> Khi clone project cần tự tải lại từ link trên rồi chạy tool `Void Runner → Setup…` để gán lại.
+> Nếu thiếu model: game vẫn chạy (fallback: tàu primitive, Void = black hole).
 
 > ℹ️ **Kenney CC0 = Public Domain** — được dùng thoải mái cho mọi mục đích (kể cả thương mại),
 > **không bắt buộc ghi công**. File `License.txt` nằm kèm trong từng thư mục gói.

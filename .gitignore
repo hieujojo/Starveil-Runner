@@ -116,3 +116,16 @@ InitTestScene*.unity*
 #   • SpaceSkies Free (Unity Asset Store) → /Assets/SpaceSkies Free/
 /Assets/Nebula Skyboxes/
 /Assets/SpaceSkies Free/
+
+# ===== 3rd-party model packs (giữ LOCAL — tổng ~2.5GB, GitHub chặn >100MB) =====
+# ⚠️ Khi clone lại project: tự tải lại 5 gói (link trong agent/CREDITS.md), Unity sinh .meta mới:
+#   • SF_Fighter (Free SF Fighter) /Assets/SF_Fighter/
+#   • Sparrow_Fighter (Star Sparrow) /Assets/Sparrow_Fighter/
+#   • Monster (Level 1 Monster Pack) /Assets/Monster/
+#   • Flying Beetle /Assets/Flying Beetle/
+#   • fantasySpider (Free Fantasy Spider) /Assets/fantasySpider/
+/Assets/SF_Fighter/
+/Assets/Sparrow_Fighter/
+/Assets/Monster/
+/Assets/Flying Beetle/
+/Assets/fantasySpider/
