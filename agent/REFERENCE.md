@@ -31,7 +31,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 |---|---|---|---|---|
 | 1 | Điều khiển 3 lane | `Core/Player/PlayerController.cs` | **Tàu vũ trụ nhỏ** (dựng từ primitive trong Awake) tự bay tới; A/D hoặc mũi tên đổi lane; lerp mượt + **banking nghiêng khi đổi lane**; đụng obstacle chỉ `RaiseObstacleHit` (không chết) | Rigidbody + Input System; tàu = Body/WingL/WingR/Cockpit/Engine + material neon code |
 | 2 | Object pool tile | `Core/World/TileSpawner.cs` + `Tile.cs` | Pool sẵn tile, spawn trước + recycle sau lưng | Không GC spike giữa chừng |
-| 3 | AI đuổi theo (Void) | `Core/World/VoidChase.cs` | **Cơ chế 2 nấc cố định** (không NavMeshAgent — track vô tận không bake được): nấc 0 giữ 9m → đụng obstacle lần 1 → nấc 1 áp sát 5m (phình to) → né sạch 12s → nới về 9m → đụng lần 2 trong cửa sổ → Void nuốt → Game Over | Điểm khác biệt so với runner thường — Void phản ánh lỗi của player, không tự tăng tốc |
+| 3 | AI đuổi theo (Enemy) | `Core/World/EnemyChase.cs` | **Cơ chế 2 nấc cố định + BẮT** (không NavMeshAgent — track vô tận không bake được): nấc 0 giữ 16m (fix 2026-08-12 v3: 9m bị camera cắt — camera cách player 10m) → đụng obstacle lần 1 → nấc 1 áp sát 12m + **vỗ cánh nhanh hơn** (Animator.speed 2x) → né sạch 12s → nới về 16m → đụng lần 2 trong cửa sổ → **Enemy LAO TỚI BẮT** (clip `atack 1`) → chờ 1.1s → Game Over mượt | Điểm khác biệt so với runner thường — Enemy phản ánh lỗi của player, không tự tăng tốc |
 | 4 | State machine | `Core/Game/GameManager.cs` | Menu → Playing → GameOver; phím R restart (tạm) | Event-driven |
 | 5 | Obstacle weighted | `Core/World/ObstacleManager.cs` + `Data/ObstacleData.cs` | Spawn theo tỉ lệ, luôn chừa ≥1 lane an toàn | ScriptableObject |
 
@@ -55,7 +55,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | 14 | VFX | `Systems/VFX/VFXManager.cs` + `Editor/VFXSetupTool.cs` | **Particle**: coin burst tại vị trí coin + power-up burst (màu theo loại) — tạo 100% bằng code; **Popup điểm** "+10" nhân combo (DOTween bounce bay lên, pool 8 text, font Kenney Future) khi nhặt coin; **Screen shake** khi đâm obstacle (Cinemachine Impulse); **Vệt khói tối** theo Void (TrailRenderer code, nở rộng theo scale, clear khi restart) | Sự kiện `GameEvents` (thêm `OnCoinCollectedAt(Vector3)` mang vị trí) — zero coupling; pool + `Emit()` → không GC spike |
 | 15 | VFX trail Void + popup | *(gộp vào 14)* | ✅ Đã làm xong | — |
 | 16 | Post-processing | `Editor/PostProcessingSetupTool.cs` + `Settings/PostProcessing/VoidRunnerProfile.asset` | **Global Volume** cả 2 scene: **Bloom** (intensity 0.35, tint xanh — coin/power-up phát sáng), **Vignette** (0.25 tối xanh — cảm giác "hư không"), **Color Adjustments** (contrast +8, saturation +6, filter lạnh); bật `renderPostProcessing` trên Main Camera (volumeTrigger + layerMask); tool 1 nút idempotent — tự sửa profile rỗng nếu có | Profile asset tạo bằng code → **phải `AddObjectToAsset` từng component** (bài học m_AtlasTextures) |
-| 17 | Material/Lighting | `Editor/MaterialLightingSetupTool.cs` | **5 material tông "hư không"**: Background tím đen, Player cyan phát sáng, Enemy (Void) tím hồng, PickUp vàng phát sáng, Obstacle cam phát sáng; **Directional Light** trắng lạnh 1.1 + shadow mềm; **Ambient** tím tối (Flat) + **Fog** ExponentialSquared tím nhẹ (chiều sâu) | URP Lit + `_EMISSION` keyword + `RealtimeEmissive` GI — Bloom kích hoạt glow |
+| 17 | Material/Lighting | `Editor/MaterialLightingSetupTool.cs` + `PlayerController.EnsureShipLight` | **5 material tông "hư không"**: Background tím đen, Player cyan phát sáng, Enemy (Flying Beetle) nguyên bản, PickUp vàng phát sáng, Obstacle cam phát sáng; **Directional Light** trắng lạnh 1.1 + shadow mềm; **Ambient** tím tối (Flat) + **Fog** ExponentialSquared tím nhẹ (chiều sâu); **Point Light cyan bám tàu** (tàu nổi bật nhất trên track tối — fix 2026-08-12 v3) | URP Lit + `_EMISSION` keyword + `RealtimeEmissive` GI — Bloom kích hoạt glow |
 | 18 | Unity Test Framework | `Tests/EditMode` + `Tests/PlayMode` (2 asmdef + 6 file) | **24 test** (16 EditMode + 8 PlayMode): SaveSystem (best score/volume), GameEvents, ScoreSystem logic + combo tăng/clamp/reset theo thời gian thật, lane clamp | **Kết quả test thật: 24/24 xanh** ✅ |
 | 19 | Assembly architecture | `Scripts/VoidRunner.Core.asmdef` + `Plugins/.../DOTween.Modules.asmdef` | Code chính thành custom assembly (test reference được); DOTween modules tách riêng | Bài học: predefined assembly không reference được từ custom asmdef |
 | 20 | Kenney assets (6 bộ) | `Art/kenney_*` | UI pack + space-expansion + **game-icons (425) + particle-pack (193) + space-kit (772 + FBX) + space-station-kit (104 + FBX)** — CC0 | Đang convert → dựng HUD đẹp + ambient 2 bên đường |
@@ -110,7 +110,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 
 | # | Kiểm tra | Kết quả |
 |---|---|---|
-| A1 | Tựa đề **"VOID RUNNER"** font Kenney Future sắc nét (không ô vuông □) | ☐ |
+| A1 | Tựa đề **"VOID RUNNER"** font Kenney Future sắc nét — **CHỈ 1 chữ** (TitleGlow đã xóa hẳn — fix 2026-08-12 v3) | ☐ |
 | A2 | Nền tối tím + hơi sương mù, menu không chói | ☐ |
 | A3 | 3 nút (PLAY / HOW TO PLAY / âm thanh) có sprite Blue + hiệu ứng hover sáng | ☐ |
 | A4 | Best score **ẨN khi lần đầu chơi (= 0)** — chỉ hiện khi đã có điểm thật (R0.6) | ☐ |
@@ -200,12 +200,13 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 
 > ✅ Refactor gameplay ĐÃ CODE (2026-08-11) — các mục này test được ngay.
 > 🧪 **Test tự động đi kèm**: `EnemyChasePlayTests` (PlayMode, 5 test) — đã chạy/validate trước khi test tay.
+> ⚠️ **2026-08-12 v3**: khoảng cách đổi 9→16m / 7.5→12m (camera cắt màn hình); hit 2 = cảnh bắt (atack) chờ 1.1s mới Game Over — chờ ~1.5s khi test V3.
 
 | # | Kiểm tra | Kết quả |
 |---|---|---|
-| V1 | Đụng vật cản lần 1 → **KHÔNG chết**, Enemy tiến sát hơn (cảm nhận rõ) | ☐ |
+| V1 | Đụng vật cản lần 1 → **KHÔNG chết**, Enemy tiến sát (16→12m) + **vỗ cánh nhanh hơn** | ☐ |
 | V2 | Không chạm vật cản trong **10–15s** → Enemy NỚI LẠI khoảng cách ban đầu | ☐ |
-| V3 | Đụng **2 lần trong cửa sổ 10–15s** → Enemy nuốt → Game Over panel hiện | ☐ |
+| V3 | Đụng **2 lần trong cửa sổ 10–15s** → Enemy **lao tới bắt (clip atack 1)** → ~1.1s sau Game Over panel fade mượt | ☐ |
 | V4 | Game Over panel **LUÔN hiện** khi chết (không bao giờ "chết mà không thấy màn hình") | ☐ |
 | V5 | Enemy **không tự tăng tốc** theo thời gian — chỉ tiến sát khi player lỗi | ☐ |
 | V6 | Player = **tàu vũ trụ nhỏ** (không còn banh xanh), banking khi đổi lane, nhìn hợp lý | ☐ |
@@ -213,7 +214,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | V8 | **Toàn bộ text gameplay + menu = tiếng Anh** (RETRY/SCORE/BEST/SOUND ON-OFF/HowToPlay) | ☐ |
 | V9 | Best score **ẩn khi = 0** ở MainMenu; hiện khi đã có điểm | ☐ |
 | V10 | Nút âm thanh: text không thụt vào viền, không quá chật | ☐ |
-| V11 | Enemy **phình to hơn khi tiến sát** (nấc 1 đe dọa) | ☐ |
+| V11 | Enemy **phình to hơn khi tiến sát** (nấc 1 đe dọa — vẫn thấy cả con bọ, không che tàu) | ☐ |
 
 ---
 

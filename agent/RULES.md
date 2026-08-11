@@ -118,6 +118,8 @@
 - **R7.3** — Bug mới → ghi CHANGELOG.md; quyết định thiết kế → DECISIONS.md; kế hoạch → PLAN.md.
 - **R7.4** — Review README sau mỗi thay đổi ảnh hưởng hành vi người dùng / setup / kiến trúc.
 - **R7.5** — Trước khi refactor lớn: cập nhật docs trước, user duyệt → mới code.
+- **R7.6** — **KHÔNG sửa file `.unity`/`.prefab` bằng script ngoài Unity khi Unity đang MỞ scene/prefab đó** — Unity giữ bản trong memory và GHI ĐÈ file khi Ctrl+S → thay đổi biến mất (bug 2026-08-12: TitleGlow ẩn bằng file nhưng quay lại). Mọi thay đổi scene/phối cảnh phải qua **Editor tool** (chạy trong Unity), rồi user Ctrl+S.
+- **R7.7** — **Model 3rd-party có Animator controller — phải kiểm tra DEFAULT STATE** (controller có thể mặc định `idle` thay vì `flying`/`run` → nhân vật đứng im dù có Animator). Sau khi instantiate: `animator.Play("tên state mong muốn")` để ép trạng thái đúng (bug 2026-08-12: Flying Beetle default = `idle 1` → bọ không vỗ cánh).
 
 ---
 

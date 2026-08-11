@@ -9,12 +9,12 @@ using VoidRunner.Core.World;
 namespace VoidRunner.Tests
 {
     /// <summary>
-    /// Play Mode tests cho cơ chế Enemy 2 NẤC CỐ ĐỊNH (R0.4):
-    /// - NẤC 0: Enemy giữ baseDistance (9m) sau lưng player — không tự tăng tốc.
-    /// - Đụng obstacle lần 1 → NẤC 1: Enemy tiến sát closeDistance (7.5m — fix 2026-08-12:
-    ///   cũ 5m che mất tàu player).
-    /// - Né sạch hết cửa sổ → Enemy nới về 9m (reset nấc 0).
-    /// - Đụng lần 2 trong cửa sổ → Enemy nuốt → Game Over.
+    /// Play Mode tests cho cơ chế Enemy 2 NẤC CỐ ĐỊNH (R0.4) — FIX 2026-08-12 v3:
+    /// - NẤC 0: Enemy giữ baseDistance (16m) sau lưng player (đẩy ra vì camera cách player 10m
+    ///   → 9m cũ làm bọ chỉ cách camera 1m, bị cắt khỏi màn hình).
+    /// - Đụng obstacle lần 1 → NẤC 1: Enemy tiến sát closeDistance (12m) + vỗ cánh nhanh hơn.
+    /// - Né sạch hết cửa sổ → Enemy nới về 16m (reset nấc 0).
+    /// - Đụng lần 2 trong cửa sổ → Enemy LAO TỚI BẮT (atack) → sau catchDelay → Game Over.
     /// GameManager chỉ dùng để có Instance + State=Playing (disable để chặn Start noise).
     /// </summary>
     public class EnemyChasePlayTests
@@ -26,8 +26,8 @@ namespace VoidRunner.Tests
         private bool _gameOverRaised;
         private System.Action _gameOverHandler;
 
-        private const float BaseDist = 9f;
-        private const float CloseDist = 7.5f;
+        private const float BaseDist = 16f;
+        private const float CloseDist = 12f;
 
         [SetUp]
         public void SetUp()
@@ -43,9 +43,10 @@ namespace VoidRunner.Tests
             _enemy = _enemyGo.AddComponent<EnemyChase>();
             _enemy.Setup(_playerGo.transform);
 
-            // Tăng tốc co/nới + cửa sổ ngắn để test nhanh
+            // Tăng tốc co/nới + cửa sổ ngắn + catch nhanh để test nhanh
             SetPrivateField(_enemy, "distanceLerpSpeed", 50f);
             SetPrivateField(_enemy, "relaxWindow", 0.3f);
+            SetPrivateField(_enemy, "catchDelay", 0.05f);
 
             // GameManager để có Instance + State=Playing — disable để Start không chạy (tránh StartRun noise).
             // ⚠️ `enabled = false` kích hoạt OnDisable NGAY LẬP TỨC → GameManager.OnDisable set Instance = null
@@ -85,7 +86,7 @@ namespace VoidRunner.Tests
         {
             yield return new WaitForSeconds(0.3f);
             Assert.AreEqual(BaseDist, DistanceBehind(), 0.8f,
-                "NẤC 0: Enemy phải giữ ~9m sau lưng player (không tự tăng tốc).");
+                "NẤC 0: Enemy phải giữ ~16m sau lưng player (không tự tăng tốc).");
         }
 
         [UnityTest]
@@ -96,7 +97,7 @@ namespace VoidRunner.Tests
 
             yield return new WaitForSeconds(0.2f);
             Assert.AreEqual(CloseDist, DistanceBehind(), 0.8f,
-                "Đụng lần 1: Enemy phải tiến sát còn ~7.5m (nấc 1) nhưng chưa chết.");
+                "Đụng lần 1: Enemy phải tiến sát còn ~12m (nấc 1) nhưng chưa chết.");
             Assert.IsFalse(_gameOverRaised, "Nấc 1 không được Game Over.");
         }
 
@@ -110,7 +111,7 @@ namespace VoidRunner.Tests
             // Không đụng gì nữa → hết cửa sổ (0.3s) → nới về nấc 0
             yield return new WaitForSeconds(0.8f);
             Assert.AreEqual(BaseDist, DistanceBehind(), 0.8f,
-                "Né sạch hết cửa sổ: Enemy phải nới lại về ~9m (reset nấc 0).");
+                "Né sạch hết cửa sổ: Enemy phải nới lại về ~16m (reset nấc 0).");
         }
 
         [UnityTest]
@@ -119,10 +120,12 @@ namespace VoidRunner.Tests
             GameEvents.RaiseObstacleHit(); // → nấc 1
             yield return new WaitForSeconds(0.1f);
 
-            GameEvents.RaiseObstacleHit(); // đụng lần 2 trong cửa sổ → Enemy nuốt
-            yield return null;
+            GameEvents.RaiseObstacleHit(); // đụng lần 2 trong cửa sổ → Enemy BẮT (atack)
+            // CatchAndKill: lunge 0.3s + catchDelay 0.05s → Game Over sau ~0.4s
+            yield return new WaitForSeconds(0.6f);
 
-            Assert.IsTrue(_gameOverRaised, "Đụng lần 2 trong cửa sổ phải kích hoạt Game Over.");
+            Assert.IsTrue(_gameOverRaised,
+                "Đụng lần 2 trong cửa sổ phải kích hoạt cảnh bắt rồi Game Over.");
         }
 
         [UnityTest]

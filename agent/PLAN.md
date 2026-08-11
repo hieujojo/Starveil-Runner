@@ -170,16 +170,16 @@ Assets/
 **✅ Milestone G2:** Chơi hoàn chỉnh — score, combo, 3 power-up, âm thanh, best score lưu lại, độ khó tăng dần
 
 ### Giai đoạn 2.5 — REFACTOR GAMEPLAY (2026-08-11 — user review) ✅ ĐÃ THỰC THI
-> ✅ Đã chốt thiết kế: **Player = tàu vũ trụ nhỏ** · **Enemy 2 nấc cố định (9m → 7.5m)**.
+> ✅ Đã chốt thiết kế: **Player = tàu vũ trụ nhỏ** · **Enemy 2 nấc cố định + BẮT (16m → 12m, hit 2 = atack → Game Over)** — cập nhật 2026-08-12 v3 (khoảng cách cũ 9/7.5m bị camera cắt màn hình).
 > ✅ Code xong + commit + push (2026-08-11) — user chạy tool `Refactor: Both Scenes` rồi test.
 
-- [x] **R3-3 — Cơ chế Enemy 2 nấc cố định** (quan trọng nhất):
-  - Enemy giữ khoảng cách nền **9m** sau player (trong tầm camera offset -10 → nhìn thấy)
-  - Đụng vật cản lần 1 → Enemy tiến sát còn **5m** (chưa chết)
-  - Né sạch **10–15s** → Enemy nới dần về **9m** (reset nấc 0)
-  - Đụng lần 2 TRONG cửa sổ 10–15s → Enemy nuốt → Game Over
+- [x] **R3-3 — Cơ chế Enemy 2 nấc cố định + BẮT** (quan trọng nhất — cập nhật 2026-08-12 v3):
+  - Enemy giữ khoảng cách nền **16m** sau player (fix v3: camera cách player 10m → 9m cũ bị cắt màn hình)
+  - Đụng vật cản lần 1 → Enemy tiến sát còn **12m** + **vỗ cánh nhanh hơn** (Animator.speed 2x — chưa chết)
+  - Né sạch **10–15s** → Enemy nới dần về **16m** (reset nấc 0)
+  - Đụng lần 2 TRONG cửa sổ 10–15s → Enemy **LAO TỚI BẮT** (clip `atack 1`) → chờ ~1.1s → Game Over mượt
   - Enemy KHÔNG tự tăng tốc theo thời gian (bỏ co dần 60s cũ)
-  - ✅ `EnemyChase` viết lại (2 nấc + `relaxWindow` 12s + safety net) + `PlayerController` bỏ `Die()` (đụng obstacle chỉ `RaiseObstacleHit`); ScoreSystem giữ `OnObstacleHit → ResetCombo`; **thêm 5 PlayMode test** (`EnemyChasePlayTests`)
+  - ✅ `EnemyChase` viết lại (2 nấc + `relaxWindow` 12s + `CatchAndKill` + ép `flying` thay idle + safety net) + `PlayerController` bỏ `Die()` (đụng obstacle chỉ `RaiseObstacleHit`); ScoreSystem giữ `OnObstacleHit → ResetCombo`; **thêm 5 PlayMode test** (`EnemyChasePlayTests` — cập nhật 16/12m + catch delay)
 - [x] **R3-4 — Game Over panel luôn hiện**: fix `UIManager.ShowGameOver` — bỏ early-return khi ScoreSystem null, dời `_panelGroup` setup lên trước (nguyên nhân gốc "không thấy màn hình game over" trước đó là Enemy không bao giờ bắt kịp — bug camera/NavMesh đã fix)
 - [x] **R3-1 — Player = TÀU VŨ TRỤ NHỎ (đã chốt)**: `PlayerController.BuildSpaceship()` — primitive (Body/WingL/WingR/Cockpit/Engine) + material neon cyan code, tắt banh cũ, banking khi đổi lane; giữ Rigidbody
 - [x] **R3-2 — Track vô tận thật**: Ground 400m → 6000m qua tool (400m chỉ đủ 15–30s chơi); tile recycle vốn vô tận
@@ -219,7 +219,7 @@ Assets/
 | `GameManager` | State machine + luồng game | Enum State; event `OnGameOver`/`OnRestart`; singleton nhẹ hoặc tham chiếu qua scene |
 | `PlayerController` | Lane switching | Rigidbody + velocity forward; `Mathf.Lerp`/`MoveTowards` theo X; chặn input khi chết; không `FindGameObjectWithTag` trong runtime |
 | `TileSpawner` | Object pool | `Queue<Tile>`; spawn theo `tileLength`; recycle khi `transform.position.z < player.z - N` |
-| `EnemyChase` | AI đuổi theo | **2 nấc cố định 9m→7.5m** (Enemy duy nhất: Flying Beetle — Animator flying loop, code chỉ điều vị trí); KHÔNG NavMeshAgent — đuổi trực tiếp giữ khoảng cách + safety net; nới lại sau 10–15s |
+| `EnemyChase` | AI đuổi theo | **2 nấc cố định 16m→12m + BẮT** (Enemy duy nhất: Flying Beetle — Animator ép `flying` vỗ cánh, code chỉ điều vị trí); KHÔNG NavMeshAgent — đuổi trực tiếp giữ khoảng cách + safety net; hit 2 → `atack 1` → 1.1s → Game Over; nới lại sau 10–15s |
 | `ObstacleManager` | Spawn obstacle | Đọc từ `ObstacleData[]`; tỉ lệ xuất hiện tăng theo Difficulty; luôn chừa ≥1 lane an toàn |
 | `ScoreSystem` | Score + combo | `event Action<int> OnScoreChanged`; combo reset khi va chạm; score theo distance `+= speed * dt` |
 | `PowerUpSystem` | Hiệu ứng power-up | Đọc `PowerUpData` (SO); coroutine cho duration; slow-mo dùng `Time.timeScale` + khôi phục |

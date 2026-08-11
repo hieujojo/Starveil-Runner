@@ -41,8 +41,8 @@ namespace VoidRunner.Core.Player
         [Header("Tàu MODEL (Task D — chọn ở MainMenu)")]
         [Tooltip("2 prefab tàu (SF Fighter / Sparrow) — tool Setup Ship Select tự gán. Rỗng = tàu primitive cũ.")]
         [SerializeField] private GameObject[] shipPrefabs;
-        [SerializeField, Tooltip("Chiều cao tàu (đơn vị) — đo bounds thật rồi ép scale; 2026-08-12 user: tàu to thêm 1 xíu (0.9 → 1.1)")]
-        private float shipTargetHeight = 1.1f;
+        [SerializeField, Tooltip("Chiều cao tàu (đơn vị) — đo bounds thật rồi ép scale; 2026-08-12 v3 user: tàu to thêm ~10px (1.1 → 1.2) + Point Light bám tàu cho nổi bật")]
+        private float shipTargetHeight = 1.2f;
         [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng (0 = model forward +Z = hướng chạy).")]
         [SerializeField] private float shipYaw = 0f;
 
@@ -327,10 +327,33 @@ namespace VoidRunner.Core.Player
             // Hạt exhaust bay ngược (-Z) từ đuôi
             _exhaust = CreateExhaustSystem(ship.transform);
 
+            // FIX 2026-08-12 v3: Point Light bám tàu (nhánh primitive — giống model ship)
+            EnsureShipLight(ship.transform);
+
             _ship = ship.transform;
 
             // Cache renderer của toàn bộ thân tàu (cho hiệu ứng nhấp nháy khi đụng obstacle)
             _shipRenderers = _ship.GetComponentsInChildren<MeshRenderer>();
+        }
+
+        /// <summary>
+        /// FIX 2026-08-12 v3 (user: "tàu bị mờ"): tạo Point Light cyan bám theo tàu (con của Ship)
+        /// để tàu sáng + nổi bật nhất trên track tối. Idempotent — đã có "ShipLight" thì thôi.
+        /// </summary>
+        private static void EnsureShipLight(Transform ship)
+        {
+            if (ship.Find("ShipLight") != null) return;
+
+            var lightGo = new GameObject("ShipLight");
+            lightGo.transform.SetParent(ship, false);
+            lightGo.transform.localPosition = new Vector3(0f, 0.1f, 0f);
+
+            var light = lightGo.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(0.45f, 0.85f, 1f, 1f); // cyan nhạt
+            light.intensity = 2.2f;
+            light.range = 7f;
+            light.shadows = LightShadows.None; // nhẹ — không tốn shadow map
         }
 
         /// <summary>
@@ -377,6 +400,11 @@ namespace VoidRunner.Core.Player
 
             _exhaust = CreateExhaustSystem(ship.transform);
             _exhaust.transform.localPosition = new Vector3(0f, liftY, rearZ - 0.25f);
+
+            // FIX 2026-08-12 v3 (user: "tàu bị mờ, muốn nó là thứ nổi bật nhất"): Point Light cyan
+            // bám theo tàu — track tối đen, không có UI đè; tàu mờ vì THIẾU ÁNH SÁNG. Light này
+            // chiếu sáng thân tàu + halo quanh, tàu nổi bật hơn mọi thứ xung quanh.
+            EnsureShipLight(ship.transform);
 
             _ship = ship.transform;
             _shipRenderers = _ship.GetComponentsInChildren<MeshRenderer>();

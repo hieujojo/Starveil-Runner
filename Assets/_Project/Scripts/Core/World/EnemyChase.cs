@@ -35,11 +35,11 @@ namespace VoidRunner.Core.World
         [Header("Khoảng cách")]
         [SerializeField] private Transform player;
 
-        [SerializeField, Tooltip("Khoảng cách nền (nấc 0) sau lưng player — trong tầm camera offset -10")]
-        private float baseDistance = 9f;
+        [SerializeField, Tooltip("Khoảng cách nền (nấc 0) sau lưng player — FIX 2026-08-12 v3: 9→16m vì camera cách player 10m → bọ cách camera chỉ 1m → bị cắt khỏi màn hình (chỉ thấy phần đầu)")]
+        private float baseDistance = 16f;
 
-        [SerializeField, Tooltip("Khoảng cách khi đụng vật cản lần 1 (nấc 1) — áp sát nhưng KHÔNG che tàu (fix 2026-08-12: 5m che mất tàu)")]
-        private float closeDistance = 7.5f;
+        [SerializeField, Tooltip("Khoảng cách khi đụng vật cản lần 1 (nấc 1) — áp sát nhưng vẫn thấy cả con bọ (fix 2026-08-12 v3: 7.5→12m cùng lý do camera)")]
+        private float closeDistance = 12f;
 
         [SerializeField, Tooltip("Dưới ngưỡng này (khoảng cách z thật) = enemy nuốt player — safety net")]
         private float swallowDistance = 1.6f;
@@ -70,10 +70,18 @@ namespace VoidRunner.Core.World
         [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng (0 = model forward +Z về phía player).")]
         [SerializeField] private float enemyYaw = 0f;
 
+        [Header("Cơ chế bắt (hit lần 2)")]
+        [SerializeField, Tooltip("Hệ số vỗ cánh nhanh hơn khi đụng obstacle lần 1 (Animator.speed)")]
+        private float hitSpeedUp = 2f;
+        [SerializeField, Tooltip("Thời gian (giây) chạy animation atack trước khi Game Over — bắt mượt không cắt cảnh")]
+        private float catchDelay = 1.1f;
+
         private Vector3 _startPos;
         private int _stage;                 // 0 = nền, 1 = áp sát (đã đụng 1 lần)
         private float _currentDistance;
         private float _relaxTimer;
+        private bool _catching;             // đang thực hiện cảnh bắt (hit lần 2) — không cho trigger/lunge lần nữa
+        private Animator _animator;         // Animator của Flying Beetle (ép flying + speed khi hit)
 
         public void Setup(Transform playerRef) => player = playerRef;
 
@@ -120,6 +128,16 @@ namespace VoidRunner.Core.World
 
             GameObject enemy = Instantiate(enemyPrefab, transform);
             enemy.name = "Enemy";
+
+            // FIX 2026-08-12 v3 (user: "đừng rung con bọ mà cho nó vỗ cánh"): default state của
+            // Animator controller là "idle 1" (bọ đứng im) → ép chạy state "flying" (vỗ cánh loop).
+            // KHÔNG ép rotation mỗi frame (R4.17) — Animator lo phần chuyển động, code chỉ điều vị trí.
+            _animator = enemy.GetComponent<Animator>();
+            if (_animator != null)
+            {
+                _animator.Play("flying", 0, 0f);
+                _animator.speed = 1f;
+            }
 
             // Vô hiệu hóa collider con — chỉ root collider trigger nuốt player (không đụng vật lý)
             foreach (var col in enemy.GetComponentsInChildren<Collider>())
@@ -178,32 +196,84 @@ namespace VoidRunner.Core.World
             _currentDistance = baseDistance;
             transform.position = _startPos;
             transform.localScale = Vector3.one * baseScale;
+
+            // FIX 2026-08-12 v3: reset cơ chế bắt — dừng coroutine, quay về vỗ cánh thường
+            StopAllCoroutines();
+            _catching = false;
+            if (_animator != null)
+            {
+                _animator.speed = 1f;
+                _animator.Play("flying", 0, 0f);
+            }
         }
 
         /// <summary>
-        /// Player đụng vật cản (R0.4):
-        /// - NẤC 0 → NẤC 1: enemy tiến sát + mở cửa sổ né sạch.
-        /// - Đã NẤC 1 (đang trong cửa sổ) → enemy nuốt → Game Over.
+        /// Player đụng vật cản (R0.4) — FIX 2026-08-12 v3 (user: "chạm 1 lần vỗ nhanh hơn,
+        /// chạm 2 lần bắt lại và kết thúc game"):
+        /// - NẤC 0 → NẤC 1: enemy tiến sát + vỗ cánh NHANH HƠN (Animator.speed 2x) + mở cửa sổ né sạch.
+        /// - Đã NẤC 1 (đang trong cửa sổ) → NẤC 2: enemy LAO TỚI bắt player (Play atack),
+        ///   chờ catchDelay (1.1s — animation bắt diễn ra mượt) rồi mới Game Over.
         /// </summary>
         private void HandleObstacleHit()
         {
             if (GameManager.Instance == null || GameManager.Instance.State != GameState.Playing) return;
+            if (_catching) return; // đang bắt — không nhận hit mới
 
             if (_stage == 0)
             {
                 _stage = 1;
                 _relaxTimer = relaxWindow;
+                if (_animator != null) _animator.speed = hitSpeedUp; // vỗ cánh nhanh hơn
             }
             else
             {
-                GameEvents.RaiseGameOver();
+                StartCoroutine(CatchAndKill());
             }
+        }
+
+        /// <summary>
+        /// NẤC 2 — cảnh bắt (hit lần 2 trong cửa sổ): enemy lao tới player, chạy animation
+        /// "atack 1" (clip tấn công/bắt của Flying Beetle), BÁM DÍNH theo player suốt catchDelay
+        /// (fix reviewer 2026-08-12: nếu đứng yên, player chạy tiếp 10–20 m/s → lệch 11–22m →
+        /// nhìn như bắt vào khoảng không) rồi mới RaiseGameOver (UIManager fade panel mượt).
+        /// </summary>
+        private System.Collections.IEnumerator CatchAndKill()
+        {
+            _catching = true;
+            if (_animator != null)
+            {
+                _animator.speed = 1f;
+                _animator.Play("atack 1", 0, 0f); // cảnh bắt vật thể
+            }
+
+            // Lao tới player trong ~0.3s (không teleport) — target cập nhật mỗi frame theo player
+            Vector3 startPos = transform.position;
+            float t = 0f;
+            while (t < 0.3f)
+            {
+                t += Time.deltaTime;
+                Vector3 targetPos = (player != null ? player.position : startPos) + Vector3.up * 0.8f;
+                transform.position = Vector3.Lerp(startPos, targetPos, Mathf.Clamp01(t / 0.3f));
+                yield return null;
+            }
+
+            // Chờ animation bắt diễn ra — BÁM DÍNH player mỗi frame (không để bọ đứng yên mà
+            // player chạy xa → cảnh bắt giữ liền mạch, mượt).
+            float elapsed = 0f;
+            while (elapsed < catchDelay)
+            {
+                elapsed += Time.deltaTime;
+                if (player != null) transform.position = player.position + Vector3.up * 0.8f;
+                yield return null;
+            }
+            GameEvents.RaiseGameOver();
         }
 
         private void Update()
         {
             if (player == null) return;
             if (GameManager.Instance == null || GameManager.Instance.State != GameState.Playing) return;
+            if (_catching) return; // đang bắt — coroutine điều khiển vị trí, không bám nữa
 
             // NẤC 1: đếm ngược cửa sổ né sạch — hết hạn (player không đụng gì nữa) → nới về NẤC 0
             if (_stage == 1)
@@ -240,6 +310,7 @@ namespace VoidRunner.Core.World
 
         private void OnTriggerEnter(Collider other)
         {
+            if (_catching) return; // đang bắt — coroutine đã chịu trách nhiệm Game Over
             if (GameManager.Instance == null || GameManager.Instance.State != GameState.Playing) return;
             if (other.GetComponent<PlayerController>() != null)
             {

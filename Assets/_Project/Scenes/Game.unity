@@ -2307,7 +2307,7 @@ MonoBehaviour:
   shipPrefabs:
   - {fileID: 1152354105411914, guid: cdbec52167efb6a48b63cebb3284c246, type: 3}
   - {fileID: 1008573922842845754, guid: 1c008dfa10dec32449bd4e221be526d6, type: 3}
-  shipTargetHeight: 1.1
+  shipTargetHeight: 1.2
   shipYaw: 0
 --- !u!54 &1348608051
 Rigidbody:
@@ -2972,8 +2972,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoidRunner.Core.World.EnemyChase
   player: {fileID: 1348608049}
-  baseDistance: 9
-  closeDistance: 7.5
+  baseDistance: 16
+  closeDistance: 12
   swallowDistance: 1.6
   relaxWindow: 12
   distanceLerpSpeed: 3

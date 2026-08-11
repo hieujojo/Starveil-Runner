@@ -23,7 +23,7 @@
 
 | Tính năng | Kỹ thuật | Trạng thái |
 |---|---|---|
-| **Enemy = Flying Beetle — cơ chế tiến sát khi player lỗi** | Chase trực tiếp + **2 nấc cố định** (9m → 7.5m khi đụng, nới lại sau 12s sạch, đụng lần 2 → Game Over) + model Flying Beetle (Animator bay) + vệt khói tối | ✅ |
+| **Enemy = Flying Beetle — cơ chế tiến sát + BẮT khi player lỗi** | Chase trực tiếp + **2 nấc cố định** (16m → 12m khi đụng + vỗ cánh nhanh hơn, nới lại sau 12s sạch, đụng lần 2 → Enemy **lao tới bắt** (clip atack) → Game Over mượt) + model Flying Beetle (Animator bay — ép `flying` thay vì idle) | ✅ |
 | Player = **tàu vũ trụ nhỏ** | Dựng từ primitive + material neon (không cần model), banking khi đổi lane | ✅ |
 | Track sinh vô tận | **Object Pool** (`ObjectPool<T>`) + Ground 6000m — chạy mãi không hết đường | ✅ |
 | Obstacle cấu hình được | **ScriptableObject** (`ObstacleData`) + gắn ngẫu nhiên theo weight, luôn chừa ≥1 lane trống, safe zone 20m đầu game | ✅ |
@@ -36,7 +36,7 @@
 | UI (HUD / Menu / Game Over) | `UIManager` + TextMeshPro — **toàn bộ tiếng Anh** | ✅ |
 | Power-up | Shield / Magnet / Slow-mo | ✅ |
 | Audio + Save | `AudioManager` singleton + `SaveSystem` (PlayerPrefs) | ✅ |
-| Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Enemy, đụng obstacle → tàu nhấp nháy, coin không đè obstacle | ✅ |
+| Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Enemy, đụng obstacle → tàu nhấp nháy, coin không đè obstacle, **Point Light cyan bám tàu (nổi bật)** | ✅ |
 | Test tự động | **Unity Test Framework — 24 test + 5 PlayMode test Enemy 2 nấc** | ✅ |
 | Deploy | **WebGL build → itch.io / Unity Play** | ⏳ Giai đoạn 3 |
 

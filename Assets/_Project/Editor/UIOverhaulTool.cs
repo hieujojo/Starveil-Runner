@@ -324,18 +324,18 @@ namespace VoidRunner.EditorTools
                 return;
             }
 
-            // Layout dọc (anchor giữa): Title lên 330 + 1 dòng; dãn nút chính NHẸ so với bản gốc
-            // (60/-60/-160 — user: "giãn quá mức, chỉ tăng 1 tí"); Best -250; SHIP/CREDITS -335.
-            // ⚠️ GAP TÍNH THEO MÉP (fix reviewer 2026-08-12): Play 420x100 → bán kính 50;
-            // HowTo 340x76 → 38; Sound 340x76 → 38; Best 600x50 → 25.
-            //   Play 120 (đáy 70)  · HowTo -20 (đỉnh 18)  → gap 52px (gốc 32px)
-            //   HowTo -58 (đáy)    · Sound -150 (đỉnh -112) → gap 54px (gốc 24px)
-            //   Sound -188 (đáy)   · Best -250 (đỉnh -225) → gap 37px (gốc 17px)
+            // Layout dọc (anchor giữa) — FIX 2026-08-12 vòng 3 (user: "khoảng cách Play/HowTo/Sound
+            // giảm còn 5-10px"). GAP THEO MÉP = 8px: Play 420x100 (bán kính 50); HowTo 340x76 (38);
+            // Sound 340x76 (38); Best 600x50 (25).
+            //   Play 120 (đáy 70) · HowTo 24 (đỉnh 62)     → gap 8px
+            //   HowTo 24 (đáy -14) · Sound -60 (đỉnh -22)   → gap 8px
+            //   Sound -60 (đáy -98) · Best -160 (đỉnh -135) → gap 37px (giữ tương quan cũ)
+            //   Best -160 (đáy -185) · Ship/Credits -245    → gap 32px (giữ tương quan cũ)
             int changed = 0;
             if (SetRectPosition("PlayButton", new Vector2(0f, 120f))) changed++;
-            if (SetRectPosition("HowToPlayButton", new Vector2(0f, -20f))) changed++;
-            if (SetRectPosition("SoundButton", new Vector2(0f, -150f))) changed++;
-            if (SetRectPosition("BestScoreText", new Vector2(0f, -250f))) changed++;
+            if (SetRectPosition("HowToPlayButton", new Vector2(0f, 24f))) changed++;
+            if (SetRectPosition("SoundButton", new Vector2(0f, -60f))) changed++;
+            if (SetRectPosition("BestScoreText", new Vector2(0f, -160f))) changed++;
 
             // --- TitleText: 1 DÒNG NGANG (fix 2026-08-12, user "đừng xuống dòng VOID RUNNER") ---
             // Root cause: fontSize 110pt wrap trong rect 900px → "VOID / RUNNER" 2 dòng, dòng 2 bị
@@ -360,12 +360,14 @@ namespace VoidRunner.EditorTools
                     changed++;
                 }
 
-                // TitleGlow (cyan mờ sau title, nếu có) — dịch theo title để không lệch
+                // ⚠️ FIX 2026-08-12 vòng 3 (user: "vẫn còn 2 chữ VOID RUNNER"): XÓA HẲN TitleGlow.
+                // Trước đây chỉ set m_IsActive=0 trong FILE scene — nhưng Unity đang mở scene sẽ
+                // GHI ĐÈ file khi Ctrl+S → chữ glow quay lại. Xóa DestroyImmediate là vĩnh viễn
+                // (title trắng đã có Shadow + Outline riêng — glow cyan đè lệch chỉ tạo 2 chữ).
                 var glow = FindTransform(canvas.transform, "TitleGlow");
-                if (glow != null && glow.TryGetComponent<RectTransform>(out var grt))
+                if (glow != null)
                 {
-                    grt.anchoredPosition = new Vector2(0f, 330f);
-                    EditorUtility.SetDirty(grt);
+                    Object.DestroyImmediate(glow.gameObject);
                     changed++;
                 }
 
@@ -382,9 +384,10 @@ namespace VoidRunner.EditorTools
             }
 
             EditorSceneManager.MarkSceneDirty(scene);
-            Debug.Log($"[VoidRunner] Fix MainMenu Spacing xong: {changed} phần tử ép vị trí/font.");
+            Debug.Log($"[VoidRunner] Fix MainMenu Spacing xong: {changed} phần tử (đã xóa TitleGlow — hết 2 chữ).");
             EditorUtility.DisplayDialog("Void Runner — MainMenu Spacing",
-                $"Đã dãn {changed} phần tử (Play 120 / HowTo -20 / Sound -150 / Best -250 / Title 330pt 1 dòng / HowToPlayText 36pt).\n\n" +
+                $"Đã ép {changed} phần tử: xóa TitleGlow (hết 2 chữ) + nút sát nhau 8px " +
+                $"(Play 120 / HowTo 24 / Sound -60 / Best -160 / Title 330pt 1 dòng / HowToPlayText 36pt).\n\n" +
                 "Nhớ Ctrl+S lưu scene.", "OK");
         }
 

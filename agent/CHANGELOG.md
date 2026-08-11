@@ -5,6 +5,49 @@
 
 ---
 
+## 2026-08-12 (v3) — Fix MainMenu (2 chữ title · nút sát) + Enemy hiện đủ + cơ chế BẮT + tàu sáng/to
+
+> User: "void runner vẫn còn 2 chữ; khoảng cách play/how to play/sound giảm còn 5-10px; tàu bị mờ — muốn nó nổi bật nhất; con bọ xuất hiện ngay từ đầu nhưng chỉ thấy phần đầu; con bọ có cảnh bắt — chạm 1 lần vỗ nhanh hơn, chạm 2 lần bắt lại rồi mới end game; đừng rung con bọ mà cho nó vỗ cánh; tàu to thêm ~10px"
+
+### 1. "2 chữ VOID RUNNER" vẫn đè nhau (fix lần 2 — lần 1 không ăn)
+
+- **Nguyên nhân THẬT**: lần trước chỉ sửa `m_IsActive: 0` TRONG FILE scene — nhưng **Unity đang mở scene đó → khi user Ctrl+S, Unity GHI ĐÈ file từ bản trong memory** (vẫn active=1) → chữ glow quay lại.
+- **Bài học (R7.4 mới)**: KHÔNG sửa file `.unity`/`.prefab` khi Unity đang mở scene đó — mọi thay đổi scene phải qua **Editor tool** (chạy trong Unity, modify trực tiếp object) rồi user Ctrl+S.
+- **Fix**: `UIOverhaulTool.FixMainMenuSpacing` → `DestroyImmediate(TitleGlow)` — xóa HẲN (title trắng đã có Shadow + Outline riêng). Tool idempotent, chạy lại không lỗi.
+
+### 2. Nút Play/HowToPlay/Sound quá xa (gap 52–54px → 8px)
+
+- Tool cũ ép 120/-20/-150 → gap theo mép 52px/54px (user: "quá chật" → "giãn quá" → giờ "giảm còn 5-10px").
+- **Fix**: gap mép 8px — Play 120 · HowTo 24 · Sound -60 · Best -160 (giữ tương quan Best/Ship như cũ). Đồng bộ code tạo nút: `ShipSelectManager` -245, `MainMenuManager` (Credits) -245.
+
+### 3. Con bọ chỉ thấy "phần đầu" khi bắt đầu
+
+- **Nguyên nhân**: camera cách player 10m (offset z=-10) nhưng `baseDistance = 9m` → bọ chỉ cách camera **1m** → nằm ngoài khung hình (chỉ phần nhô lên lọt vào).
+- **Fix**: `baseDistance 9 → 16m`, `closeDistance 7.5 → 12m` (bọ cách camera 6m/2m — thấy rõ cả con, áp sát vẫn không che tàu). Đồng bộ scene Game + test.
+
+### 4. Con bọ KHÔNG vỗ cánh — đứng im (idle)
+
+- **Nguyên nhân**: default state của Animator controller = **"idle 1"** (bọ đứng im), KHÔNG phải "flying". Instantiate xong chỉ có Animator thôi nhưng state mặc định là idle.
+- **Fix**: `BuildEnemyVisual` → `_animator.Play("flying")` — ép vỗ cánh loop ngay khi dựng. KHÔNG ép rotation mỗi frame (giữ R4.17).
+
+### 5. Cơ chế BẮT (hit lần 2) — theo đúng animation clip có sẵn
+
+- Animator Flying Beetle có sẵn **10 clip**: `atack 1/2/3`, `death`, `flying`, `gethit`, `idle 1/2`, `roar` (folder `animation/`, FBX `@atack`...).
+- **Fix** (`EnemyChase`): hit lần 1 → `_animator.speed = 2` (vỗ nhanh hơn); hit lần 2 trong cửa sổ → **`CatchAndKill()`**: lao tới player 0.3s (không teleport) + `Play("atack 1")` (cảnh bắt) → chờ `catchDelay 1.1s` → mới `RaiseGameOver()` → UIManager fade panel 0.4s (mượt, không cắt cảnh). `_catching` guard: không nhận hit mới / không trigger lần nữa; `ResetEnemy` stop coroutine + quay về flying.
+
+### 6. Tàu bị mờ → nổi bật nhất + to thêm ~10px
+
+- **Không có UI đè** (Score HUD top giữa, ComboText góc trái — đã verify vị trí anchor). Tàu mờ vì **THIẾU ÁNH SÁNG** trên track tối.
+- **Fix**: (a) `shipTargetHeight 1.1 → 1.2` (+~10px); (b) **`EnsureShipLight`** — Point Light cyan bám tàu (con của Ship, intensity 2.2, range 7, shadows off) → tàu sáng + halo nổi bật nhất trên nền đen.
+
+### Đề xuất assets (chưa tải — user tự quyết):
+
+- VFX engine: **Kenney Particle Pack** (đã có) · **Cartoon FX Remaster Free** (Asset Store) · **Stylized VFX** (itch.io) · **Magic VFX** (Asset Store free)
+- Trail tàu/obstacle: **Echo Trail** / dùng Trail Renderer code (không cần asset)
+- Background space: **Nebula/Spaceskies** (user đã tải) — dùng làm skybox chính
+
+---
+
 ## 2026-08-11 — Dọn file chết (sau nhiều đợt refactor) + fix chọn tàu không hiện
 
 > User: "chưa test các task trên, có cần chạy tool nào trước khi test ko; test chọn ship thì không hiện tàu mới, vẫn hiện tàu cũ; sau vài đợt refactor nên dọn sạch các file không dùng".
