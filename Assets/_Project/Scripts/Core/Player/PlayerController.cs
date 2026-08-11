@@ -6,6 +6,7 @@ using VoidRunner.Systems.Input;
 using VoidRunner.Systems.PowerUp;
 using VoidRunner.Systems.Save;
 using VoidRunner.Systems.VFX;
+using VoidRunner.Utils;
 
 namespace VoidRunner.Core.Player
 {
@@ -347,6 +348,9 @@ namespace VoidRunner.Core.Player
 
             GameObject ship = Instantiate(prefab, transform);
             ship.name = "Ship";
+
+            // Fix material Built-in → URP (model 3rd-party thường dùng shader Standard → hiện TÍM trong URP)
+            MaterialFixer.EnsureURPMaterials(ship);
 
             // Vô hiệu hóa collider con — không đụng vật lý, chỉ render
             foreach (var col in ship.GetComponentsInChildren<Collider>())

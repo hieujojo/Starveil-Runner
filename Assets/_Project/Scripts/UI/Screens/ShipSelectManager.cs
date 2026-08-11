@@ -1,7 +1,9 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using VoidRunner.Systems.Save;
+using VoidRunner.Utils;
 
 namespace VoidRunner.UI
 {
@@ -32,6 +34,7 @@ namespace VoidRunner.UI
         private RenderTexture _rt;
         private Transform _previewRoot; // chứa model đang xem (thay con khi đổi)
         private GameObject _currentModel;
+        private GameObject _dimmer; // che menu phía sau khi mở panel (giống HowToPlay/Credits)
         private int _selected;
 
         private static readonly string[] ShipNames = { "SF FIGHTER", "SPARROW" };
@@ -66,7 +69,7 @@ namespace VoidRunner.UI
             var rt = (RectTransform)go.transform;
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(-160f, -280f); // CÙNG HÀNG với CREDITS (bên phải 160) — SHIP bên trái
+            rt.anchoredPosition = new Vector2(-160f, -320f); // CÙNG HÀNG với CREDITS (bên phải 160) — SHIP bên trái (Fix Spacing 2026-08-12)
             rt.sizeDelta = new Vector2(300f, 56f);
 
             var img = go.GetComponent<Image>();
@@ -194,15 +197,15 @@ namespace VoidRunner.UI
             ctmp.textWrappingMode = TextWrappingModes.NoWrap;
             AssignFallbackFont(ctmp);
 
-            // Nút CLOSE
+            // Nút đóng — dấu X nhỏ góc trên phải (fix 2026-08-12: nút CLOSE to che chữ)
             var closeGo = new GameObject("CloseButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             closeGo.transform.SetParent(panel.transform, false);
             var krrt = (RectTransform)closeGo.transform;
             krrt.anchorMin = new Vector2(1f, 1f);
             krrt.anchorMax = new Vector2(1f, 1f);
             krrt.pivot = new Vector2(1f, 1f);
-            krrt.anchoredPosition = new Vector2(-16f, -16f);
-            krrt.sizeDelta = new Vector2(110f, 44f);
+            krrt.anchoredPosition = new Vector2(-12f, -12f);
+            krrt.sizeDelta = new Vector2(44f, 44f); // vuông nhỏ — dấu X
             var kimg = closeGo.GetComponent<Image>();
             kimg.color = new Color(0.48f, 0.29f, 1f, 1f);
             var kbtn = closeGo.GetComponent<Button>();
@@ -217,8 +220,8 @@ namespace VoidRunner.UI
             klrt.offsetMin = Vector2.zero;
             klrt.offsetMax = Vector2.zero;
             var ktmp = klabel.GetComponent<TextMeshProUGUI>();
-            ktmp.text = "CLOSE";
-            ktmp.fontSize = 22;
+            ktmp.text = "X"; // chữ X đậm = dấu X (font chỉ pack ASCII — ✕ U+2715 sẽ ra ô vuông □, R5.2)
+            ktmp.fontSize = 30;
             ktmp.fontStyle = FontStyles.Bold;
             ktmp.color = Color.white;
             ktmp.alignment = TextAlignmentOptions.Center;
@@ -345,6 +348,7 @@ namespace VoidRunner.UI
 
             GameObject model = Instantiate(prefab, _previewRoot);
             SetLayerRecursively(model, 6); // layer ShipPreview
+            MaterialFixer.EnsureURPMaterials(model); // model 3rd-party dùng shader Standard → TÍM trong URP (fix 2026-08-12)
 
             // Chuẩn hóa scale — vừa khung camera (bounds cao ~1.2)
             Bounds b = GetRenderBounds(model);
@@ -364,6 +368,18 @@ namespace VoidRunner.UI
             {
                 _previewRoot.Rotate(0f, previewRotateSpeed * Time.deltaTime, 0f, Space.World);
             }
+
+            // Phím mũi tên / A / D đổi tàu khi panel mở (fix 2026-08-12: user bấm phím mũi tên không chuyển)
+            if (_panel != null && _panel.activeSelf)
+            {
+                if (WasKeyPressed(Key.LeftArrow) || WasKeyPressed(Key.A)) SelectPrev();
+                else if (WasKeyPressed(Key.RightArrow) || WasKeyPressed(Key.D)) SelectNext();
+            }
+        }
+
+        private static bool WasKeyPressed(Key key)
+        {
+            return Keyboard.current != null && Keyboard.current[key].wasPressedThisFrame;
         }
 
         private void SelectPrev()
@@ -388,12 +404,44 @@ namespace VoidRunner.UI
         {
             if (_panel == null) return;
             bool show = !_panel.activeSelf;
+
+            // Dimmer che menu phía sau khi mở panel (fix 2026-08-12: panel đè lộ VOID RUNNER phía sau)
+            if (show) EnsureDimmer();
             _panel.SetActive(show);
+            if (_dimmer != null)
+            {
+                _dimmer.SetActive(show);
+                if (show) _dimmer.transform.SetAsFirstSibling();
+            }
             if (show)
             {
                 _panel.transform.SetAsLastSibling();
                 RefreshPreview();
             }
+        }
+
+        /// <summary>Tạo dimmer đen 0.93 phủ canvas — click vùng tối = đóng panel (idempotent).</summary>
+        private void EnsureDimmer()
+        {
+            if (_dimmer != null) return;
+            if (_canvas == null) return;
+
+            var go = new GameObject("ShipSelectDimmer", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.transform.SetParent(_canvas.transform, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            var img = go.GetComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0.93f);
+            img.raycastTarget = true;
+            var btn = go.AddComponent<Button>();
+            btn.targetGraphic = img;
+            btn.transition = Selectable.Transition.None;
+            btn.onClick.AddListener(TogglePanel);
+            go.SetActive(false);
+            _dimmer = go;
         }
 
         private static void SetLayerRecursively(GameObject go, int layer)

@@ -86,15 +86,19 @@ namespace VoidRunner.UI
                     panelImg.color = c;
                 }
 
-                // Panel luôn vẽ TRÊN dimmer (SetAsLastSibling) — menu phía sau tối lại, text đọc rõ
+                // ⚠️ FIX 2026-08-12 (bug "popup đè lộ VOID RUNNER phía sau"): dimmer phải nằm TRÊN
+                // menu nhưng DƯỚI panel. SetAsFirstSibling (cũ) chìm dimmer XUỐNG DƯỚI menu → các nút
+                // menu vẽ lên trên → vẫn sáng rõ phía sau panel. Đúng: dimmer SetAsLastSibling TRƯỚC,
+                // rồi panel SetAsLastSibling SAU → dimmer che menu, panel che dimmer.
+                if (_dimmer != null) _dimmer.transform.SetAsLastSibling();
                 howToPlayPanel.transform.SetAsLastSibling();
-                if (_dimmer != null) _dimmer.transform.SetAsFirstSibling();
             }
         }
 
         /// <summary>
-        /// Tạo nút "CLOSE" góc phải panel HowToPlay (fix 2026-08-11 — user: "HowToPlay ổn nhưng
-        /// không có nút để tắt"). Trước đây chỉ có cách click vùng tối (dimmer) — user không rõ.
+        /// Tạo nút đóng dấu X nhỏ góc trên phải panel HowToPlay (fix 2026-08-11 — user: "HowToPlay
+        /// ổn nhưng không có nút để tắt"). 2026-08-12: đổi nút CLOSE TO (150×56 che chữ trong panel)
+        /// → nút X vuông nhỏ 40×40, nằm lệch ra ngoài viền (không che text).
         /// Tạo bằng code, idempotent (transform.Find kiểm tra trước khi tạo).
         /// </summary>
         private void EnsureCloseButton()
@@ -102,7 +106,7 @@ namespace VoidRunner.UI
             if (howToPlayPanel == null) return;
             if (howToPlayPanel.transform.Find("CloseButton") != null) return;
 
-            // Nút nền
+            // Nút nền — vuông nhỏ, đặt lệch ra ngoài mép trên phải (không đè chữ bên trong)
             var go = new GameObject("CloseButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             go.transform.SetParent(howToPlayPanel.transform, false);
 
@@ -110,8 +114,8 @@ namespace VoidRunner.UI
             rt.anchorMin = new Vector2(1f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(1f, 1f);
-            rt.anchoredPosition = new Vector2(-24f, -24f);
-            rt.sizeDelta = new Vector2(150f, 56f);
+            rt.anchoredPosition = new Vector2(-8f, -8f);
+            rt.sizeDelta = new Vector2(40f, 40f);
 
             var img = go.GetComponent<Image>();
             img.color = new Color(0.48f, 0.29f, 1f, 1f); // tím — tông nút phụ (khớp HowToPlayButton)
@@ -120,19 +124,19 @@ namespace VoidRunner.UI
             btn.onClick.AddListener(ToggleHowToPlay);
             btn.transition = Selectable.Transition.ColorTint;
 
-            // Label con
+            // Label con — chữ X đậm (font chỉ pack ASCII — ✕ U+2715 ra ô vuông □, R5.2)
             var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             label.transform.SetParent(go.transform, false);
 
             var lrt = (RectTransform)label.transform;
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = new Vector2(10f, 4f);
-            lrt.offsetMax = new Vector2(-10f, -4f);
+            lrt.offsetMin = Vector2.zero;
+            lrt.offsetMax = Vector2.zero;
 
             var tmp = label.GetComponent<TextMeshProUGUI>();
-            tmp.text = "CLOSE";
-            tmp.fontSize = 32;
+            tmp.text = "X";
+            tmp.fontSize = 28;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.white;
             tmp.alignment = TextAlignmentOptions.Center;
@@ -159,7 +163,7 @@ namespace VoidRunner.UI
             // Nút CREDITS — CÙNG HÀNG với nút SHIP (y=-280): CREDITS bên PHẢI (160), SHIP bên TRÁI (-160)
             // (tránh chồng nhau — user thêm chọn ship Task D). KHÔNG subscribe onClick ở đây —
             // Start() đã subscribe (subscribe 2 lần = 1 click toggle 2 lần = nhìn như hỏng — góp ý reviewer).
-            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(160f, -280f), new Vector2(300f, 56f));
+            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(160f, -320f), new Vector2(300f, 56f)); // Fix Spacing 2026-08-12
 
             // Panel credits + nút CLOSE
             GameObject panel = CreditsPanelBuilder.EnsurePanel(canvas);
@@ -193,15 +197,16 @@ namespace VoidRunner.UI
 
             if (show) EnsureDimmer();
             panel.gameObject.SetActive(show);
-            if (_dimmer != null)
+            if (_dimmer != null) _dimmer.SetActive(show);
+            if (show)
             {
-                _dimmer.SetActive(show);
-                if (show) _dimmer.transform.SetAsFirstSibling();
+                // Cùng fix dimmer như ToggleHowToPlay: dimmer trên menu, panel trên dimmer
+                _dimmer.transform.SetAsLastSibling();
+                panel.SetAsLastSibling();
             }
-            if (show) panel.SetAsLastSibling();
         }
 
-        /// <summary>Tạo 1 Image đen alpha 0.72 phủ toàn màn hình, nằm DƯỚI panel (idempotent).</summary>
+        /// <summary>Tạo 1 Image đen alpha 0.93 phủ toàn màn hình, nằm TRÊN menu nhưng DƯỚI panel (idempotent).</summary>
         private void EnsureDimmer()
         {
             if (_dimmer != null) return;
@@ -220,19 +225,42 @@ namespace VoidRunner.UI
             rt.offsetMax = Vector2.zero;
 
             var img = go.GetComponent<Image>();
-            // 0.72 → 0.85 (fix vòng 2): menu phía sau tối sâu hơn, popup nổi bật hơn hẳn
-            img.color = new Color(0f, 0f, 0f, 0.85f);
+            // 0.85 → 0.93 (fix 2026-08-12): menu phía sau gần như khuất hẳn, không lộ chữ VOID RUNNER
+            img.color = new Color(0f, 0f, 0f, 0.93f);
             img.raycastTarget = true; // chặn click xuyên xuống nút menu phía sau
 
-            // Click vào vùng tối (ngoài popup) = đóng popup — dimmer phải là Button, nếu không
-            // user bị kẹt (nút HowToPlay phía sau bị dimmer chặn, không đóng được — góp ý reviewer)
+            // Click vào vùng tối (ngoài popup) = đóng popup ĐANG MỞ — dimmer dùng chung cho cả
+            // HowToPlay + Credits nên không thể hardcode ToggleHowToPlay (bug 2026-08-12: click
+            // dimmer khi Credits mở sẽ BẬT HowToPlay). Đóng popup nào đang active.
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = img;
-            btn.onClick.AddListener(ToggleHowToPlay);
+            btn.onClick.AddListener(CloseActivePopup);
             btn.transition = Selectable.Transition.None;
 
             go.SetActive(false);
             _dimmer = go;
+        }
+
+        /// <summary>Đóng popup đang mở (HowToPlay hoặc Credits) — dùng cho click dimmer (dùng chung).</summary>
+        private void CloseActivePopup()
+        {
+            if (howToPlayPanel != null && howToPlayPanel.activeSelf)
+            {
+                ToggleHowToPlay();
+                return;
+            }
+            Canvas canvas = FindAnyObjectByType<Canvas>();
+            if (canvas != null)
+            {
+                Transform credits = canvas.transform.Find("CreditsPanel");
+                if (credits != null && credits.gameObject.activeSelf)
+                {
+                    ToggleCredits();
+                    return;
+                }
+            }
+            // Không popup nào mở → tự tắt dimmer (an toàn)
+            if (_dimmer != null) _dimmer.SetActive(false);
         }
 
         /// <summary>Bật/tắt âm thanh (0 hoặc 1) — lưu qua SaveSystem, áp ngay qua AudioManager.</summary>

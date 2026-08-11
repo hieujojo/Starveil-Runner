@@ -73,12 +73,12 @@ namespace VoidRunner.UI
             prt.anchorMin = new Vector2(0.5f, 0.5f);
             prt.anchorMax = new Vector2(0.5f, 0.5f);
             prt.anchoredPosition = Vector2.zero;
-            prt.sizeDelta = new Vector2(720f, 560f);
+            prt.sizeDelta = new Vector2(760f, 660f); // to hơn (fix 2026-08-12: chữ 20 nhỏ khó đọc → 22 + dòng thoáng)
 
             var pimg = panel.GetComponent<Image>();
             pimg.color = new Color(0.06f, 0.04f, 0.12f, 1f); // tím đen — đục hoàn toàn (R0.9)
             // Viền cyan neon mờ — tông game
-            AddBorder(panel.transform, new Vector2(720f, 560f));
+            AddBorder(panel.transform, new Vector2(760f, 660f));
 
             // Tiêu đề
             var title = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
@@ -91,7 +91,7 @@ namespace VoidRunner.UI
             trt.sizeDelta = new Vector2(640f, 56f);
             var ttmp = title.GetComponent<TextMeshProUGUI>();
             ttmp.text = "CREDITS";
-            ttmp.fontSize = 44;
+            ttmp.fontSize = 48;
             ttmp.fontStyle = FontStyles.Bold;
             ttmp.color = new Color(1f, 0.85f, 0.3f, 1f); // vàng — tông điểm nhấn
             ttmp.alignment = TextAlignmentOptions.Center;
@@ -109,22 +109,23 @@ namespace VoidRunner.UI
 
             var body = textGo.GetComponent<TextMeshProUGUI>();
             body.text = BuildCreditsText();
-            body.fontSize = 20;
-            body.color = new Color(0.82f, 0.8f, 1f, 1f);
+            body.fontSize = 22; // 20 → 22 (fix 2026-08-12: chữ nhỏ khó đọc; 24 tràn ~19 dòng → 22 + panel 660 vừa)
+            body.lineSpacing = 1.12f; // dòng thoáng hơn
+            body.color = new Color(0.9f, 0.9f, 1f, 1f); // sáng hơn
             body.alignment = TextAlignmentOptions.TopLeft;
             body.raycastTarget = false;
             body.textWrappingMode = TextWrappingModes.Normal;
             AssignFallbackFont(body);
 
-            // Nút CLOSE (do caller gán onClick — builder chỉ dựng hình)
+            // Nút đóng — dấu X nhỏ góc trên phải (fix 2026-08-12: CLOSE to 130×48 che chữ + khó đọc)
             var closeGo = new GameObject(CloseName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             closeGo.transform.SetParent(panel.transform, false);
             var crt = (RectTransform)closeGo.transform;
             crt.anchorMin = new Vector2(1f, 1f);
             crt.anchorMax = new Vector2(1f, 1f);
             crt.pivot = new Vector2(1f, 1f);
-            crt.anchoredPosition = new Vector2(-20f, -20f);
-            crt.sizeDelta = new Vector2(130f, 48f);
+            crt.anchoredPosition = new Vector2(-10f, -10f);
+            crt.sizeDelta = new Vector2(42f, 42f);
             var cimg = closeGo.GetComponent<Image>();
             cimg.color = new Color(0.48f, 0.29f, 1f, 1f);
             var cbtn = closeGo.GetComponent<Button>();
@@ -138,8 +139,8 @@ namespace VoidRunner.UI
             clrt.offsetMin = Vector2.zero;
             clrt.offsetMax = Vector2.zero;
             var ctmp = closeLabel.GetComponent<TextMeshProUGUI>();
-            ctmp.text = "CLOSE";
-            ctmp.fontSize = 24;
+            ctmp.text = "X"; // chữ X đậm = dấu X (font chỉ pack ASCII — ✕ U+2715 ra ô vuông □, R5.2)
+            ctmp.fontSize = 30;
             ctmp.fontStyle = FontStyles.Bold;
             ctmp.color = Color.white;
             ctmp.alignment = TextAlignmentOptions.Center;

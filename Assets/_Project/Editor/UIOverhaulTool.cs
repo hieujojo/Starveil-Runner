@@ -313,6 +313,78 @@ namespace VoidRunner.EditorTools
             }
         }
 
+        [MenuItem(MenuRoot + "Fix MainMenu Spacing (dãn nút cho thoáng)")]
+        public static void FixMainMenuSpacing()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (scene.name != "MainMenu")
+            {
+                EditorUtility.DisplayDialog("Void Runner — MainMenu Spacing",
+                    "Tool chạy trên scene 'MainMenu'. Mở scene MainMenu rồi chạy lại.", "OK");
+                return;
+            }
+
+            // Layout dọc (anchor giữa): title giữ 260; dãn nút chính cách tâm 120-130px;
+            // BestScore -250; SHIP/CREDITS (tạo bằng code runtime) -320.
+            // Các nút nằm trong scene → ép qua SerializedObject (không phá prefab).
+            // ⚠️ GAP TÍNH THEO MÉP (fix reviewer 2026-08-12): Play 420x100 → bán kính 50;
+            // HowTo 340x76 → 38; Sound 340x76 → 38; Best 600x50 → 25.
+            //   Play 160 (đáy 110) · HowTo 0 (đỉnh 38)  → gap 72px
+            //   HowTo -38 (đáy)   · Sound -160 (đỉnh -122) → gap 84px
+            //   Sound -198 (đáy)   · Best -250 (đỉnh -225) → gap 27px (text mỏng, đủ)
+            int changed = 0;
+            if (SetRectPosition("PlayButton", new Vector2(0f, 160f))) changed++;
+            if (SetRectPosition("HowToPlayButton", new Vector2(0f, 0f))) changed++;
+            if (SetRectPosition("SoundButton", new Vector2(0f, -160f))) changed++;
+            if (SetRectPosition("BestScoreText", new Vector2(0f, -250f))) changed++;
+
+            // HowToPlayText: font 30 → 36 + lineSpacing thoáng (khó đọc với font pixel)
+            var howText = FindTransformRecursive(scene.GetRootGameObjects()[0].transform, "HowToPlayText");
+            if (howText != null && howText.TryGetComponent<TextMeshProUGUI>(out var ht))
+            {
+                ht.fontSize = 36;
+                ht.lineSpacing = 1.15f;
+                ht.color = new Color(0.92f, 0.95f, 1f, 1f);
+                EditorUtility.SetDirty(ht);
+                changed++;
+            }
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            Debug.Log($"[VoidRunner] Fix MainMenu Spacing xong: {changed} phần tử ép vị trí/font.");
+            EditorUtility.DisplayDialog("Void Runner — MainMenu Spacing",
+                $"Đã dãn {changed} phần tử (Play 160 / HowTo 0 / Sound -160 / Best -250 / HowToPlayText 36pt).\n\n" +
+                "Nhớ Ctrl+S lưu scene.", "OK");
+        }
+
+        /// <summary>Tìm RectTransform theo tên (đệ quy) — dùng cho text nằm sâu trong panel.</summary>
+        private static Transform FindTransformRecursive(Transform root, string name)
+        {
+            if (root == null) return null;
+            foreach (Transform child in root)
+            {
+                if (child.name == name) return child;
+                var deep = FindTransformRecursive(child, name);
+                if (deep != null) return deep;
+            }
+            return null;
+        }
+
+        private static bool SetRectPosition(string objectName, Vector2 pos)
+        {
+            var go = GameObject.Find(objectName);
+            if (go == null) return false;
+            var rt = go.GetComponent<RectTransform>();
+            if (rt == null) return false;
+
+            var so = new SerializedObject(rt);
+            var prop = so.FindProperty("m_AnchoredPosition");
+            if (prop == null) return false;
+            prop.vector2Value = pos;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(rt);
+            return true;
+        }
+
         [MenuItem(MenuRoot + "Overhaul UI (ép chuẩn tông hư không — 2 scene)", true)]
         private static bool ValidateOverhaul()
         {
