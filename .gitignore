@@ -109,3 +109,10 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# ===== 3rd-party asset packs (giữ LOCAL — file quá lớn, GitHub chặn >100MB) =====
+# ⚠️ Khi clone lại project: tự tải lại 2 gói từ nguồn gốc, Unity sinh .meta mới:
+#   • Nebula Skyboxes (itch.io) → /Assets/Nebula Skyboxes/
+#   • SpaceSkies Free (Unity Asset Store) → /Assets/SpaceSkies Free/
+/Assets/Nebula Skyboxes/
+/Assets/SpaceSkies Free/
