@@ -31,9 +31,9 @@ Chạy + né obstacle (đụng → Void tiến sát) → không chạm 10–15s 
 | Hạng mục | Trạng thái | Xử lý |
 |---|---|---|
 | Unity 6 + URP + Input System | ✅ Có | Giữ |
-| Scene `Minigame` (Player, Enemy NavMesh, PickUp, Obstacle Ramp/Pillar, Canvas) | ✅ Có | Archive làm scene test NavMesh → xóa khỏi Build Settings |
+| Scene `Minigame` (Player, Enemy NavMesh, PickUp, Obstacle Ramp/Pillar, Canvas) | ✅ Có | **ĐÃ XÓA HẲN 2026-08-11** (cùng `_Archive/` + NavMesh-Ground) — không cần test NavMesh nữa (Void chase bỏ NavMeshAgent) |
 | `PlayerController.cs` (Roll-a-Ball: AddForce, FindGameObjectWithTag) | ✅ Có | **Viết lại** (lane-switching) |
-| `EnemyMovement.cs` (NavMeshAgent đuổi theo) | ✅ Có | **Chuyển thành `VoidChase.cs`** |
+| `EnemyMovement.cs` (NavMeshAgent đuổi theo) | ✅ Có | **ĐÃ XÓA HẲN 2026-08-11** — chuyển sang `VoidChase.cs` (2 nấc cố định, không NavMesh) |
 | `Rotator.cs` (xoay PickUp) | ✅ Có | Giữ → dùng cho coin |
 | `CameraController.cs` (follow đơn giản) | ✅ Có | Thay bằng Cinemachine (G3) |
 | Prefab `DynamicBox`, `DynamicBox 1`, `PickUp` | ✅ Có | Giữ làm obstacle di động + coin placeholder |
@@ -65,7 +65,7 @@ Assets/
 │   │   │       ├── Tile.cs          # Di chuyển, recycle, spawn nội dung
 │   │   │       ├── ObstacleManager.cs # Gắn obstacle ngẫu nhiên lên tile
 │   │   │       ├── Obstacle.cs      # Va chạm → chết
-│   │   │       ├── VoidChase.cs     # NavMeshAgent đuổi theo (từ EnemyMovement)
+│   │   │       ├── VoidChase.cs     # Void 2 nấc cố định đuổi theo (quái vật random — Task B)
 │   │   │       └── Pickup.cs        # Coin + Rotator
 │   │   ├── Systems/                 # ★ Dịch vụ độc lập — đăng ký qua event
 │   │   │   ├── Input/
@@ -98,8 +98,8 @@ Assets/
 │   │       └── Singleton.cs         # Base singleton
 │   ├── Scenes/
 │   │   ├── MainMenu.unity
-│   │   ├── Game.unity
-│   │   └── _Archive/                # Scene Minigame + NavMesh-Ground (test)
+│   │   └── Game.unity
+│   │   # (_Archive/ đã xóa 2026-08-11 — không còn scene test NavMesh)
 │   ├── Prefabs/
 │   │   ├── Player/  Tiles/  Obstacles/  PowerUps/  Pickups/  UI/
 │   ├── ScriptableObjects/
@@ -118,7 +118,7 @@ Assets/
 | Hiện tại | Vị trí mới | Ghi chú |
 |---|---|---|
 | `Scripts/PlayerController.cs` | `_Project/Scripts/Core/Player/` | Viết lại ở G1 |
-| `Scripts/EnemyMovement.cs` | `_Project/Scripts/Core/World/VoidChase.cs` | Viết lại ở G1 |
+| `Scripts/EnemyMovement.cs` | `_Project/Scripts/Core/World/VoidChase.cs` | Viết lại ở G1 — bản cũ đã xóa 2026-08-11 |
 | `Scripts/CameraController.cs` | `_Project/Scripts/_Archive/` (tạm) | Thay Cinemachine ở G3 |
 | `Scripts/Rotator.cs` | `_Project/Scripts/Core/World/Pickup.cs` | Gộp vào coin |
 | `Prefabs/PickUp.prefab` | `_Project/Prefabs/Pickups/` | Coin |
@@ -140,7 +140,7 @@ Assets/
 - [x] Cài **DOTween** từ Asset Store (miễn phí) — đã import `Assets/Plugins/Demigiant/DOTween` + có `DOTweenSettings.asset`
 - [x] Tái cấu trúc `Assets/_Project/` theo kiến trúc mục 3: đã di chuyển Scripts → `Core/Player`, `Core/World`; Prefabs → `Pickups`, `Obstacles`; Materials → `Art/Materials`; Input actions → `Settings`; đã xóa `SampleScene`, `TutorialInfo`, `CameraController.cs`
 - [x] Tạo 2 scene `MainMenu` + `Game`; đưa vào **Build Settings** (MainMenu index 0, Game index 1) — ✅ đã xong
-- [x] Archive scene `Minigame` + `NavMesh-Ground.asset` → `Assets/_Project/Scenes/_Archive/` (giữ làm nơi test NavMesh bake)
+- [x] Archive scene `Minigame` + `NavMesh-Ground.asset` → `Assets/_Project/Scenes/_Archive/` (giữ làm nơi test NavMesh bake) — **sau đó ĐÃ XÓA HẲN cả `_Archive/` 2026-08-11** (Void không dùng NavMesh nữa)
 
 ### Giai đoạn 1 — Core Gameplay
 > Mục tiêu: **chạy được · né được · chết được** — core loop hoàn chỉnh
@@ -198,6 +198,10 @@ Assets/
 - [x] Material PBR tối giản đồng bộ (tông "hư không": tím/đen phát sáng); lighting + skybox nhất quán — ✅ tool `MaterialLightingSetupTool` (5 material phát sáng + Light lạnh + ambient/fog tím), đã chạy 2 scene
 - [x] **Unity Test Framework** — 24 test (EditMode 16 + PlayMode 8), **kết quả 24/24 xanh**; asmdef `VoidRunner.Core` (code chính) + `DOTween.Modules` (bài học predefined assembly)
 - [x] **Kenney assets 6 bộ** (ui-pack, space-expansion, game-icons, particle-pack, space-kit, space-station-kit — CC0) — ✅ đã copy vào `Art/kenney_*`, đang convert + dựng HUD đẹp + ambient 2 bên đường
+- [x] **Task A — Credits thiết kế lại đẹp** (MainMenu + Game Over): `CreditsPanelBuilder` dùng chung — panel tím/đen + viền cyan + tiêu đề vàng + danh sách third-party assets (khớp CREDITS.md); nút CREDITS + GameOverCreditsButton (ẩn cùng gameOverPanel); fix double-subscribe — ✅ commit `faed21f`
+- [x] **Task B — Void = QUÁI VẬT** (random 1 trong 3: Monster Skin1 / Flying Beetle / Fantasy Spider, fallback black hole): scale theo bounds thật, yaw set 1 lần (không đánh Animator), collider con tắt; tool `Setup Void Monsters` gán 3 prefab — ✅ commit `cd42fa9`
+- [x] **Task D — CHỌN TÀU ở MainMenu có preview 3D**: SaveSystem.SelectedShip; PlayerController.shipPrefabs (model SF Fighter/Sparrow thay primitive); ShipSelectManager (panel preview RenderTexture 256 + camera layer ShipPreview(6), nút < > SELECT CLOSE, tên tàu); tool `Setup Ship Select`; ShipCatalog (1 nguồn path + self-heal khi chưa gán prefab) — ✅ commit `decaa0e` + `de329c7`
+- [ ] **Task C — VẬT CẢN = asteroid/rock pack**: thay cube primitive (Dynamic Obstacle material) bằng model thiên thạch/đá có nhiều biến thể — CHỜ user tải pack (đã có sẵn meteor/rock trong Kenney Space Kit CC0 nếu muốn dùng luôn)
 - [ ] Tuning: độ khó fair; Unity Profiler đảm bảo **60 FPS**; test nhiều độ phân giải
 - [ ] **WebGL build**: Resolution responsive · **Compression: Brotli** · WebGL 2.0 · Linear color space · chỉnh Initial Memory hợp lý (256–512 MB), hạn chế GC spike
 - [ ] **Upload itch.io** (chính): tài khoản → New project → Kind: HTML → nén thư mục WebGL `.zip` → mô tả + screenshot + GIF → Publish
@@ -215,7 +219,7 @@ Assets/
 | `GameManager` | State machine + luồng game | Enum State; event `OnGameOver`/`OnRestart`; singleton nhẹ hoặc tham chiếu qua scene |
 | `PlayerController` | Lane switching | Rigidbody + velocity forward; `Mathf.Lerp`/`MoveTowards` theo X; chặn input khi chết; không `FindGameObjectWithTag` trong runtime |
 | `TileSpawner` | Object pool | `Queue<Tile>`; spawn theo `tileLength`; recycle khi `transform.position.z < player.z - N` |
-| `VoidChase` | AI đuổi theo | NavMeshAgent; `speed` và `transform.localScale` tăng theo thời gian; cap tốc độ |
+| `VoidChase` | AI đuổi theo | **2 nấc cố định 9m→5m** (Task B: có thể spawn quái vật random); KHÔNG NavMeshAgent — đuổi trực tiếp giữ khoảng cách + safety net; nới lại sau 10–15s |
 | `ObstacleManager` | Spawn obstacle | Đọc từ `ObstacleData[]`; tỉ lệ xuất hiện tăng theo Difficulty; luôn chừa ≥1 lane an toàn |
 | `ScoreSystem` | Score + combo | `event Action<int> OnScoreChanged`; combo reset khi va chạm; score theo distance `+= speed * dt` |
 | `PowerUpSystem` | Hiệu ứng power-up | Đọc `PowerUpData` (SO); coroutine cho duration; slow-mo dùng `Time.timeScale` + khôi phục |
@@ -274,7 +278,7 @@ Initial Memory: 256–512 MB (tránh crash do OOM)
 
 | Kỹ thuật | Nơi áp dụng | Ghi chú phỏng vấn |
 |---|---|---|
-| **AI / NavMesh pathfinding** | `VoidChase` | Điểm khác biệt — void đuổi theo, tốc độ tăng dần |
+| **AI / Void chase** | `VoidChase` | Void đuổi theo 2 nấc (chạm vật cản → tiến sát), nới lại khi né sạch 10–15s; Task B: hiển thị quái vật random |
 | Object Pool | `TileSpawner` | Không GC spike, 60 FPS WebGL |
 | ScriptableObject | `ObstacleData`, `PowerUpData` | Tách data / logic |
 | C# Event System | `ScoreSystem` → UI | Decoupled architecture |

@@ -5,6 +5,35 @@
 
 ---
 
+## 2026-08-11 — Dọn file chết (sau nhiều đợt refactor) + fix chọn tàu không hiện
+
+> User: "chưa test các task trên, có cần chạy tool nào trước khi test ko; test chọn ship thì không hiện tàu mới, vẫn hiện tàu cũ; sau vài đợt refactor nên dọn sạch các file không dùng".
+
+### Nguyên nhân "chọn tàu không hiện" (chính xác)
+
+- `ShipSelectManager` chưa có trong scene MainMenu (GUID count=0) và `PlayerController.shipPrefabs` chưa gán trong scene Game → **tool `Setup Ship Select` chưa chạy** → preview rỗng + vẫn tàu primitive cũ.
+
+### Cách fix (self-heal — R4.18)
+
+- **NEW `Systems/Save/ShipCatalog.cs`**: 1 nguồn path duy nhất (2 tàu) + `Load(index)` dùng `AssetDatabase.LoadAssetAtPath` (guarded `#if UNITY_EDITOR`, build trả null → rơi về tàu primitive).
+- `ShipSelectManager.RefreshPreview` + `PlayerController.BuildSpaceship`: nếu `shipPrefabs` rỗng → fallback `ShipCatalog.Load(idx)` — **không còn phụ thuộc user nhớ chạy tool khi test**.
+- `ShipSelectSetupTool` dùng `ShipCatalog.ShipPaths` (bỏ trùng lặp path — reviewer góp ý).
+- Commit `de329c7`.
+
+### Dọn file chết (user duyệt 2026-08-11)
+
+- **Xóa 2 script chết**: `EnemyMovement.cs` (script Roll a Ball cũ dùng NavMeshAgent — vi phạm R4.1, chỉ còn `_Archive/Minigame` tham chiếu) + `AmbientScroller.cs` (đã xóa Ambient props → 0 tham chiếu code + scene).
+- **Xóa cả `Scenes/_Archive/`** (Minigame + NavMesh-Ground) — không trong Build Settings, Void không dùng NavMesh nữa.
+- GIỮ 11 Editor tool 1-lần (user chọn không xóa): AmbientSetupTool, CameraFollowFixTool, GameplayFixTool, HUDUIBuilder, HUDUpgradeTool, MainMenuUIBuilder, ScenePolishTool, SpriteBatchConverter, UIOverhaulTool, VFXSetupTool, RefactorGameplayTool.
+- Commit `9b27501`.
+
+### Bài học — **QUY TẮC MỚI (R3.13/R6.7)**
+
+- **Dọn file chết phải kiểm tra 2 chiều**: (a) GUID có trong scene/prefab nào không (grep trong `Scenes` + `Prefabs`), (b) class có được code khác reference không (grep trong `Scripts`). Script có GUID=0 và refs=0 mới chắc chắn chết. Trước khi hỏi user duyệt xóa: liệt kê rõ ràng file + lý do.
+- Scene `_Archive` giờ ĐÃ XÓA HẲN — không còn "nơi test NavMesh" (Void bỏ NavMeshAgent ở Task B).
+
+---
+
 ## 2026-08-11 — CS0234: ShipSelectSetupTool không compile được (safe mode)
 
 > User: "hiện có 1 log lỗi, ưu tiên fix đi".
