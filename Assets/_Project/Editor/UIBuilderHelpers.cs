@@ -70,23 +70,26 @@ namespace VoidRunner.EditorTools
         public static TMP_FontAsset CreateFontAssetCore(Font font, string fontAssetPath)
         {
             // ⚠️ GỐC RỄ font chỉ có 8 ký tự (bug 2026-08-11 — combo "x2" hiện "HS"):
-            // Kenney Future.ttf importer để characterSet = Dynamic (mặc định, không có field trong .meta)
+            // Kenney Future.ttf importer để fontTextureCase = Dynamic (mặc định, không có field trong .meta)
             // → Unity chỉ extract ký tự ĐANG ĐƯỢC DÙNG trong scene → characterInfo gần rỗng →
-            // CreateFontAsset chỉ tạo ~8 glyph. Fix: ép importer extract ASCII printable trước khi tạo.
-            var importer = AssetImporter.GetAtPath(KenneyFontPath) as FontImporter;
-            if (importer != null && importer.characterSet != FontImporterCharacterSet.ASCIIPrintableSet)
+            // CreateFontAsset chỉ tạo ~8 glyph. Fix: ép importer extract toàn bộ Latin trước khi tạo.
+            // ⚠️ Unity 6: KHÔNG còn FontImporter/characterSet/FontImporterCharacterSet (CS0246) —
+            // thay bằng TrueTypeFontImporter.fontTextureCase + enum FontTextureCase (không có ASCIIPrintableSet).
+            var ttfImporter = AssetImporter.GetAtPath(KenneyFontPath) as TrueTypeFontImporter;
+            if (ttfImporter != null && ttfImporter.fontTextureCase != FontTextureCase.Unicode)
             {
-                importer.characterSet = FontImporterCharacterSet.ASCIIPrintableSet;
-                importer.SaveAndReimport();
+                ttfImporter.fontTextureCase = FontTextureCase.Unicode;
+                ttfImporter.SaveAndReimport();
             }
 
             var fontAsset = TMP_FontAsset.CreateFontAsset(font, 128, 9, GlyphRenderMode.SDFAA, 2048, 2048);
 
             // Belt-and-suspenders: ép pack TOÀN BỘ ASCII (32..126) vào atlas 2048 — đủ x/2/chữ thường.
-            // (Dù importer đã đúng, TryAddCharacters đảm bảo font không bao giờ thiếu glyph nữa.)
-            var asciiChars = new System.Collections.Generic.List<char>();
-            for (int c = 32; c < 127; c++) asciiChars.Add((char)c);
-            if (!fontAsset.TryAddCharacters(asciiChars, out _))
+            // ⚠️ API TMP bản này: chỉ có TryAddCharacters(string) / TryAddCharacters(uint[]) —
+            // KHÔNG có overload IEnumerable<char> / out bool (CS1503/CS1615 nếu dùng List<char> + out).
+            var sb = new System.Text.StringBuilder();
+            for (int c = 32; c < 127; c++) sb.Append((char)c);
+            if (!fontAsset.TryAddCharacters(sb.ToString()))
             {
                 Debug.LogWarning($"[VoidRunner] Font không pack đủ toàn bộ ASCII — atlas 2048 có thể đầy ({fontAsset.characterTable?.Count ?? 0} ký tự). Kiểm tra lại.");
             }

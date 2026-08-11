@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-11 — Fix API sai khi sửa font (5 lỗi đỏ → safe mode): FontImporter KHÔNG còn trong Unity 6
+
+> User báo 5 log đỏ sau khi clear → đều trong `UIBuilderHelpers.cs` (do fix font vòng trước dùng API cũ).
+
+### Đã xong
+
+- **Lỗi 1 (3 lỗi): `CS0246 FontImporter` + `CS0103 FontImporterCharacterSet`** — Unity 6 **ĐÃ XÓA/KHÔNG CÒN `FontImporter`** (class + enum). Xác minh qua meta file: importer thật là **`TrueTypeFontImporter`** (`class in UnityEditor`, inherit AssetImporter) và property đúng là **`fontTextureCase`** (kiểu `FontTextureCase`), KHÔNG phải `characterSet`. Enum `FontTextureCase` cũng **KHÔNG có `ASCIIPrintableSet`** — dùng `Unicode` (đủ Latin). Xác minh DLL: `grep -a 'UnityEditor.TrueTypeFontImporter' UnityEditor.dll`.
+- **Lỗi 2 (2 lỗi): `CS1503` (List<char> → uint[]) + `CS1615` (out)** — TMP bản này **CHỈ có `TryAddCharacters(string)` / `TryAddCharacters(uint[])`** — KHÔNG có overload `IEnumerable<char>` hay `out bool` (xác minh source: `Library/PackageCache/com.unity.ugui@*/Runtime/TMP/TMP_FontAsset.cs` dòng 1776/1790/1998/2012). Fix: dùng `TryAddCharacters(string)` với ASCII 32..126 qua StringBuilder.
+- **Cách xác minh API chuẩn (đã làm):** (1) đọc meta file biết importer thật; (2) `grep -a` trên `UnityEditor.dll` (tìm string type theo cách grep đơn giản, namespace lưu rời); (3) đọc source package trong `Library/PackageCache` — TMP Unity 6 nằm trong `com.unity.ugui/Runtime/TMP/TMP_FontAsset.cs` (KHÔNG phải FontAsset.cs!).
+
+### Bài học — **QUY TẮC MỚI (bổ sung R3.10)**
+
+- **Unity 6 KHÔNG còn `FontImporter`/`FontImporterCharacterSet`/`characterSet`** — thay bằng `UnityEditor.TrueTypeFontImporter.fontTextureCase` (enum `FontTextureCase`: Dynamic/Unicode/ASCII/..., không có ASCIIPrintableSet). Kiểm tra meta file (`TrueTypeFontImporter:` chính là class để dùng) trước khi viết code.
+- **TMP `TryAddCharacters` trong Unity 6.4 chỉ có overload `string` và `uint[]`** (KHÔNG có `IEnumerable<char>`/`out bool`) — lỗi `CS1503`/`CS1615` khi gọi sai overload. Luôn grep source thật trong `Library/PackageCache` trước khi dùng API lạ.
+- **Tên file TMP là `TMP_FontAsset.cs`** (không phải `FontAsset.cs`) — tìm source TMP: `Library/PackageCache/com.unity.ugui@*/Runtime/TMP/`.
+
+---
+
 ## 2026-08-11 — Vòng 6: gốc rễ font 8 glyph, input đè giữ, đuôi tàu, HUD spacing, road rộng
 
 > User chạy 2 tool xong: vẫn có warning; ComboText "x2" giờ hiện "HS" cam; "SCORE" dính số; road quá nhỏ; muốn ĐÈ phím di chuyển liên tục + đuôi tàu có hiệu ứng.

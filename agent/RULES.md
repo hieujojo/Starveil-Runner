@@ -57,6 +57,8 @@
 - **R3.8** — Editor script dùng class runtime phải `using` đúng namespace (`VoidRunner.UI`...).
 - **R3.9** — Bỏ tham số method không dùng (dead parameter) — reviewer bắt.
 - **R3.10** — **Unity BCL KHÔNG có `Regex.Replace(string, string, string, int count)`** — chỉ 3-arg hoặc variant `RegexOptions` (lỗi `CS1503: Argument 3: cannot convert from 'string' to 'int'`). Muốn giới hạn số lần replace: bỏ count (pattern xuất hiện 1 lần thì 3-arg vẫn ổn) hoặc **dùng string ops** (`IndexOf`/`Substring`/`Replace`). `.meta` luôn có đúng 1 dòng `guid:` → thao tác GUID trong Editor tool dùng IndexOf+Substring, không cần Regex. *(Bug 2026-08-11.)*
+- **R3.11** — **Unity 6 KHÔNG còn `FontImporter`/`FontImporterCharacterSet`/`characterSet`** (CS0246/CS0103) — thay bằng **`UnityEditor.TrueTypeFontImporter.fontTextureCase`** (enum `FontTextureCase`: Dynamic/Unicode/ASCII/ASCIIUpperCase/ASCIILowerCase/CustomSet — **không có ASCIIPrintableSet**, dùng `Unicode` cho đủ Latin). Cách biết class thật: đọc `ttf.meta` — dòng `TrueTypeFontImporter:` chính là tên class. *(Bug 2026-08-11: 5 lỗi đỏ.)*
+- **R3.12** — **TMP `TryAddCharacters` chỉ có overload `string` và `uint[]`** (KHÔNG có `IEnumerable<char>`/`out bool` — CS1503/CS1615). Source TMP Unity 6 nằm ở `Library/PackageCache/com.unity.ugui@*/Runtime/TMP/TMP_FontAsset.cs` (tên file có tiền tố TMP_, không phải FontAsset.cs). Trước khi dùng API lạ: grep source thật trong PackageCache hoặc `grep -a` trên `UnityEditor.dll` (namespace lưu rời trong metadata — grep đơn giản, không grep chuỗi dài). *(Bug 2026-08-11.)*
 
 ## 🎬 NHÓM 4 — Gameplay / World (bài học về game feel)
 
