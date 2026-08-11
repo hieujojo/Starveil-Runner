@@ -51,6 +51,16 @@ namespace VoidRunner.Core.World
         [SerializeField, Tooltip("Scale ở nấc 1 (áp sát) — Void phình to đe dọa")]
         private float closeScale = 1.6f;
 
+        [Header("Quái vật (Task B — thay black hole)")]
+        [Tooltip("3 con quái vật đã import (Monster/Flying Beetle/Fantasy Spider) — tool Setup Void Monster tự gán; random 1 con mỗi lần vào game.")]
+        [SerializeField] private GameObject[] monsterPrefabs;
+
+        [Tooltip("Chiều cao chuẩn hóa của quái vật (đơn vị) — đo bounds thật rồi ép scale.")]
+        [SerializeField] private float monsterTargetHeight = 2.6f;
+
+        [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng (0 = model forward +Z về phía player).")]
+        [SerializeField] private float monsterYaw = 0f;
+
         private Vector3 _startPos;
         private int _stage;                 // 0 = nền, 1 = áp sát (đã đụng 1 lần)
         private float _currentDistance;
@@ -70,8 +80,77 @@ namespace VoidRunner.Core.World
             Collider col = GetComponent<Collider>();
             if (col != null) col.isTrigger = true;
 
-            // R0.2: Void = HỐ ĐEN thực thụ (không phải banh tím) — dựng visual bằng code, idempotent
-            BuildBlackHoleVisual();
+            // R0.2: Void có hình dạng đe dọa. Ưu tiên QUÁI VẬT (Task B — user import 3 con);
+            // không có prefab thì fallback HỐ ĐEN (build code) — không bao giờ là quả banh tím cũ.
+            if (monsterPrefabs != null && monsterPrefabs.Length > 0)
+            {
+                BuildMonsterVisual();
+            }
+            else
+            {
+                BuildBlackHoleVisual();
+            }
+        }
+
+        /// <summary>
+        /// Task B (2026-08-11): Void = quái vật — random 1 trong 3 monster (mỗi lần vào game),
+        /// scale chuẩn theo chiều cao mục tiêu (đo bounds thật), xoá mọi collider con (tránh
+        /// đụng vật lý — chỉ root trigger nuốt player), ẩn mesh root cũ.
+        /// </summary>
+        private void BuildMonsterVisual()
+        {
+            // Ẩn mesh root cũ TRƯỚC mọi early-return (góp ý reviewer: nhánh existing return
+            // trước đó khiến quả banh tím hiện xuyên qua nếu nhánh này chạy lại).
+            MeshRenderer rootMr = GetComponent<MeshRenderer>();
+            if (rootMr != null) rootMr.enabled = false;
+
+            // Dọn black hole cũ nếu có (lần đầu không có)
+            Transform oldBh = transform.Find("BlackHole");
+            if (oldBh != null) Destroy(oldBh.gameObject);
+
+            Transform existing = transform.Find("Monster");
+            if (existing != null) return; // idempotent — đã dựng rồi
+
+            GameObject prefab = monsterPrefabs[Random.Range(0, monsterPrefabs.Length)];
+            if (prefab == null) { BuildBlackHoleVisual(); return; }
+
+            GameObject monster = Instantiate(prefab, transform);
+            monster.name = "Monster";
+
+            // Vô hiệu hóa collider con — chỉ root collider trigger nuốt player (không đụng vật lý)
+            foreach (var col in monster.GetComponentsInChildren<Collider>())
+            {
+                col.enabled = false;
+            }
+
+            // Chuẩn hóa scale theo chiều cao thật (nhiều FBX import to/nhỏ khác nhau)
+            Bounds b = GetRenderBounds(monster);
+            if (b.size.y > 0.001f)
+            {
+                float s = monsterTargetHeight / b.size.y;
+                monster.transform.localScale = Vector3.one * s;
+            }
+
+            // Quay mặt về hướng player (player luôn phía +Z so với Void) — set 1 LẦN khi build.
+            // ⚠️ KHÔNG ép mỗi frame (góp ý reviewer): monster có Animator (Flying Beetle bay / Monster
+            // rig) — ghi đè localRotation mỗi frame sẽ đánh nhau với root motion của animation.
+            monster.transform.localRotation = Quaternion.Euler(0f, monsterYaw, 0f);
+
+            Debug.Log($"[Void] Quái vật: {prefab.name} (scale={monster.transform.localScale.x:F2}, bounds={b.size})");
+        }
+
+        /// <summary>Bounds world gộp mọi renderer (dùng để chuẩn hóa scale monster).</summary>
+        private static Bounds GetRenderBounds(GameObject go)
+        {
+            Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
+            bool has = false;
+            foreach (var r in go.GetComponentsInChildren<Renderer>())
+            {
+                if (r == null || !r.enabled) continue;
+                if (has) bounds.Encapsulate(r.bounds);
+                else { bounds = r.bounds; has = true; }
+            }
+            return has ? bounds : new Bounds(Vector3.zero, Vector3.one);
         }
 
         /// <summary>
@@ -260,6 +339,8 @@ namespace VoidRunner.Core.World
             {
                 _disk.Rotate(0f, 40f * Time.deltaTime, 0f, Space.Self);
             }
+
+
 
             // Safety net: khoảng cách z thực tế dưới ngưỡng → Void nuốt player (cơ chế chết chắc chắn
             // chạy kể cả khi collider chưa kịp overlap do player đổi lane)
