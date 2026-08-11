@@ -70,12 +70,12 @@ namespace VoidRunner.Core.World
 
         private void SpawnOnTile(ObstacleData data, Tile tile, float x)
         {
-            // [TẠM] chẩn đoán — log WORLD position + tile lossyScale (để biết fix scale có chạy không)
-            Debug.Log($"[DiagObstacle] TẠO {data.name} lane={x} tileScale={tile.transform.lossyScale} tilePos={tile.transform.position}");
+            // [TẠM] chẩn đoán — log WORLD position + tile rotation (để biết tile có bị xoay không)
+            Debug.Log($"[DiagObstacle] TẠO {data.name} lane={x} tileRot={tile.transform.eulerAngles} tilePos={tile.transform.position}");
             GameObject obstacle = Instantiate(data.prefab, tile.transform);
             // y=0.5: obstacle nằm trên mặt road (road surface ở y≈0.05) — trigger nên không cần vật lý đặt xuống
             obstacle.transform.localPosition = new Vector3(x, 0.5f, Random.Range(0f, tile.Length * 0.6f));
-            Debug.Log($"[DiagObstacle] WORLD {obstacle.transform.position} scale={obstacle.transform.lossyScale} renderer={obstacle.GetComponent<Renderer>()?.enabled}");
+            Debug.Log($"[DiagObstacle] WORLD {obstacle.transform.position} local={obstacle.transform.localPosition} parent={obstacle.transform.parent.name} renderer={obstacle.GetComponent<Renderer>()?.enabled}");
 
             Obstacle comp = obstacle.GetComponent<Obstacle>();
             if (comp == null)

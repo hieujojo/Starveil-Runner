@@ -22,6 +22,7 @@ namespace VoidRunner.Core.World
         [SerializeField] private ObstacleManager obstacleManager;
         [SerializeField] private PickupSpawner pickupSpawner;
 
+        private static int _instanceCount;
         private ObjectPool<Tile> _pool;
         private readonly List<Tile> _activeTiles = new List<Tile>();
         private float _nextSpawnZ;
@@ -30,6 +31,9 @@ namespace VoidRunner.Core.World
 
         private void Awake()
         {
+            _instanceCount++;
+            Debug.Log($"[DiagTS] Awake instance={_instanceCount} parent={(transform.parent != null ? transform.parent.name : "(root)")} pos={transform.position}");
+
             if (tilePrefab == null)
             {
                 Debug.LogError("TileSpawner thiếu tilePrefab.");
@@ -41,6 +45,16 @@ namespace VoidRunner.Core.World
                 factory: CreateTile,
                 onRelease: tile => tile.Deactivate(),
                 prewarmCount: poolSize);
+        }
+
+        private void OnDestroy()
+        {
+            _instanceCount--;
+        }
+
+        private void OnEnable()
+        {
+            Debug.Log($"[DiagTS] OnEnable instance={_instanceCount} — có TileSpawner khác chạy? count thực tế từ FindAny: {FindObjectsByType<TileSpawner>(FindObjectsSortMode.None).Length}");
         }
 
         private Tile CreateTile()
