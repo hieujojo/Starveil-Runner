@@ -129,6 +129,30 @@
 
 ---
 
+---
+
+## ✨ Task A/B/D (2026-08-11/12 — Credits · Void quái vật · Chọn tàu)
+
+> ⚠️ **Chạy tool TRƯỚC khi test** (mỗi tool 1 lần, idempotent):
+> 1. Mở scene **Game** → `Tools/Void Runner/Setup Void Monsters` (gán 3 quái vật) + `Setup Ship Select` (gán 2 tàu)
+> 2. Mở scene **MainMenu** → `Tools/Void Runner/Setup Ship Select` (tạo ShipSelectManager + gán prefab)
+> 3. **Ctrl+S** cả 2 scene. *(Nếu quên: ShipCatalog tự tải khi chưa gán — nhưng build cần tool.)*
+
+| # | Kiểm tra | Kết quả |
+|---|---|---|
+| T1 | MainMenu: nút **CREDITS** (bên phải, cùng hàng SHIP) → panel tím/đen + viền cyan + tiêu đề vàng, liệt kê đủ third-party assets (Kenney/Nebula/SpaceSkies + 5 model) | ☐ |
+| T2 | Panel Credits có nút **CLOSE** đóng được; dimmer tối phía sau, không kẹt | ☐ |
+| T3 | Game Over: có nút **CREDITS** phía dưới (ẩn cùng panel, không lộ khi chơi) → mở được panel | ☐ |
+| T4 | MainMenu: nút **SHIP** (bên trái, cùng hàng CREDITS) → panel SELECT SHIP: preview 3D tàu xoay + tên tàu (SF FIGHTER/SPARROW) | ☐ |
+| T5 | Panel chọn tàu: nút **< >** đổi tàu (preview đổi theo), **SELECT** lưu chọn, **CLOSE** đóng | ☐ |
+| T6 | Bấm PLAY → Game: tàu hiển thị = model đã chọn (SF Fighter hoặc Sparrow — KHÔNG phải tàu primitive cũ), có flame đuôi + exhaust | ☐ |
+| T7 | Vào game: Void = **QUÁI VẬT** (1 trong 3: Monster/Flying Beetle/Spider) đuổi theo, không còn banh tím; scale hợp lý | ☐ |
+| T8 | Quái vật KHÔNG xoay lung tung (Animator chạy bình thường), không có collider con chặn đường | ☐ |
+| T9 | Chọn tàu khác → về MainMenu → PLAY lại → tàu mới vẫn giữ (SaveSystem.SelectedShip) | ☐ |
+| T10 | Console 0 lỗi đỏ khi mở cả 2 panel + đổi tàu | ☐ |
+
+---
+
 ## 🛠️ Công cụ test tự động (đang xem xét — tham khảo)
 
 | Công cụ | Loại | Dành cho | Có cần thiết? |
