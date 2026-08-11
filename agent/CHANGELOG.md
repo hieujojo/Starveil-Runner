@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-08-12 (v3c) — Tích hợp obstacle = Asteroid (OlegWER thiên thạch)
+
+> User: "cứ thực thi từng việc đi, làm từ việc obstacle trước" (sau khi tải OlegWER Asteroid thay obstacle kenney).
+
+### Việc đã làm
+
+- **NEW `Editor/AsteroidObstacleSetupTool.cs`** (idempotent — chạy lại không đổi):
+  1. Load model `Assets/OlegWER/High-Poly_Asteroid/Prefabs/fbx.prefab` (folder GIỮ LOCAL qua gitignore — 180MB; nếu thiếu, tool báo hướng dẫn tải lại)
+  2. Tạo prefab `Assets/_Project/Prefabs/Obstacles/AsteroidObstacle.prefab` (nếu chưa có): root = SphereCollider (isTrigger — Obstacle.Awake tự bật) + component `Obstacle`; con = model asteroid, scale chuẩn theo chiều cao thật (targetHeight 1.5), collider radius theo bounds thực
+  3. Gán prefab mới vào CẢ 2 ObstacleData (`Ramp.asset` + `DynamicBox.asset`) qua SerializedObject — giữ nguyên obstacleType/spawnWeight (gameplay không đổi, chỉ đổi visual)
+- **Không sửa scene file tay** (R7.6) — user chạy tool 1 nút trong Unity.
+
+### Bài học (R7.8)
+
+- **ObstacleData assets nằm ở `Assets/_Project/ScriptableObjects/`** (Ramp.asset + DynamicBox.asset) chứ KHÔNG phải `Data/` như namespace gợi ý — namespace `VoidRunner.Data` là tên C#, không phải thư mục. Trước khi sửa data: dùng `git ls-files | grep obstacle` + đọc GUID trong scene để định vị file thật.
+- Model 3rd-party scale kỳ lạ (FBX scale 100) → **luôn đo bounds thật rồi chuẩn hóa** (pattern giống ShipCatalog/EnemyCatalog — R4.18).
+
+---
+
 ## 2026-08-12 (v3b) — Dọn kenney không dùng (~58MB) + import 3 gói VFX/Obstacle mới
 
 > User: "tôi tải 3 cái là vfx tàu, magic vfx mới (thay thế cái kenny hiện tại), obstacle (thay thế kenny hiện tại luôn), những kenny assets nào ko dùng thì xóa bớt cho đỡ nặng máy".

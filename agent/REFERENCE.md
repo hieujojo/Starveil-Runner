@@ -33,7 +33,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | 2 | Object pool tile | `Core/World/TileSpawner.cs` + `Tile.cs` | Pool sẵn tile, spawn trước + recycle sau lưng | Không GC spike giữa chừng |
 | 3 | AI đuổi theo (Enemy) | `Core/World/EnemyChase.cs` | **Cơ chế 2 nấc cố định + BẮT** (không NavMeshAgent — track vô tận không bake được): nấc 0 giữ 16m (fix 2026-08-12 v3: 9m bị camera cắt — camera cách player 10m) → đụng obstacle lần 1 → nấc 1 áp sát 12m + **vỗ cánh nhanh hơn** (Animator.speed 2x) → né sạch 12s → nới về 16m → đụng lần 2 trong cửa sổ → **Enemy LAO TỚI BẮT** (clip `atack 1`) → chờ 1.1s → Game Over mượt | Điểm khác biệt so với runner thường — Enemy phản ánh lỗi của player, không tự tăng tốc |
 | 4 | State machine | `Core/Game/GameManager.cs` | Menu → Playing → GameOver; phím R restart (tạm) | Event-driven |
-| 5 | Obstacle weighted | `Core/World/ObstacleManager.cs` + `Data/ObstacleData.cs` | Spawn theo tỉ lệ, luôn chừa ≥1 lane an toàn | ScriptableObject |
+| 5 | Obstacle weighted | `Core/World/ObstacleManager.cs` + `Data/ObstacleData.cs` | Spawn theo tỉ lệ, luôn chừa ≥1 lane an toàn. **Visual 2026-08-12 v3c: Asteroid (OlegWER)** — prefab `Prefabs/Obstacles/AsteroidObstacle.prefab` (tool `Setup Obstacle = Asteroid`); data nằm ở `ScriptableObjects/Ramp.asset` + `DynamicBox.asset` | ScriptableObject |
 
 ### G2 — Hệ thống game
 
@@ -130,10 +130,10 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | B6 | Nhặt **Shield** (xanh) → vòng hạt xanh, trong 3s đâm obstacle **không chết** | ☐ |
 | B7 | Nhặt **Magnet** (đỏ) → hút coin xa về phía player (bụi đỏ) | ☐ |
 | B8 | Nhặt **SlowMo** (tím) → game chậm lại 3s (bụi tím) | ☐ |
-| B9 | Đâm obstacle → **camera rung nhẹ** (screen shake) + SFX death | ☐ |
+| B9 | Đâm obstacle (**thiên thạch Asteroid**) → **camera rung nhẹ** (screen shake) + SFX death | ☐ |
 | B10 | Sau lưng có **Enemy = Flying Beetle** đuổi theo (cánh vỗ bay) + **vệt khói tối** phía sau | ☐ |
 | B11 | Coin/player/obstacle **phát sáng** trong bóng tối (Bloom) | ☐ |
-| B12 | Không thấy hộp vật lý lạ, không xuyên sàn, không bay lung tung | ☐ |
+| B12 | Không thấy hộp vật lý lạ, không xuyên sàn, không bay lung tung — Asteroid đứng yên trên đường, không quay lộn xộn | ☐ |
 
 ## C. Game Over + restart
 

@@ -14,7 +14,7 @@
 - **Enemy = Flying Beetle đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Enemy **tiến sát** (phình to, đe dọa); né sạch 10–15s → Enemy **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Enemy nuốt chửng = **Game Over**. Đụng obstacle → tàu **nhấp nháy** (feedback rõ ràng)
 - **Chướng ngại vật**: Ramp + DynamicBox gắn ngẫu nhiên, **luôn chừa ≥1 lane an toàn** + **safe zone 20m đầu game** (không obstacle — không chết tức thì)
 - **Coin & Power-up**: gom coin tăng điểm (hàng coin **không bao giờ đè lên obstacle** — chọn lane khác), nhặt power-up (Shield / Magnet / Slow-mo)
-- **Cảnh vật**: obstacle dựng bằng code (cube neon) — đã import **OlegWER High-Poly Asteroid** để thay thế (chờ tích hợp)
+- **Obstacle**: **thiên thạch Asteroid** (OlegWER High-Poly Asteroid) — chạy tool `Tools/Void Runner/Setup Obstacle = Asteroid` để tạo prefab + gán vào ObstacleData
 - **Độ khó công bằng**: tốc độ nền tăng dần + combo multiplier — cái chết do **lỗi của bạn**, không phải ngẫu nhiên
 
 ---
