@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-08-11 — Vòng 6: gốc rễ font 8 glyph, input đè giữ, đuôi tàu, HUD spacing, road rộng
+
+> User chạy 2 tool xong: vẫn có warning; ComboText "x2" giờ hiện "HS" cam; "SCORE" dính số; road quá nhỏ; muốn ĐÈ phím di chuyển liên tục + đuôi tàu có hiệu ứng.
+
+### Đã xong (3 commit)
+
+- **Root cause "HS" = font Kenney Future SDF regenerate 2048 NHƯNG chỉ 8 ký tự** (không có `x`/`2` → ComboText "x2" render qua fallback → glyph loạn "HS" + warning TMP). Gốc rễ: `Kenney Future.ttf` importer để **`characterSet = Dynamic` (mặc định, .meta không có field)** → Unity chỉ extract ký tự ĐANG ĐƯỢC DÙNG trong scene → `characterInfo` gần rỗng → `CreateFontAsset` chỉ tạo ~8 glyph dù atlas 2048. Fix trong `CreateFontAssetCore`: ép `FontImporter.characterSet = ASCIIPrintableSet` + `SaveAndReimport()` TRƯỚC khi tạo + `TryAddCharacters(32..126)` belt-and-suspenders + `LogWarning` nếu pack không đủ.
+- **Input ĐÈ GIỮ = trượt liên tục** (Subway Surfers): InputReader bỏ event rời rạc `LaneLeft/LaneRight` + repeat 0.12s → poll `MoveInput` mỗi frame; PlayerController đè giữ = `_targetX` trượt liên tục (`sweepSpeed` 6, clamp ±maxX), nhả = snap `Round(_targetX/laneWidth)` về lane gần nhất + đồng bộ `_currentLane`. GameManager bỏ wiring lane. Giữ `MoveLeft/MoveRight` cho tests.
+- **Đuôi tàu**: ngọn lửa `Thruster` cone lập lòe (PerlinNoise theo `Time.time`, tắt khi dead, bật khi restart) + `Exhaust` ParticleSystem (loop, rate 45, startSpeed -7 về sau, `Particles/Unlit` + soft material **tái sử dụng** `VFXManager.CreateSoftParticleMaterial` — đổi `internal static`, bỏ duplicate).
+- **HUD**: ScoreLabel "SCORE" lên sát đỉnh panel (anchor 0.5,1 @ y=-4, font 20 bold) + ScoreText xuống **nửa dưới panel** (anchor x 0..1 / y 0..0.72) — label và số tách rõ (trước đây ScoreText stretch FULL panel nên số dính ngay dưới label).
+- **Road rộng 10 → 14** ("đường quá nhỏ"): tool set Ground scale x=14 + `laneWidth` 2→3 cho PlayerController/ObstacleManager/PickupSpawner (SerializedObject) + AmbientScroller `sideOffset` 7→9.5 (prop ra ngoài mép road ±7); Tile.cs `roadHalfWidth` 5→7 (lane marker + scale tile tự theo). Code default `laneWidth` GIỮ 2 vì `PlayerControllerPlayTests` hardcode 2 (đổi default = test fail) — set qua scene/tool.
+
+### Bài học — **QUY TẮC MỚI**
+
+- **TTF importer `characterSet = Dynamic` là BẪY khi tạo TMP font bằng code** — Unity chỉ extract ký tự ĐANG ĐƯỢC DÙNG trong scene → `CreateFontAsset` sinh font vài glyph (dù atlas to). Khi font tạo bằng code thiếu glyph hàng loạt: kiểm tra `ttf.meta` (không có `characterSet:` = Dynamic) → ép `FontImporter.characterSet = ASCIIPrintableSet` + `SaveAndReimport()` trước khi tạo.
+- **Label + value trong cùng panel: value stretch full panel (anchor 0..1/0..1) = dính label** — tách bằng anchor: label đỉnh (0.5,1 @ y=-4, font nhỏ bold), value nửa dưới (y 0..0.72).
+- **Road rộng phải đồng bộ 4 chỗ** (thiếu 1 chỗ = lệch): Ground scale x, `roadHalfWidth` (Tile), `laneWidth` (Player/Obstacle/Pickup), ambient `sideOffset`.
+- **Serialized default đổi → test hardcode fail âm thầm** — test hardcode `laneWidth=2` nên giữ default code = 2, muốn đổi chỉ set qua scene/tool (không sửa default ảnh hưởng test).
+
+---
+
 ## 2026-08-11 — Compile error: Regex.Replace overload 4 tham số với `count` KHÔNG tồn tại trong BCL Unity 6
 
 > User báo 1 log đỏ trước khi chạy tool → `UIBuilderHelpers.cs(120,45): error CS1503: Argument 3: cannot convert from 'string' to 'int'`.

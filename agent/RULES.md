@@ -86,6 +86,10 @@
 - **R5.7** — `AudioListener` chỉ 1 per scene — nếu gắn AudioManager (DontDestroyOnLoad) có RequireComponent(AudioListener) phải xóa listener trên Main Camera.
 - **R5.8** — **TMP font atlas phải đủ lớn cho TOÀN BỘ ký tự dùng** — 1024² + sampling 128 chỉ chứa ~40 glyph (thiếu chữ thường, 'x', '2' → text hiện "lạ/vỡ" qua fallback). Dùng **2048²** (`CreateFontAsset(font, 128, 9, SDFAA, 2048, 2048)`). Kiểm tra nhanh: `grep 'm_Unicode:' <font>.asset` — đếm chữ thường (97-122) / digit (48-57) / hoa (65-90). *(Bug 2026-08-11: combo "x2" thành "H2".)*
 - **R5.9** — **Editor tool regenerate asset (DeleteAsset+CreateAsset) sinh GUID MỚI → gãy mọi tham chiếu scene âm thầm** — phải lưu guid cũ (đọc `.meta`) trước khi xóa + restore sau khi tạo lại (`Regex` thay `guid: [0-9a-f]{32}` + `AssetDatabase.ImportAsset(path, ForceUpdate)`). *(Bug 2026-08-11: font.)*
+- **R5.10** — **TTF importer `characterSet = Dynamic` (mặc định, .meta không có field) = BẪY khi tạo TMP font bằng code** — Unity chỉ extract ký tự ĐANG ĐƯỢC DÙNG trong scene → `CreateFontAsset` sinh font vài glyph (dù atlas 2048). Khi font mới thiếu glyph hàng loạt: kiểm tra `ttf.meta`, ép `FontImporter.characterSet = ASCIIPrintableSet` + `SaveAndReimport()` TRƯỚC khi tạo + `TryAddCharacters(32..126)`. *(Bug 2026-08-11: combo "x2" thành "HS".)*
+- **R5.11** — **Label + value trong cùng panel: value stretch full (anchor 0..1/0..1) = dính label** — tách: label anchor đỉnh (0.5,1 @ y=-4, font nhỏ bold), value nửa dưới panel (y 0..0.72). *(Fix 2026-08-11.)*
+- **R5.12** — **Road widen phải đồng bộ 4 chỗ** (thiếu 1 chỗ = obstacle lệch khỏi lane / prop nằm trên đường): Ground scale x, `roadHalfWidth` (Tile), `laneWidth` (Player/Obstacle/Pickup), ambient `sideOffset`. *(Fix 2026-08-11.)*
+- **R5.13** — **Đổi serialized default → test hardcode fail âm thầm** — test hardcode giá trị (vd `laneWidth=2` trong PlayerControllerPlayTests) → giữ default code, muốn đổi set qua scene/tool.
 
 ## ⚙️ NHÓM 6 — Workflow Unity / Git (thủ tục bất biến)
 
