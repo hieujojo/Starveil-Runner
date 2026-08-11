@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-11 — Fix nhanh sau vòng 5 vấn đề: 1 error + 2 warning (commit `307d10c`)
+
+> User báo 1 log đỏ + 2 warning trước khi test. Đọc log → đúng trúng 2 chỗ vừa sửa.
+
+### Đã fix
+
+- **1 error CS1061** — `PickupSpawner.cs(118)`: `IReadOnlyCollection<int>.Contains` không tồn tại → **thiếu `using System.Linq;`** (Contains là extension method của LINQ).
+- **2 warning CS0618** — `TileSpawner.cs(57,61)`: `FindObjectsByType<T>(FindObjectsSortMode)` **obsolete trong Unity 6** → bỏ tham số, dùng `FindObjectsByType<T>()`.
+
+### Bài học — **QUY TẮC MỚI**
+
+- **`IReadOnlyCollection<T>` KHÔNG có method `Contains`** — đó là extension của LINQ (`System.Linq`). Khi dùng `Contains` trên `IReadOnlyCollection`/`IEnumerable` nhớ `using System.Linq;` (HashSet/List có sẵn thì không cần). *(Bug 2026-08-11.)*
+- **Unity 6: `FindObjectsByType<T>(FindObjectsSortMode)` BỊ DEPRECATED** — dùng `FindObjectsByType<T>()` hoặc `FindObjectsByType<T>(FindObjectsInactive)`. Các tool Editor cũ (`RefactorGameplayTool`, `GameplayFixTool`) vẫn còn warning này — fix dần khi chạm tới (không ưu tiên).
+
+---
+
 ## 2026-08-11 — Vòng 5 vấn đề: HowToPlay khó đọc + obstacle đè coin + player bắt đầu khác nhau + cảnh vật lúc có lúc không
 
 > User đọc 166 log, báo 5 vấn đề. Điều tra từng gốc rễ → fix 7 file + góp ý reviewer.
