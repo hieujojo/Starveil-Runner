@@ -127,7 +127,7 @@ namespace VoidRunner.EditorTools
             model.transform.localPosition = new Vector3(-final.center.x, -final.center.y, -final.center.z);
 
             EnsureFolder(outputPath);
-            Debug.Log($"[DroneObstacle] Prefab {outputPath}: bounds={final.size.ToString(\"F2\")} pivotOffset={model.transform.localPosition.ToString(\"F2\")}");
+            Debug.Log($"[DroneObstacle] Prefab {outputPath}: bounds={final.size.ToString("F2")} pivotOffset={model.transform.localPosition.ToString("F2")}");
             bool saved = PrefabUtility.SaveAsPrefabAsset(root, outputPath);
             Object.DestroyImmediate(root); // ⚠️ hủy cả cây con — KHÔNG truy cập model sau dòng này (R7.10)
             if (!saved)

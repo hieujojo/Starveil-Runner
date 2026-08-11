@@ -2,6 +2,7 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using VoidRunner.Core.World;
 
 namespace VoidRunner.Tests
 {
