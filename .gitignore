@@ -136,5 +136,17 @@ InitTestScene*.unity*
 /Assets/Flying Beetle.meta
 /Assets/fantasySpider.meta
 
+# ===== 3rd-party VFX/Obstacle packs (giữ LOCAL — tổng ~235MB, import 2026-08-12 v3b) =====
+# ⚠️ Khi clone lại project: tự tải lại 3 gói (link trong agent/REFERENCE.md PART 3), Unity sinh .meta mới:
+#   • OlegWER High-Poly Asteroid (obstacle) /Assets/OlegWER/
+#   • Eric VFX Studio Free Game VFX /Assets/Eric VFX Studio/
+#   • JMO Assets Cartoon FX Remaster /Assets/JMO Assets/
+/Assets/OlegWER/
+/Assets/Eric VFX Studio/
+/Assets/JMO Assets/
+/Assets/OlegWER.meta
+/Assets/Eric VFX Studio.meta
+/Assets/JMO Assets.meta
+
 # ===== Config tool khác (kilo CLI) =====
 /.kilo/

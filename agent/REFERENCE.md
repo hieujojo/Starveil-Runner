@@ -52,13 +52,13 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 |---|---|---|---|---|
 | 12 | UI Kenney (Blue + font) | `Editor/MainMenuUIBuilder.cs` + `Editor/HUDUIBuilder.cs` | Tự dựng menu + HUD: sprite `panel_glass`, button Blue `button_rectangle_gloss/flat`, font `Kenney Future SDF` (sampling 128); tự gán field qua `SerializedObject` | 1608 PNG đã convert Sprite; tool chạy 1 nút |
 | 13 | Game HUD + Game Over | `UI/UIManager.cs` | ScorePanel + coin icon + score + combo (ẩn khi ×1); Game Over: title + điểm + cao nhất + **nút CHƠI LẠI / MENU** | Panel fade DOTween; nút CHƠI LẠI gọi `GameManager.Restart()`, MENU load scene MainMenu |
-| 14 | VFX | `Systems/VFX/VFXManager.cs` + `Editor/VFXSetupTool.cs` | **Particle**: coin burst tại vị trí coin + power-up burst (màu theo loại) — tạo 100% bằng code; **Popup điểm** "+10" nhân combo (DOTween bounce bay lên, pool 8 text, font Kenney Future) khi nhặt coin; **Screen shake** khi đâm obstacle (Cinemachine Impulse); **Vệt khói tối** theo Void (TrailRenderer code, nở rộng theo scale, clear khi restart) | Sự kiện `GameEvents` (thêm `OnCoinCollectedAt(Vector3)` mang vị trí) — zero coupling; pool + `Emit()` → không GC spike |
+| 14 | VFX | `Systems/VFX/VFXManager.cs` + `Editor/VFXSetupTool.cs` | **Particle**: coin burst tại vị trí coin + power-up burst (màu theo loại) — tạo 100% bằng code; **Popup điểm** "+10" nhân combo (DOTween bounce bay lên, pool 8 text, font Kenney Future) khi nhặt coin; **Screen shake** khi đâm obstacle (Cinemachine Impulse); **Vệt khói tối** theo Enemy (TrailRenderer code, nở rộng theo scale, clear khi restart). *2026-08-12 v3b: đã import Eric VFX Studio (15M) + JMO Cartoon FX (40M) — chưa tích hợp* | Sự kiện `GameEvents` (thêm `OnCoinCollectedAt(Vector3)` mang vị trí) — zero coupling; pool + `Emit()` → không GC spike |
 | 15 | VFX trail Void + popup | *(gộp vào 14)* | ✅ Đã làm xong | — |
 | 16 | Post-processing | `Editor/PostProcessingSetupTool.cs` + `Settings/PostProcessing/VoidRunnerProfile.asset` | **Global Volume** cả 2 scene: **Bloom** (intensity 0.35, tint xanh — coin/power-up phát sáng), **Vignette** (0.25 tối xanh — cảm giác "hư không"), **Color Adjustments** (contrast +8, saturation +6, filter lạnh); bật `renderPostProcessing` trên Main Camera (volumeTrigger + layerMask); tool 1 nút idempotent — tự sửa profile rỗng nếu có | Profile asset tạo bằng code → **phải `AddObjectToAsset` từng component** (bài học m_AtlasTextures) |
 | 17 | Material/Lighting | `Editor/MaterialLightingSetupTool.cs` + `PlayerController.EnsureShipLight` | **5 material tông "hư không"**: Background tím đen, Player cyan phát sáng, Enemy (Flying Beetle) nguyên bản, PickUp vàng phát sáng, Obstacle cam phát sáng; **Directional Light** trắng lạnh 1.1 + shadow mềm; **Ambient** tím tối (Flat) + **Fog** ExponentialSquared tím nhẹ (chiều sâu); **Point Light cyan bám tàu** (tàu nổi bật nhất trên track tối — fix 2026-08-12 v3) | URP Lit + `_EMISSION` keyword + `RealtimeEmissive` GI — Bloom kích hoạt glow |
 | 18 | Unity Test Framework | `Tests/EditMode` + `Tests/PlayMode` (2 asmdef + 6 file) | **24 test** (16 EditMode + 8 PlayMode): SaveSystem (best score/volume), GameEvents, ScoreSystem logic + combo tăng/clamp/reset theo thời gian thật, lane clamp | **Kết quả test thật: 24/24 xanh** ✅ |
 | 19 | Assembly architecture | `Scripts/VoidRunner.Core.asmdef` + `Plugins/.../DOTween.Modules.asmdef` | Code chính thành custom assembly (test reference được); DOTween modules tách riêng | Bài học: predefined assembly không reference được từ custom asmdef |
-| 20 | Kenney assets (6 bộ) | `Art/kenney_*` | UI pack + space-expansion + **game-icons (425) + particle-pack (193) + space-kit (772 + FBX) + space-station-kit (104 + FBX)** — CC0 | Đang convert → dựng HUD đẹp + ambient 2 bên đường |
+| 20 | Kenney assets (còn 2 bộ) | `Art/kenney_ui-pack` + `kenney_ui-pack-space-expansion` | UI pack + space-expansion — **5 PNG đang dùng**: panel_glass, star, button_rectangle_flat/gloss (4 GUID trong scene) — CC0. **Đã xóa 2026-08-12 v3b**: game-icons, particle-pack, space-kit, space-station-kit (~58MB — không được tham chiếu) | Thay bằng 3 gói mới: OlegWER Asteroid + Eric VFX Studio + JMO Cartoon FX |
 | 21 | WebGL + deploy | *(chưa làm)* | Build Brotli → itch.io + Unity Play + README | ⏳ Cuối cùng |
 
 ---
@@ -77,7 +77,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 - ✅ G1 + G2 hoàn tất (commit theo convention, đã push)
 - ✅ G3: **UI Kenney (menu + HUD)** + **VFX** (particle + popup điểm + screen shake + trail Void) + **Post-processing** (Bloom + Vignette + Color Grading) + **Material/Lighting** hoàn tất
 - ✅ **Unity Test Framework: 24/24 test xanh** (EditMode 16 + PlayMode 8)
-- 🔧 Đang làm: **6 bộ Kenney assets** → convert sprite → **HUD đẹp hơn** (score glow + label) → **ambient 2 bên đường** (Space Kit)
+- 🔧 Đang làm: **3 gói mới (OlegWER Asteroid + Eric VFX + JMO Cartoon FX)** → tích hợp thay obstacle/VFX code-drawn (2026-08-12 v3b, chờ user duyệt từng bước)
 - ✅ **REFACTOR GAMEPLAY (Giai đoạn 2.5) HOÀN TẤT (2026-08-11, user đã duyệt):** Enemy 2 nấc cố định + PlayMode test mới + player tàu vũ trụ + track 6000m + Game Over panel luôn hiện + UI tiếng Anh + best score ẩn khi 0 + layout nút âm thanh. Xem `PLAN.md` mục 2.5.
 - ⏭️ Tiếp theo: user chạy tool `Refactor: Both Scenes` → test tay theo `REFERENCE.md` PART 2 (mục A–E + V1–V11) → Tuning/60 FPS → WebGL build → upload
 
@@ -274,10 +274,9 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 | **SpaceSkies Free** | PULSAR BYTES | **Standard Unity Asset Store EULA** | [SpaceSkies Free — Unity Asset Store](https://assetstore.unity.com/packages/2d/textures-materials/sky/spaceskies-free-80503) | Skybox sao (Pink/Green/Purple) — fallback nhẹ |
 | **Kenney UI Pack** | Kenney (kenney.nl) | **CC0 1.0 (Public Domain)** | [kenney.nl/assets/ui-pack](https://kenney.nl/assets/ui-pack) | Sprite UI chính |
 | **Kenney UI Pack — Space Expansion** | Kenney | **CC0 1.0** | [kenney.nl/assets/ui-pack-space-expansion](https://kenney.nl/assets/ui-pack-space-expansion) | Sprite UI mở rộng |
-| **Kenney Space Kit** | Kenney | **CC0 1.0** | [kenney.nl/assets/space-kit](https://kenney.nl/assets/space-kit) | Mô hình 3D ambient 2 bên đường |
-| **Kenney Space Station Kit** | Kenney | **CC0 1.0** | [kenney.nl/assets/space-station-kit](https://kenney.nl/assets/space-station-kit) | Mô hình 3D trạm vũ trụ |
-| **Kenney Game Icons** | Kenney | **CC0 1.0** | [kenney.nl/assets/game-icons](https://kenney.nl/assets/game-icons) | Icon UI (coin, power-up...) |
-| **Kenney Particle Pack** | Kenney | **CC0 1.0** | [kenney.nl/assets/particle-pack](https://kenney.nl/assets/particle-pack) | Texture particle (burst, exhaust) |
+| **OlegWER — High-Poly Asteroid** | OlegWER | Standard Unity Asset Store EULA (theo nguồn tải) | Tìm "High-Poly Asteroid" trên Unity Asset Store | ⭐ Thay obstacle code-drawn bằng thiên thạch (import 2026-08-12) |
+| **Eric VFX Studio — Free Game VFX** | Eric VFX Studio | Standard Unity Asset Store EULA | [assetstore.unity.com](https://assetstore.unity.com) | ⭐ Thay particle code bằng prefab VFX (FX_Fireball, FX_Green_Hit...) (import 2026-08-12) |
+| **JMO Assets — Cartoon FX Remaster** | JMO Assets | Standard Unity Asset Store EULA | [assetstore.unity.com/packages/vfx/particles/cartoon-fx-remaster-free-109565](https://assetstore.unity.com/packages/vfx/particles/cartoon-fx-remaster-free-109565) | ⭐ VFX tàu (Explosions, Fire, Impacts...) (import 2026-08-12) |
 | **Kenney Fonts (Kenney Future)** | Kenney | **CC0 1.0** | [kenney.nl/assets/kenney-fonts](https://kenney.nl/assets/kenney-fonts) | Font UI / HUD |
 | **Kenney Audio Packs** (music/sfx) | Kenney | **CC0 1.0** | [kenney.nl/assets](https://kenney.nl/assets) | Nhạc nền + hiệu ứng âm thanh |
 | **Free SF Fighter** | CGPitbull | **Standard Unity Asset Store EULA** | [assetstore.unity.com/packages/3d/vehicles/space/free-sf-fighter-11711](https://assetstore.unity.com/packages/3d/vehicles/space/free-sf-fighter-11711) | Tàu player tùy chọn #1 (Ship Select) |
@@ -294,6 +293,8 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 > ℹ️ **Kenney CC0 = Public Domain** — được dùng thoải mái cho mọi mục đích (kể cả thương mại),
 > **không bắt buộc ghi công**. File `License.txt` nằm kèm trong từng thư mục gói.
 > ⚠️ Logo Kenney KHÔNG thuộc CC0 — không dùng logo trong game.
+> ℹ️ **Đã xóa 2026-08-12 v3b** (~58MB, không được tham chiếu): Kenney Space Kit, Space Station Kit,
+> Game Icons, Particle Pack — thay bằng OlegWER Asteroid + Eric VFX Studio + JMO Cartoon FX.
 
 ---
 
@@ -321,8 +322,11 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 THIRD-PARTY ASSETS
 - SpaceSkies Free by PULSAR BYTES (Unity Asset Store EULA)
 - Nebula Skyboxes (Unity Asset Store EULA)
-- UI, Space Kit, Fonts, Particle, Game Icons, Audio by Kenney (CC0 Public Domain)
-- Font "Kenney Future" by Kenney (CC0)
+- UI Pack + Font "Kenney Future" + Audio by Kenney (CC0 Public Domain)
+- High-Poly Asteroid by OlegWER (Unity Asset Store EULA)
+- Free Game VFX by Eric VFX Studio (Unity Asset Store EULA)
+- Cartoon FX Remaster by JMO Assets (Unity Asset Store EULA)
+- SF Fighter by CGPitbull · Sparrow by Ebal Studios · Flying Beetle · Monster Pack · Fantasy Spider (Unity Asset Store EULA)
 ```
 
 > Khi build WebGL lên itch.io / Unity Play, nên thêm phần Credits này vào README hiển thị

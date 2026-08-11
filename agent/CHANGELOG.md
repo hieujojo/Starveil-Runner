@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-08-12 (v3b) — Dọn kenney không dùng (~58MB) + import 3 gói VFX/Obstacle mới
+
+> User: "tôi tải 3 cái là vfx tàu, magic vfx mới (thay thế cái kenny hiện tại), obstacle (thay thế kenny hiện tại luôn), những kenny assets nào ko dùng thì xóa bớt cho đỡ nặng máy".
+
+### Xóa 4 kenney folder không dùng (~58MB)
+
+- **Đã verify KHÔNG được scene/prefab/material/code tham chiếu** (chỉ còn 4 GUID từ ui-pack được dùng):
+  - `kenney_game-icons` (6.6M) · `kenney_particle-pack` (16M — thay bằng Eric VFX Studio)
+  - `kenney_space-kit` (28M — thay bằng OlegWER Asteroid) · `kenney_space-station-kit` (7.5M)
+- **GIỮ**: `kenney_ui-pack` + `kenney_ui-pack-space-expansion` (5 PNG đang dùng trong UI: panel_glass, star, button_rectangle_flat/gloss).
+- `SpriteBatchConverter` Roots chỉ còn 2 folder UI (bỏ 4 path đã xóa).
+- Commit `a6d550e`.
+
+### 3 gói mới đã import (CHƯA tích hợp vào game — chờ user duyệt từng bước)
+
+| Gói | Nội dung | Dự định dùng | Dung lượng |
+|---|---|---|---|
+| **OlegWER** | High-Poly_Asteroid (FBX + Material + Prefab `fbx.prefab`) | Thay obstacle code-drawn bằng thiên thạch | 180M |
+| **Eric VFX Studio** | Free Game VFX (FX_Fireball, FX_Green_Hit, FX_LootDrop, FX_Orange_Slash...) | Thay particle code bằng prefab VFX có sẵn | 15M |
+| **JMO Assets** | Cartoon FX Remaster (CFXR Prefabs: Explosions, Fire, Impacts, Light...) | VFX tàu (engine/trail/va chạm) | 40M |
+
+> ⚠️ Lưu ý repo: 3 gói = ~235MB — hỏi user trước khi commit lên GitHub (repo nặng).
+
+---
+
 ## 2026-08-12 (v3) — Fix MainMenu (2 chữ title · nút sát) + Enemy hiện đủ + cơ chế BẮT + tàu sáng/to
 
 > User: "void runner vẫn còn 2 chữ; khoảng cách play/how to play/sound giảm còn 5-10px; tàu bị mờ — muốn nó nổi bật nhất; con bọ xuất hiện ngay từ đầu nhưng chỉ thấy phần đầu; con bọ có cảnh bắt — chạm 1 lần vỗ nhanh hơn, chạm 2 lần bắt lại rồi mới end game; đừng rung con bọ mà cho nó vỗ cánh; tàu to thêm ~10px"

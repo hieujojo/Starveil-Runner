@@ -17,14 +17,13 @@ namespace VoidRunner.EditorTools
     {
         private const string MenuRoot = "Tools/Void Runner/";
 
+        // FIX 2026-08-12: chỉ còn 2 folder UI (đang dùng trong scene) — 4 folder khác
+        // (game-icons, particle-pack, space-kit, space-station-kit) ĐÃ XÓA (~58MB) vì không
+        // được scene/prefab/material/code tham chiếu (thay bằng OlegWER Asteroid + Eric VFX + Cartoon FX).
         private static readonly string[] Roots =
         {
             "Assets/_Project/Art/kenney_ui-pack",
             "Assets/_Project/Art/kenney_ui-pack-space-expansion",
-            "Assets/_Project/Art/kenney_game-icons",
-            "Assets/_Project/Art/kenney_particle-pack",
-            "Assets/_Project/Art/kenney_space-kit",
-            "Assets/_Project/Art/kenney_space-station-kit",
         };
 
         private static readonly string[] ExcludeFolders =
