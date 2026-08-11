@@ -38,6 +38,26 @@
 
 ---
 
+## 2026-08-11 — Xóa hẳn Ambient + fix vệt sao + Credits UI + Task B (Nebula theo độ khó)
+
+> User test Task D OK ("UI oke rồi") → yêu cầu: xóa hẳn cảnh vật lúc trước, thêm credits game, vệt sao đang thành "1 dãy" không giống sao → chỉnh lại; xong thì thực thi Task B.
+
+### Đã xong
+
+- **Xóa HẲN Ambient** khỏi Game.unity (script python `tools/remove_ambient.py` dùng 1 lần rồi xóa): parse block, xóa GO 2079828960 + Transform 2079828961 + MonoBehaviour 2079828962 + **115 block** (28 prop children gồm GO/Transform/MeshRenderer/MeshFilter) + gỡ `- {fileID: 2079828961}` khỏi m_Children Managers. Backup `.ambient-bak` + verify 0 tham chiếu còn lại rồi xóa backup. User đã duyệt xóa hẳn (review xong).
+- **Fix vệt sao SpeedLines**: renderMode `Stretch` (velocityScale 0.14 + lengthScale 1.1 + emission 90 → DẢI sáng liên tục dính nhau, không giống sao) → `Billboard` chấm tròn rời rạc (startSize 0.09, emission 70, maxParticles 280) — đúng cảm giác "sao bay" rải rác.
+- **Credits UI (MainMenu)**: `MainMenuManager.EnsureCredits()` — nút CREDITS tím y=-320 (dưới BestScore -230 — vị trí đầu -250 sẽ ĐÈ BestScore) + panel CreditsPanel 760×560 tím đen đục + text danh sách third-party assets (Kenney CC0, Nebula/SpaceSkies EULA — khớp agent/CREDITS.md) + nút CLOSE. Tất cả tạo bằng code idempotent, `ToggleCredits` dùng chung dimmer.
+- **Task B — Nebula đổi theo độ khó**: `NebulaChanger.cs` (mới) — subscribe `DifficultyManager.OnDifficultyChanged` → `level=(speed-10)/10` → chọn `nebula[floor(level×4)]` → `RenderSettings.skybox` (idempotent `_currentIndex`, null-safe). `SkyboxSetupTool` refactor `CreateNebulaMaterial(tex,mat,name)` + menu mới **"Setup Nebula Difficulty"**: tạo 4 material Nebula01..04.mat từ 4 cubemap + AddComponent NebulaChanger lên GO Managers + gán mảng qua SerializedObject (idempotent).
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Xóa hẳn object/scene block bằng script parse có backup + verify số dư tham chiếu = 0** — không sửa tay từng block (28 prop × 4 component = 115 block); luôn backup trước, verify sau (đếm fileID còn xuất hiện), rồi mới xóa backup. Dùng `python` (Windows: `python3` alias WindowsApps không chạy).
+- **Vệt "speed-line" KHÔNG dùng renderMode Stretch với lengthScale lớn + emission cao** — Stretch + lengthScale 1.1 + rate 90 biến thành dải sáng dính nhau, không giống sao. Muốn giống sao: Billboard chấm tròn nhỏ, rate vừa phải.
+- **UI element tạo bằng code phải kiểm tra vị trí so với element KHÁC cùng cột** — nút CREDITS y=-250 đè BestScoreText y=-230 → đẩy xuống -320 (dưới mọi thứ). Vẽ trước khi fix: liệt kê tọa độ các element gần đó.
+- **Task B event-driven đúng chuẩn**: DifficultyManager đã phát `OnDifficultyChanged` → NebulaChanger chỉ subscribe/đổi skybox khi thực sự đổi (`_currentIndex`) — không poll, không spam log.
+
+---
+
 ## 2026-08-11 — Bản quyền assets: tạo agent/CREDITS.md + README (Nebula/SpaceSkies/Kenney)
 
 > User: "nhớ ghi bản quyền nhé, assets đó không phải của tôi" — 2 gói mới (Nebula, SpaceSkies) không thuộc tác giả.

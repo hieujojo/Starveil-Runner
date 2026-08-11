@@ -23,10 +23,13 @@ namespace VoidRunner.Systems.VFX
         [SerializeField] private float bandHalfLength = 24f;
 
         [Header("Hạt")]
-        [SerializeField] private float startSize = 0.06f;
-        [SerializeField] private float startLifetime = 0.55f;
-        [SerializeField] private float emissionRate = 90f;
-        [SerializeField] private int maxParticles = 240;
+        [Tooltip("Kích thước chấm sao (Billboard — chấm tròn rời rạc, KHÔNG phải vệt dài liên tục).")]
+        [SerializeField] private float startSize = 0.09f;
+        [Tooltip("Thời gian sống của chấm sao — ngắn = bay thoáng, không tạo dải dính nhau.")]
+        [SerializeField] private float startLifetime = 0.5f;
+        [Tooltip("Số hạt/giây — cao = sao dày, thấp = thưa (tránh thành dải liên tục).")]
+        [SerializeField] private float emissionRate = 70f;
+        [SerializeField] private int maxParticles = 280;
         [Tooltip("Hệ số nhân tốc độ hạt so với tốc độ player (>1 = vệt lướt qua rõ hơn).")]
         [SerializeField] private float speedFactor = 1.15f;
         [SerializeField] private Color lineColor = new Color(0.7f, 0.85f, 1f, 0.55f);
@@ -67,16 +70,15 @@ namespace VoidRunner.Systems.VFX
             var emission = ps.emission;
             emission.rateOverTime = emissionRate;
 
-            // Dải sinh dọc theo track — hạt xuất hiện quanh player, bay ngược -Z thành vệt
+            // Dải sinh dọc theo track — chấm sao xuất hiện quanh player, bay ngược -Z
             var shape = ps.shape;
             shape.shapeType = ParticleSystemShapeType.Box;
             shape.scale = new Vector3(0.1f, 0.1f, bandHalfLength * 2f);
 
-            // Stretch theo vận tốc → vệt sáng kéo dài (speed-line)
+            // Billboard = chấm sao TRÒN rời rạc (fix 2026-08-11: renderMode Stretch + lengthScale
+            // 1.1 + emission 90 biến thành DẢI sáng liên tục dính nhau, không giống sao).
             var renderer = ps.GetComponent<ParticleSystemRenderer>();
-            renderer.renderMode = ParticleSystemRenderMode.Stretch;
-            renderer.velocityScale = 0.14f;
-            renderer.lengthScale = 1.1f;
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
             renderer.material = mat;
 
             return ps;

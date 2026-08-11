@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VoidRunner.Systems.VFX; // NebulaChanger (Task B)
 
 namespace VoidRunner.EditorTools
 {
@@ -28,11 +29,74 @@ namespace VoidRunner.EditorTools
         private const string SpaceSkiesMatPath = "Assets/SpaceSkies Free/Skybox_3/Purple_2K_Resolution.mat";
         private const string FallbackSpaceskies = "Assets/SpaceSkies Free/Skybox_2/Green_2K_Resoution.mat";
 
+        // Task B — 4 nebula đổi theo độ khó (Nebula_01 → 04)
+        private static readonly (string Tex, string Mat, string Name)[] NebulaVariants =
+        {
+            ("Assets/Nebula Skyboxes/Nebula_01_Cubemap.exr", "Assets/_Project/Materials/Skybox/Nebula01.mat", "Nebula01"),
+            ("Assets/Nebula Skyboxes/Nebula_02_Cubemap.exr", "Assets/_Project/Materials/Skybox/Nebula02.mat", "Nebula02"),
+            ("Assets/Nebula Skyboxes/Nebula_03_Cubemap.exr", "Assets/_Project/Materials/Skybox/Nebula03.mat", "Nebula03"),
+            ("Assets/Nebula Skyboxes/Nebula_04_Cubemap.exr", "Assets/_Project/Materials/Skybox/Nebula04.mat", "Nebula04"),
+        };
+
         [MenuItem(MenuRoot + "Setup Skybox (Nebula — tinh vân hư không)")]
         public static void SetupNebula() => Setup(useNebula: true);
 
         [MenuItem(MenuRoot + "Setup Skybox (SpaceSkies Purple — nhẹ hơn)")]
         public static void SetupSpaceSkies() => Setup(useNebula: false);
+
+        /// <summary>
+        /// Task B (2026-08-11): tạo 4 material Nebula01..04 (từ 4 cubemap) + gắn NebulaChanger
+        /// vào GO "Managers" trong scene đang mở (Game) — skybox đổi dần theo độ khó.
+        /// Idempotent — chạy lại không nhân đôi.
+        /// </summary>
+        [MenuItem(MenuRoot + "Setup Nebula Difficulty (Task B — 4 skybox theo độ khó)")]
+        public static void SetupNebulaDifficulty()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (scene.name != "Game")
+            {
+                EditorUtility.DisplayDialog("Void Runner — Nebula Difficulty",
+                    $"Scene đang mở là '{scene.name}'. Mở scene Game rồi chạy lại.", "OK");
+                return;
+            }
+
+            // 1) Tạo 4 material (idempotent)
+            var mats = new Material[NebulaVariants.Length];
+            for (int i = 0; i < NebulaVariants.Length; i++)
+            {
+                mats[i] = CreateNebulaMaterial(NebulaVariants[i].Tex, NebulaVariants[i].Mat, NebulaVariants[i].Name);
+            }
+
+            // 2) Tìm GO Managers
+            var managers = GameObject.Find("Managers");
+            if (managers == null)
+            {
+                EditorUtility.DisplayDialog("Void Runner — Nebula Difficulty",
+                    "Không tìm thấy GO 'Managers' trong scene. Dừng lại.", "OK");
+                return;
+            }
+
+            // 3) Gắn NebulaChanger nếu chưa có (idempotent)
+            var changer = managers.GetComponent<NebulaChanger>();
+            bool created = changer == null;
+            if (changer == null) changer = managers.AddComponent<NebulaChanger>();
+
+            // 4) Gán mảng material qua SerializedObject
+            var so = new SerializedObject(changer);
+            var prop = so.FindProperty("nebulaMaterials");
+            prop.arraySize = mats.Length;
+            for (int i = 0; i < mats.Length; i++)
+            {
+                prop.GetArrayElementAtIndex(i).objectReferenceValue = mats[i];
+            }
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            Debug.Log($"[VoidRunner] Nebula Difficulty: {(created ? "tạo mới" : "đã có")} NebulaChanger trên '{managers.name}' + {mats.Length} material.");
+            EditorUtility.DisplayDialog("Void Runner — Nebula Difficulty",
+                $"✓ {(created ? "Tạo mới" : "Đã có")} NebulaChanger trên GO Managers với {mats.Length} nebula.\n\n" +
+                "Nhớ Ctrl+S lưu scene.", "OK");
+        }
 
         private static void Setup(bool useNebula)
         {
@@ -78,20 +142,26 @@ namespace VoidRunner.EditorTools
         /// <summary>Tạo material Skybox/Cubemap từ Nebula exr (nếu chưa có trên đĩa — idempotent).</summary>
         private static Material GetOrCreateNebulaMaterial()
         {
-            var existing = AssetDatabase.LoadAssetAtPath<Material>(NebulaMatPath);
+            return CreateNebulaMaterial(NebulaTexPath, NebulaMatPath, "NebulaSkybox");
+        }
+
+        /// <summary>Refactor: tạo material Skybox/Cubemap từ 1 Nebula exr bất kỳ (idempotent).</summary>
+        private static Material CreateNebulaMaterial(string texPath, string matPath, string matName)
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<Material>(matPath);
             if (existing != null) return existing;
 
-            if (!File.Exists(NebulaTexPath))
+            if (!File.Exists(texPath))
             {
-                Debug.LogWarning("[Skybox] Không thấy Nebula exr — fallback SpaceSkies.");
+                Debug.LogWarning($"[Skybox] Không thấy {texPath} — fallback SpaceSkies.");
                 return LoadSpaceSkiesMaterial();
             }
 
             // Load cubemap đã import (textureShape: Cube, maxTextureSize 2048)
-            var cubemap = AssetDatabase.LoadAssetAtPath<Cubemap>(NebulaTexPath);
+            var cubemap = AssetDatabase.LoadAssetAtPath<Cubemap>(texPath);
             if (cubemap == null)
             {
-                Debug.LogWarning("[Skybox] Nebula exr chưa import dạng Cubemap — fallback SpaceSkies.");
+                Debug.LogWarning($"[Skybox] {texPath} chưa import dạng Cubemap — fallback SpaceSkies.");
                 return LoadSpaceSkiesMaterial();
             }
 
@@ -102,16 +172,16 @@ namespace VoidRunner.EditorTools
                 return LoadSpaceSkiesMaterial();
             }
 
-            string dir = Path.GetDirectoryName(NebulaMatPath);
+            string dir = Path.GetDirectoryName(matPath);
             if (!string.IsNullOrEmpty(dir) && !AssetDatabase.IsValidFolder(dir))
             {
                 Directory.CreateDirectory(dir);
                 AssetDatabase.Refresh(); // ⚠️ bắt buộc — nếu không AssetDatabase chưa biết folder → CreateAsset fail (góp ý reviewer)
             }
 
-            var mat = new Material(shader) { name = "NebulaSkybox" };
+            var mat = new Material(shader) { name = matName };
             mat.SetTexture("_Tex", cubemap);
-            AssetDatabase.CreateAsset(mat, NebulaMatPath);
+            AssetDatabase.CreateAsset(mat, matPath);
             AssetDatabase.SaveAssets();
             return mat;
         }

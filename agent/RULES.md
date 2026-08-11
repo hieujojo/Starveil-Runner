@@ -45,6 +45,10 @@
 - **R0b.2 — Nebula có 4 cubemap (01–04): đổi dần theo độ khó / mốc điểm** — càng vào sâu (DifficultyManager tăng) càng chuyển nebula đậm hơn → cảm giác "đi sâu vào hư không".
 - **R0b.3 — Tận dụng texture mặt (SpaceSkies) làm nền UI**: Game Over / MainMenu background có thể dùng 1 mặt texture skybox làm ảnh nền (cinematic) thay vì nền trơn.
 - **R0b.4 — Khi có skybox rồi: bỏ ý tưởng "props lề" — thay bằng hiệu ứng không gian** (xem FEATURES.md — starfield parallax / speed lines) cho hợp lý.
+- **R0b.5 — ĐÃ XÓA HẲN Ambient (props lề) khỏi scene Game 2026-08-11** (user duyệt sau khi test UI OK) — thay bằng SpeedLines (vệt sao 2 bên). Nếu muốn dựng lại cảnh vật lề: phải là vật thể "thuộc vũ trụ" (thiên thạch, mảnh vỡ), không phải cột trụ đứng.
+- **R0b.6 — Speed-lines phải là chấm sao Billboard rời rạc, KHÔNG dùng renderMode Stretch + lengthScale lớn + emission cao** — Stretch tạo dải sáng liên tục dính nhau (không giống sao). Billboard + startSize 0.09 + rate 70 = sao bay rải rác đúng nghĩa. *(Bug Task D 2026-08-11.)*
+- **R0b.7 — Nebula đổi theo độ khó (Task B)**: `NebulaChanger` subscribe `DifficultyManager.OnDifficultyChanged` → level=(speed-start)/(max-start) → `nebula[floor(level×4)]` → RenderSettings.skybox. Tool `Setup Nebula Difficulty` tạo 4 material (Nebula01..04.mat) + gắn component lên Managers (SerializedObject array) — idempotent. Nhớ `using VoidRunner.Systems.VFX;` khi Editor tool reference script Systems (thiếu = CS0246).
+- **R0b.8 — Credits/third-party attribution PHẢI hiển thị trong game** (nút CREDITS MainMenu → panel liệt kê assets — dữ liệu khớp agent/CREDITS.md): Kenney CC0 + Nebula/SpaceSkies EULA + "Developed with Unity". Tạo bằng code idempotent (EnsureCredits). Vị trí nút phụ kiểm tra với element cùng cột (BestScore -230 → nút CREDITS -280).
 
 ---
 
