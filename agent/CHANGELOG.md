@@ -34,6 +34,26 @@
 
 ---
 
+## 2026-08-12 — Log đỏ RefactorGameplayTool + dọn 6 Editor tool không dùng
+
+> User: "vẫn còn 1 log đỏ liên quan RefactorGameplayTool, điều tra ngay; tool nào không còn sử dụng thì xóa — tool phải tái dùng được nhiều lần, không phải 1 lần".
+
+### Log đỏ — `RefactorGameplayTool.cs(155,66) CS0246 AmbientScroller`
+
+- Nguyên nhân: tool vẫn gọi `WidenRoadAndMoveAmbientOut()` tham chiếu `AmbientScroller` (đã xóa ở đợt dọn trước) → compile fail.
+- Fix: bỏ tham chiếu ambient → `WidenRoad()` chỉ set laneWidth cho Player/Obstacle/Pickup; đồng thời fix warning CS0618 (`FindObjectsByType` với `FindObjectsSortMode` deprecated → 1 tham số) ở RefactorGameplayTool + ShipSelectManager. Commit `b99eeee`.
+- **Tool GIỮ vì tái dùng được** (idempotent, chạy nhiều lần): RefactorGameplayTool, UIOverhaulTool, KenneyFontImporter, MaterialLightingSetupTool, PostProcessingSetupTool, ShipSelectSetupTool, VoidMonsterSetupTool, SkyboxSetupTool, SpriteBatchConverter, VFXSetupTool, UIBuilderHelpers.
+
+### Dọn 6 Editor tool không còn dùng (user duyệt)
+
+- **HUDUIBuilder + MainMenuUIBuilder** — dựng UI tông BLUE cũ, đã bị UIOverhaulTool thay thế (comment trong UIOverhaulTool ghi rõ). Không ai gọi (chỉ nhắc tên trong comment).
+- **HUDUpgradeTool** — nâng cấp HUD cũ, UIOverhaulTool đã làm chuẩn hơn.
+- **CameraFollowFixTool + GameplayFixTool + ScenePolishTool** — tool fix 1 lần đã hoàn thành.
+- **GIỮ UIBuilderHelpers** — KenneyFontImporter vẫn dùng (`CreateFontAssetCore`/`ReadGuid`/`RestoreGuid`).
+- Commit `f643f6f`. Kiểm tra lại: log sạch (build success gần cuối, không lỗi CS).
+
+---
+
 ## 2026-08-11 — CS0246 AmbientSetupTool sau đợt dọn file (2 log đỏ)
 
 > User: "đang có 2 log lỗi đỏ, đọc log rồi fix nhé".

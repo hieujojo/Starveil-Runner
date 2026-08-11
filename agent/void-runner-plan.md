@@ -244,7 +244,7 @@ Assets/
 | kenney_space-kit | 772 sprite + FBX (cột trụ, kiến trúc — ambient 2 bên đường) | [kenney.nl/assets/space-kit](https://kenney.nl/assets/space-kit) — CC0 |
 | kenney_space-station-kit | 104 sprite + FBX (trạm vũ trụ lơ lửng) | [kenney.nl/assets/space-station-kit](https://kenney.nl/assets/space-station-kit) — CC0 |
 | kenney_music-jingles | BGM 8-bit | [kenney.nl](https://kenney.nl/assets/music-jingles) — CC0 |
-| Editor tools (`_Project/Editor/`) | Convert sprite, tạo font, dựng UI tự động | Tự viết (menu `Tools/Void Runner/`) |
+| Editor tools (`_Project/Editor/`) | Setup scene/UI/font/skybox tự động — 10 tool idempotent (chạy lại an toàn) | Tự viết (menu `Tools/Void Runner/`): KenneyFontImporter, MaterialLightingSetupTool, PostProcessingSetupTool, RefactorGameplayTool, ShipSelectSetupTool, SkyboxSetupTool, SpriteBatchConverter, UIOverhaulTool, VFXSetupTool, VoidMonsterSetupTool + UIBuilderHelpers |
 
 > Nguyên tắc: **không dùng asset gameplay từ Asset Store** — mọi logic tự viết (thể hiện skill).
 
