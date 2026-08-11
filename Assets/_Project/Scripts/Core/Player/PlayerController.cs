@@ -424,8 +424,10 @@ namespace VoidRunner.Core.Player
         }
 
         /// <summary>Hệ hạt exhaust liên tục — hạt cam mềm bay về sau đuôi (không cần asset).
-        /// v3f.7: tăng rate/size/speed (user: "tàu vũ trụ thì phát ra tên lửa chứ") — lửa đuôi rõ rệt
-        /// hơn sau khi xóa vệt trail tím che mất.</summary>
+        /// v3f.7: tăng rate/size (user: "tàu vũ trụ thì phát ra tên lửa chứ") — lửa đuôi rõ rệt sau
+        /// khi xóa vệt trail tím che mất.
+        /// v3f.7.1 (user: "lửa văng lên trời loạn quá"): shape Sphere phun MỌI HƯỚNG (cả lên trời) →
+        /// đổi sang CONE hẹp (chùm lửa hẹp về sau -Z) + giảm rate 70→35, size 0.3→0.24.</summary>
         private static ParticleSystem CreateExhaustSystem(Transform parent)
         {
             var go = new GameObject("Exhaust");
@@ -436,19 +438,20 @@ namespace VoidRunner.Core.Player
             var main = ps.main;
             main.loop = true;
             main.playOnAwake = true;
-            main.startLifetime = 0.4f;
-            main.startSpeed = -9f; // hướng về sau (-Z)
-            main.startSize = 0.3f;
+            main.startLifetime = 0.35f;
+            main.startSpeed = -8f; // hướng về sau (-Z)
+            main.startSize = 0.24f;
             main.startColor = new Color(1f, 0.55f, 0.12f, 0.85f);
-            main.maxParticles = 120;
+            main.maxParticles = 80;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
 
             var emission = ps.emission;
-            emission.rateOverTime = 70f;
+            emission.rateOverTime = 35f;
 
             var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Sphere;
-            shape.radius = 0.12f;
+            shape.shapeType = ParticleSystemShapeType.Cone; // chùm hẹp — không văng lung tung
+            shape.angle = 6f;
+            shape.radius = 0.15f;
 
             var renderer = go.GetComponent<ParticleSystemRenderer>();
             // Tái sử dụng material mềm của VFXManager (không duplicate — bài học code reuse)

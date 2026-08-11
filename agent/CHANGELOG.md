@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-08-12 (v3f.7.1) — Sao trôi thành HÌNH VUÔNG + lửa văng lung tung
+
+**Triệu chứng:** user: "sao trôi quá to + hình ô vuông, nếu thật là ô vuông thì bỏ luôn; lửa bắn ít đi, đừng văng lên trời loạn quá".
+
+**Root cause 1 — sao vuông:** `CreateSoftParticleMaterial` tạo `new Material(shader URP Unlit)` nhưng **KHÔNG bật alpha blending** — keyword `_ALPHABLEND_ON` tắt → material render **OPAQUE** → texture tròn (RGB trắng, alpha chỉ ở kênh alpha) hiện thành **khối vuông trắng/xanh nhạt** (nhìn ảnh: "square floating blocks"). Coin burst từng dùng chung material nhưng hạt nhỏ 0.35 + bay nhanh nên không thấy rõ; sao to 0.8 → lộ rõ.
+
+**Fix:** cấu hình blend đúng trong `CreateSoftParticleMaterial` (HasProperty guard để an toàn với fallback Sprites/Default):
+```csharp
+if (mat.HasProperty("_BlendMode")) mat.SetFloat("_BlendMode", 0f);   // 0 = Alpha
+if (mat.HasProperty("_SrcBlend"))  mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+if (mat.HasProperty("_DstBlend"))  mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+mat.EnableKeyword("_ALPHABLEND_ON");
+mat.SetOverrideTag("RenderType", "Transparent");
+mat.renderQueue = (int)RenderQueue.Transparent;
+```
+BÀI HỌC R3.1 (nâng cấp): `new Material(shader)` không kế thừa cấu hình blend của shader — **material particle runtime phải tự set blend keyword + Src/DstBlend + renderQueue**, không tin default. Đồng thời giảm sao: size 0.35–0.8 → **0.15–0.35** (quá to), rate 90→**50**.
+
+**Root cause 2 — lửa văng lung tung:** `CreateExhaustSystem` dùng shape **Sphere** (radius 0.12) → hạt phun ra **MỌI HƯỚNG** (cả lên trời) với speed -9 → loạn. Fix: shape **Cone** góc 6° (chùm hẹp về sau -Z) + rate 70→**35**, size 0.3→**0.24**, speed -9→-8, lifetime 0.4→0.35.
+
 ## 2026-08-12 (v3f.7) — XÓA VỆT TÍM: shader Particles/Additive KHÔNG tồn tại trong URP
 
 **Triệu chứng:** user: "vệt dài tím tím sau xe, tàu vũ trụ thì phát ra tên lửa chứ, vệt quá dài, hệ sao trôi là gì tôi ko thấy".
