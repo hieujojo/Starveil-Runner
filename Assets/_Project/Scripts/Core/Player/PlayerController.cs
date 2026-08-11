@@ -321,7 +321,7 @@ namespace VoidRunner.Core.Player
             CreatePart(ship.transform, "Engine", new Vector3(0f, 0.12f, -0.62f), new Vector3(0.3f, 0.12f, 0.2f), _engineMat);
 
             // Ngọn lửa đẩy sau đuôi — lập lòe theo thời gian (cảm giác đang bay)
-            _flame = CreatePart(ship.transform, "Thruster", new Vector3(0f, 0.12f, -0.85f), new Vector3(0.18f, 0.18f, 0.55f), _flameMat);
+            _flame = CreatePart(ship.transform, "Thruster", new Vector3(0f, 0.12f, -0.85f), new Vector3(0.18f, 0.18f, 0.7f), _flameMat);
             _flameBaseScale = _flame.localScale;
 
             // Hạt exhaust bay ngược (-Z) từ đuôi
@@ -395,7 +395,7 @@ namespace VoidRunner.Core.Player
             float rearZ = -scaled.size.z * 0.5f - 0.15f;
             float liftY = scaled.size.y * 0.35f;
 
-            _flame = CreatePart(ship.transform, "Thruster", new Vector3(0f, liftY, rearZ), new Vector3(0.18f, 0.18f, 0.55f), _flameMat);
+            _flame = CreatePart(ship.transform, "Thruster", new Vector3(0f, liftY, rearZ), new Vector3(0.18f, 0.18f, 0.7f), _flameMat);
             _flameBaseScale = _flame.localScale;
 
             _exhaust = CreateExhaustSystem(ship.transform);
@@ -423,7 +423,9 @@ namespace VoidRunner.Core.Player
             return has ? bounds : new Bounds(Vector3.zero, Vector3.one);
         }
 
-        /// <summary>Hệ hạt exhaust liên tục — hạt cam mềm bay về sau đuôi (không cần asset).</summary>
+        /// <summary>Hệ hạt exhaust liên tục — hạt cam mềm bay về sau đuôi (không cần asset).
+        /// v3f.7: tăng rate/size/speed (user: "tàu vũ trụ thì phát ra tên lửa chứ") — lửa đuôi rõ rệt
+        /// hơn sau khi xóa vệt trail tím che mất.</summary>
         private static ParticleSystem CreateExhaustSystem(Transform parent)
         {
             var go = new GameObject("Exhaust");
@@ -434,19 +436,19 @@ namespace VoidRunner.Core.Player
             var main = ps.main;
             main.loop = true;
             main.playOnAwake = true;
-            main.startLifetime = 0.35f;
-            main.startSpeed = -7f; // hướng về sau (-Z)
-            main.startSize = 0.22f;
+            main.startLifetime = 0.4f;
+            main.startSpeed = -9f; // hướng về sau (-Z)
+            main.startSize = 0.3f;
             main.startColor = new Color(1f, 0.55f, 0.12f, 0.85f);
-            main.maxParticles = 80;
+            main.maxParticles = 120;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
 
             var emission = ps.emission;
-            emission.rateOverTime = 45f;
+            emission.rateOverTime = 70f;
 
             var shape = ps.shape;
             shape.shapeType = ParticleSystemShapeType.Sphere;
-            shape.radius = 0.1f;
+            shape.radius = 0.12f;
 
             var renderer = go.GetComponent<ParticleSystemRenderer>();
             // Tái sử dụng material mềm của VFXManager (không duplicate — bài học code reuse)

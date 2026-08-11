@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-08-12 (v3f.7) — XÓA VỆT TÍM: shader Particles/Additive KHÔNG tồn tại trong URP
+
+**Triệu chứng:** user: "vệt dài tím tím sau xe, tàu vũ trụ thì phát ra tên lửa chứ, vệt quá dài, hệ sao trôi là gì tôi ko thấy".
+
+**Root cause (R3.1 tái phát):** `SetupShipTrail` (v3f.6) dùng `CreateAdditiveSoftMaterial()` = `new Material(Shader.Find("Universal Render Pipeline/Particles/Additive"))`. Shader **`Particles/Additive` KHÔNG TỒN TẠI trong URP** (verify: chỉ có Lit / Simple Lit / Unlit) → `Shader.Find` trả null → `new Material(null)` = **error shader MÀU TÍM**. Guard cũ `if (mat == null || mat.shader == null)` **KHÔNG bắt được** vì error shader không phải null → fallback `Sprites/Default` không bao giờ chạy.
+
+**BÀI HỌC R3.1 (nâng cấp):** check **`Shader` trước** khi `new Material` — không dựa vào `mat.shader == null`:
+```csharp
+Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+if (shader == null) shader = Shader.Find("Sprites/Default");
+var mat = new Material(shader);
+```
+
+**Fix:**
+- Xóa hẳn `SetupShipTrail` + `CreateAdditiveSoftMaterial` + `_shipTrail` + clear trail trong HandleRestart (grep: không ai gọi — xóa an toàn).
+- **Lửa tên lửa ĐÃ CÓ SẴN** ở PlayerController (Thruster lập lòe PerlinNoise + exhaust hạt cam) — bị vệt tím che mất. Tăng cho rõ: exhaust rate 45→70, size 0.22→0.3, speed -7→-9, lifetime 0.35→0.4, maxParticles 80→120; Thruster dài 0.55→0.7 (cả nhánh primitive + model).
+- **Sao trôi vô hình**: quá nhỏ (0.06–0.18) + box đặt cách player 14m phía trước → to hơn 0.35–0.8 + box BAO QUANH player (offset 0,1.5,0), scale (28,14,26), lifetime 1.8s, maxParticles 500.
+- Scene KHÔNG serialize drift*/shipTrail* (verify awk block dừng ở trailColor) → chỉ sửa code default là áp dụng.
+
 ## 2026-08-12 (v3f.6) — VFX: vệt glow tàu + hệ sao trôi + dọn DIAG logs
 
 - **Xóa 3 DIAG logs** (EnemyChase/ObstacleManager/PickupSpawner) — user đã xác nhận mọi thứ OK (R7.11). Xóa luôn `GetRenderBounds` dead trong ObstacleManager (chỉ DIAG dùng — R3.15).

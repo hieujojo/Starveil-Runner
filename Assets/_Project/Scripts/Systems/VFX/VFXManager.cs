@@ -54,18 +54,17 @@ namespace VoidRunner.Systems.VFX
         [SerializeField] private float trailStartWidth = 1.4f;
         [SerializeField] private Color trailColor = new Color(0.05f, 0.05f, 0.1f, 0.55f);
 
-        [Header("Ship trail (vệt glow theo tàu — cảm giác tốc độ)")]
-        [SerializeField] private float shipTrailTime = 0.5f;
-        [SerializeField] private float shipTrailWidth = 0.55f;
-        [SerializeField] private Color shipTrailColor = new Color(0.45f, 0.9f, 1f, 0.85f);
+        // NOTE (v3f.7): LỬA TÊN LỬA nằm ở PlayerController (Thruster + hạt exhaust cam) —
+        // KHÔNG tạo vệt trail ở VFXManager nữa (vệt cũ dùng shader Additive không tồn tại trong
+        // URP → error shader TÍM + quá dài che mất flame — user phàn nàn).
 
         [Header("Space drift (sao trôi ngang — chiều sâu vũ trụ)")]
         [SerializeField] private float driftRate = 90f;
-        [SerializeField] private float driftSpeed = -12f; // ngược hướng chạy (phía sau)
-        [SerializeField] private float driftLifetime = 2.5f;
-        [SerializeField] private float driftSizeMin = 0.06f;
-        [SerializeField] private float driftSizeMax = 0.18f;
-        [SerializeField] private Color driftColor = new Color(0.85f, 0.92f, 1f, 1f);
+        [SerializeField] private float driftSpeed = -10f; // ngược hướng chạy (phía sau)
+        [SerializeField] private float driftLifetime = 1.8f;
+        [SerializeField] private float driftSizeMin = 0.35f;
+        [SerializeField] private float driftSizeMax = 0.8f;
+        [SerializeField] private Color driftColor = new Color(0.9f, 0.95f, 1f, 1f);
 
         private Transform _player;
         private ParticleSystem _coinBurst;
@@ -77,7 +76,6 @@ namespace VoidRunner.Systems.VFX
         private int _popupIndex;
         private TrailRenderer _enemyTrail;
         private Transform _enemyTransform;
-        private TrailRenderer _shipTrail;
         private ParticleSystem _spaceDrift;
         private ScoreSystem _scoreSystem;
 
@@ -125,7 +123,6 @@ namespace VoidRunner.Systems.VFX
             SetupScreenShake();
             SetupPopups();
             SetupEnemyTrail();
-            SetupShipTrail();
             SetupSpaceDrift();
         }
 
@@ -137,10 +134,10 @@ namespace VoidRunner.Systems.VFX
                 _enemyTrail.startWidth = trailStartWidth * _enemyTransform.localScale.x;
             }
 
-            // Hệ sao trôi bám theo player (phía trước mặt) — sao nhỏ trôi ngược ra sau = chiều sâu + tốc độ
+            // Hệ sao trôi bám theo player (box bao quanh player) — sao trôi ngược ra sau = chiều sâu + tốc độ
             if (_spaceDrift != null && _player != null)
             {
-                _spaceDrift.transform.position = _player.position + new Vector3(0f, 2.5f, 14f);
+                _spaceDrift.transform.position = _player.position + new Vector3(0f, 1.5f, 0f);
             }
         }
 
@@ -190,8 +187,6 @@ namespace VoidRunner.Systems.VFX
         {
             // Enemy teleport về vị trí ban đầu khi restart — xóa vệt cũ tránh kéo dài xuyên map
             if (_enemyTrail != null) _enemyTrail.Clear();
-            // Player teleport về start — xóa vệt glow tàu cũ (v3f.6)
-            if (_shipTrail != null) _shipTrail.Clear();
         }
 
         // ---------- Setup ----------
@@ -315,31 +310,9 @@ namespace VoidRunner.Systems.VFX
         }
 
         /// <summary>
-        /// Vệt glow cyan theo tàu player (TrailRenderer additive, runtime) — vẽ đường bay + chuyển lane,
-        /// cảm giác di chuyển mạnh hơn. Không cần asset (v3f.6, user: "qua làm VFX — tàu có hiệu ứng").
-        /// </summary>
-        private void SetupShipTrail()
-        {
-            if (_player == null) return;
-
-            TrailRenderer trail = _player.GetComponent<TrailRenderer>();
-            if (trail == null) trail = _player.gameObject.AddComponent<TrailRenderer>();
-            _shipTrail = trail;
-
-            trail.time = shipTrailTime;
-            trail.startWidth = shipTrailWidth;
-            trail.endWidth = 0.05f;
-            trail.minVertexDistance = 0.25f;
-            trail.numCornerVertices = 4;
-            trail.numCapVertices = 4;
-            trail.startColor = shipTrailColor;
-            trail.endColor = new Color(shipTrailColor.r, shipTrailColor.g, shipTrailColor.b, 0f);
-            trail.material = CreateAdditiveSoftMaterial();
-        }
-
-        /// <summary>
-        /// Hệ sao trôi quanh player (ParticleSystem World) — chấm nhỏ sáng trôi ngược hướng chạy.
-        /// Nhỏ + tròn (không phải vệt dài) nên nhìn như sao đang lướt qua (user từng chê "vệt sao ko giống sao").
+        /// Hệ sao trôi quanh player (ParticleSystem World) — chấm sáng trôi ngược hướng chạy.
+        /// v3f.7: TO hơn (0.35–0.8, trước 0.06–0.18 quá nhỏ không thấy) + box BAO QUANH player
+        /// (trước đặt cách 14m phía trước) → sao lướt ngang qua 2 bên tàu rõ ràng.
         /// </summary>
         private void SetupSpaceDrift()
         {
@@ -354,7 +327,7 @@ namespace VoidRunner.Systems.VFX
             main.startSpeed = driftSpeed;
             main.startSize = new ParticleSystem.MinMaxCurve(driftSizeMin, driftSizeMax);
             main.startColor = driftColor;
-            main.maxParticles = 400;
+            main.maxParticles = 500;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
 
             var emission = _spaceDrift.emission;
@@ -362,7 +335,7 @@ namespace VoidRunner.Systems.VFX
 
             var shape = _spaceDrift.shape;
             shape.shapeType = ParticleSystemShapeType.Box;
-            shape.scale = new Vector3(26f, 12f, 30f); // rộng hơn road ±9 + phủ cả 2 bên lề
+            shape.scale = new Vector3(28f, 14f, 26f); // bao quanh player ±13 z + rộng hơn road ±9
 
             var renderer = go.GetComponent<ParticleSystemRenderer>();
             renderer.material = CreateSoftParticleMaterial();
@@ -423,30 +396,17 @@ namespace VoidRunner.Systems.VFX
         /// <summary>
         /// Material mềm alpha blend (Particles/Unlit) — dùng cho burst, hạt, khói.
         /// internal static để các hệ thống khác (PlayerController exhaust...) tái sử dụng, không duplicate.
+        ///
+        /// R3.1 lesson (v3f.7): SHADER "Universal Render Pipeline/Particles/Additive" KHÔNG TỒN TẠI
+        /// trong URP (chỉ Lit / Simple Lit / Unlit) → Shader.Find trả null → new Material(null) = error
+        /// shader MÀU TÍM. Check SHADER trước khi new Material (check mat.shader == null KHÔNG bắt được
+        /// vì error shader không phải null) — đây chính là nguồn gốc "vệt tím" user báo.
         /// </summary>
         internal static Material CreateSoftParticleMaterial()
         {
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
-            if (mat == null || mat.shader == null)
-            {
-                // Fallback nếu không tìm thấy shader URP (hiếm khi xảy ra)
-                mat = new Material(Shader.Find("Sprites/Default"));
-            }
-            mat.mainTexture = BuildSoftTexture();
-            return mat;
-        }
-
-        /// <summary>
-        /// Material mềm ADDITIVE (Particles/Additive) — phát sáng cộng vào nền tối, dùng cho vệt glow
-        /// tàu (trail) — sáng rõ hơn alpha blend trên nền đen vũ trụ (v3f.6).
-        /// </summary>
-        internal static Material CreateAdditiveSoftMaterial()
-        {
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Particles/Additive"));
-            if (mat == null || mat.shader == null)
-            {
-                mat = new Material(Shader.Find("Sprites/Default"));
-            }
+            Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            if (shader == null) shader = Shader.Find("Sprites/Default");
+            var mat = new Material(shader);
             mat.mainTexture = BuildSoftTexture();
             return mat;
         }
