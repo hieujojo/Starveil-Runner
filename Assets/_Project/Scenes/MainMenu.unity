@@ -1894,6 +1894,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1964162065}
   - component: {fileID: 1964162066}
+  - component: {fileID: 1964162067}
   m_Layer: 0
   m_Name: MainMenuManager
   m_TagString: Untagged
@@ -1931,10 +1932,28 @@ MonoBehaviour:
   playButton: {fileID: 1779866509}
   howToPlayButton: {fileID: 758207288}
   soundButton: {fileID: 1001143454}
+  creditsButton: {fileID: 0}
   howToPlayPanel: {fileID: 406369630}
   bestScoreText: {fileID: 744814681}
   soundButtonText: {fileID: 1162007484}
   gameSceneName: Game
+--- !u!114 &1964162067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964162063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed4dc96987ef21f4abaa3e6b5f7cb27d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VoidRunner.Core::VoidRunner.UI.ShipSelectManager
+  shipPrefabs:
+  - {fileID: 1152354105411914, guid: cdbec52167efb6a48b63cebb3284c246, type: 3}
+  - {fileID: 1008573922842845754, guid: 1c008dfa10dec32449bd4e221be526d6, type: 3}
+  previewRotateSpeed: 35
+  previewBg: {r: 0.1, g: 0.07, b: 0.18, a: 1}
 --- !u!1 &2021357960
 GameObject:
   m_ObjectHideFlags: 0

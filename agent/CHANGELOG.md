@@ -34,6 +34,25 @@
 
 ---
 
+## 2026-08-12 — Fix UI MainMenu theo 4 ảnh user test (bước 1)
+
+> User gửi 4 ảnh: (1) nút menu sát nhau, (2) CLOSE to che chữ HowToPlay + font khó đọc, (3) Select ship CLOSE to + không đổi tàu bằng phím mũi tên + tàu màu TÍM, (4) Credits chữ nhỏ + CLOSE to + mọi popup lộ menu phía sau.
+
+### Nguyên nhân gốc từng lỗi + fix
+
+- **Tàu TÍM (không phải màu gốc)** — material SF Fighter/Sparrow dùng **shader Standard (Built-in)** (`m_Shader: fileID 45, guid 000...`) → trong URP render tím/magenta (shader không compile). Fix: **NEW `Utils/MaterialFixer.cs`** — convert mọi material không-URP → `Universal Render Pipeline/Lit`, giữ `_Color`/`_EmissionColor`, **cache static** (không leak, không tạo mới mỗi frame); áp dụng trong `PlayerController.BuildModelShip` + `ShipSelectManager.RefreshPreview`.
+- **Không đổi được tàu bằng phím mũi tên** — ShipSelectManager chỉ có nút `<`/`>` bấm chuột, chưa xử lý keyboard. Fix: `Update()` bắt `Keyboard.current[key].wasPressedThisFrame` (←/→ + A/D) — project dùng **Input System only** (activeInputHandler=1) nên KHÔNG dùng legacy `Input.GetKeyDown`.
+- **Popup lộ menu phía sau (VOID RUNNER vẫn thấy)** — `dimmer.SetAsFirstSibling()` chìm dimmer xuống DƯỚI các nút menu → menu vẽ lên trên → không bị tối. Fix: **dimmer `SetAsLastSibling()` TRƯỚC panel** (dimmer trên menu, panel trên dimmer) + alpha 0.85→**0.93**. Select ship CHƯA có dimmer → thêm `ShipSelectDimmer`.
+- **Bug ẩn: click dimmer khi Credits mở lại BẬT HowToPlay** — dimmer dùng chung onClick hardcode `ToggleHowToPlay`. Fix: `CloseActivePopup()` đóng popup ĐANG MỞ.
+- **CLOSE to che chữ** (3 chỗ: HowToPlay/Select ship/Credits) → nút **X nhỏ 40-44px** góc trên phải. ⚠️ Dùng chữ `X` (ASCII) KHÔNG dùng `✕` U+2715 — font chỉ pack ASCII 32..126 → ✕ ra ô vuông □ (R5.2).
+- **Nút menu sát nhau** — Play y=60/HowTo -60/Sound -160 → mép-mép chỉ 24-32px. Tool mới **`Fix MainMenu Spacing`** (trong UIOverhaulTool): Play 160/HowTo 0/Sound -160/Best -250 (gap mép 72-84px) + HowToPlayText font 30→**36** + lineSpacing 1.15 + SHIP/CREDITS → -320 (đồng bộ scene + code runtime).
+- **Credits chữ nhỏ** — body font 20→22 + panel 760×660 + lineSpacing 1.12 + title 44→48. (Reviewer: 24pt tràn ~19 dòng → 22 vừa.)
+
+### Commit
+- `49d8ad9` fix(ui) — 6 file. Scene Game/MainMenu được user chạy tool + Ctrl+S → có shipPrefabs/monsterPrefabs/ShipSelectManager với giá trị thật — commit kèm đợt docs.
+
+---
+
 ## 2026-08-12 — Log đỏ RefactorGameplayTool + dọn 6 Editor tool không dùng
 
 > User: "vẫn còn 1 log đỏ liên quan RefactorGameplayTool, điều tra ngay; tool nào không còn sử dụng thì xóa — tool phải tái dùng được nhiều lần, không phải 1 lần".

@@ -86,6 +86,7 @@
 - **R3.13** — **`using X.Y.Z` phải khớp namespace THẬT của file đích, KHÔNG khớp thư mục.** Thư mục `Scripts/UI/Screens/` chứa file khai `namespace VoidRunner.UI` (thư mục chỉ là tổ chức vật lý) → `using VoidRunner.UI.Screens;` trong Editor tool = **CS0234 → safe mode**. Trước khi viết `using` cho class lạ: `grep -n '^namespace' <file đích>` xác minh. Lỗi CS0234/CS0246 ở dòng `using` → nghi sai namespace trước tiên. *(Bug 2026-08-11: ShipSelectSetupTool.)*
 - **R3.14** — **Khi xóa 1 script (class), PHẢI quét Editor tools tham chiếu nó TRƯỚC** (`grep -rln '<TênClass>' Assets/_Project/Editor/`) — tool tham chiếu class đã xóa = **CS0246 compile fail toàn project**. Nếu tool chỉ phục vụ đúng thứ đã xóa → xóa luôn tool. *(Bug 2026-08-11: xóa AmbientScroller.cs → AmbientSetupTool vỡ; 2026-08-12: RefactorGameplayTool vẫn gọi AmbientScroller → phải sửa.)*
 - **R3.15** — **Editor tool PHẢI idempotent (chạy lại an toàn nhiều lần) — đây là tiêu chí GIỮ tool.** Tool one-shot đã hoàn thành hoặc bị tool khác thay thế (vd HUDUIBuilder/MainMenuUIBuilder tông blue cũ bị UIOverhaulTool thay thế) → XÓA, tránh menu Tools mọc loạn + khó bảo trì. Khi xóa tool: kiểm tra không file khác gọi nó (chỉ comment thì OK), giữ helper dùng chung nếu tool khác còn dùng. *(2026-08-12.)*
+- **R3.16** — **Model 3rd-party (FBX) import thường dùng shader Built-in Standard → trong URP hiện MÀU TÍM/MAGENTA** (shader không compile — không phải lỗi màu, không phải logic). Fix: quét renderer → convert material sang `URP/Lit` giữ màu gốc (`MaterialFixer` — cache static). Kiểm tra material: `grep 'm_Shader:' *.mat` — fileID 45 guid 000... = Standard Built-in.
 
 ## 🎬 NHÓM 4 — Gameplay / World (bài học về game feel)
 
@@ -129,6 +130,12 @@
 - **R5.11** — **Label + value trong cùng panel: value stretch full (anchor 0..1/0..1) = dính label** — tách: label anchor đỉnh (0.5,1 @ y=-4, font nhỏ bold), value nửa dưới panel (y 0..0.72). *(Fix 2026-08-11.)*
 - **R5.12** — **Road widen phải đồng bộ 4 chỗ** (thiếu 1 chỗ = obstacle lệch khỏi lane / prop nằm trên đường): Ground scale x, `roadHalfWidth` (Tile), `laneWidth` (Player/Obstacle/Pickup), ambient `sideOffset`. *(Fix 2026-08-11.)*
 - **R5.13** — **Đổi serialized default → test hardcode fail âm thầm** — test hardcode giá trị (vd `laneWidth=2` trong PlayerControllerPlayTests) → giữ default code, muốn đổi set qua scene/tool.
+- **R5.14** — **Popup/dimmer: dimmer phải `SetAsLastSibling` TRƯỚC panel** (dimmer che menu, panel che dimmer). `SetAsFirstSibling` chìm dimmer DƯỚI menu → menu không bị tối → "popup vẫn lộ VOID RUNNER phía sau" (bug tưởng là alpha không đủ, thực ra là sibling order). Kiểm tra: dimmer có nằm TRÊN mọi element menu không.
+- **R5.15** — **Dimmer dùng chung cho nhiều popup → onClick KHÔNG hardcode 1 popup** — phải đóng popup đang mở (`CloseActivePopup`). Click dimmer khi Credits mở mà gọi `ToggleHowToPlay` = BẬT HowToPlay thay vì đóng Credits (bug ẩn 2026-08-12).
+- **R5.16** — **Font chỉ pack ASCII 32..126 (Kenney Future) → không dùng ký tự Unicode (✕ U+2715, ▶) — ra ô vuông □.** Dùng chữ `X` cho nút đóng.
+- **R5.17** — **Nút đóng popup = dấu X NHỎ (40-44px) góc trên phải, không phải nút CLOSE to** — CLOSE to che chữ trong panel (HowToPlay/Credits/Select ship đều bị). Vị trí: pivot (1,1) pos (-8,-8).
+- **R5.18** — **Text panel (HowToPlay) font pixel 30pt nhỏ khó đọc → tăng 36 + lineSpacing 1.15.** Credits body font 20→22 kèm panel to hơn (760×660) — 24 tràn ~19 dòng.
+- **R5.19** — **Input System only (activeInputHandler=1): bắt phím dùng `Keyboard.current[key].wasPressedThisFrame`, KHÔNG dùng legacy `Input.GetKeyDown`** (vô hiệu). ShipSelectManager cần `using UnityEngine.InputSystem;` (asmdef đã reference Unity.InputSystem).
 
 ## ⚙️ NHÓM 6 — Workflow Unity / Git (thủ tục bất biến)
 

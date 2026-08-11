@@ -555,6 +555,7 @@ MonoBehaviour:
   bestScoreText: {fileID: 2013297669}
   retryButton: {fileID: 1068268561}
   menuButton: {fileID: 2144816551}
+  creditsButton: {fileID: 0}
   fadeDuration: 0.4
 --- !u!114 &288287884
 MonoBehaviour:
@@ -2303,6 +2304,11 @@ MonoBehaviour:
   laneCount: 3
   bankAngle: 14
   bankSmooth: 10
+  shipPrefabs:
+  - {fileID: 1152354105411914, guid: cdbec52167efb6a48b63cebb3284c246, type: 3}
+  - {fileID: 1008573922842845754, guid: 1c008dfa10dec32449bd4e221be526d6, type: 3}
+  shipTargetHeight: 0.9
+  shipYaw: 0
 --- !u!54 &1348608051
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2974,6 +2980,12 @@ MonoBehaviour:
   lateralFollow: 4
   baseScale: 1
   closeScale: 1.6
+  monsterPrefabs:
+  - {fileID: 9081247891841179449, guid: 937b81db8bd32214a9e53ae8838a83d6, type: 3}
+  - {fileID: 1174681552261998, guid: cda9515b23e2f454b9c8d645acee645e, type: 3}
+  - {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
+  monsterTargetHeight: 2.6
+  monsterYaw: 0
 --- !u!135 &2067106722
 SphereCollider:
   m_ObjectHideFlags: 0
