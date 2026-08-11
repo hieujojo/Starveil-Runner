@@ -147,155 +147,38 @@ namespace VoidRunner.UI
         }
 
         /// <summary>
-        /// Tạo nút CREDITS (góc dưới — y=-250, nhỏ) + panel credits hiển thị third-party assets
-        /// (dữ liệu khớp agent/CREDITS.md). Tạo bằng code idempotent — không cần kéo thả scene.
+        /// Tạo nút CREDITS + panel credits (thiết kế đẹp — xem CreditsPanelBuilder).
+        /// Idempotent, tạo bằng code — không cần kéo thả scene.
         /// </summary>
         private void EnsureCredits()
         {
             Canvas canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null) return;
 
-            // --- Nút CREDITS (chỉ tạo nếu chưa có) ---
-            Transform existingBtn = canvas.transform.Find("CreditsButton");
-            if (existingBtn != null)
+            // Nút CREDITS — dưới BestScore (-230), an toàn màn hình nhỏ.
+            // ⚠️ KHÔNG subscribe onClick ở đây — Start() đã subscribe (nếu subscribe 2 lần
+            // thì 1 click = toggle 2 lần = panel bật-tắt liền nhau, nhìn như hỏng — góp ý reviewer).
+            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(0f, -280f), new Vector2(280f, 56f));
+
+            // Panel credits + nút CLOSE
+            GameObject panel = CreditsPanelBuilder.EnsurePanel(canvas);
+            if (panel != null)
             {
-                creditsButton = existingBtn.GetComponent<Button>();
-            }
-            else
-            {
-                var go = new GameObject("CreditsButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-                go.transform.SetParent(canvas.transform, false);
-
-                var rt = (RectTransform)go.transform;
-                rt.anchorMin = new Vector2(0.5f, 0.5f);
-                rt.anchorMax = new Vector2(0.5f, 0.5f);
-                rt.anchoredPosition = new Vector2(0f, -280f); // dưới BestScore (-230) — an toàn màn hình nhỏ (góp ý reviewer: -320 có thể cắt dưới)
-                rt.sizeDelta = new Vector2(280f, 56f);
-
-                var img = go.GetComponent<Image>();
-                img.color = new Color(0.48f, 0.29f, 1f, 1f); // tím — tông nút phụ
-
-                var btn = go.GetComponent<Button>();
-                btn.transition = Selectable.Transition.ColorTint;
-                btn.onClick.AddListener(ToggleCredits);
-
-                var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-                label.transform.SetParent(go.transform, false);
-                var lrt = (RectTransform)label.transform;
-                lrt.anchorMin = Vector2.zero;
-                lrt.anchorMax = Vector2.one;
-                lrt.offsetMin = new Vector2(10f, 4f);
-                lrt.offsetMax = new Vector2(-10f, -4f);
-
-                var tmp = label.GetComponent<TextMeshProUGUI>();
-                tmp.text = "CREDITS";
-                tmp.fontSize = 28;
-                tmp.fontStyle = FontStyles.Bold;
-                tmp.color = Color.white;
-                tmp.alignment = TextAlignmentOptions.Center;
-                tmp.raycastTarget = false;
-                tmp.textWrappingMode = TextWrappingModes.NoWrap;
-                if (tmp.font == null)
+                Transform close = panel.transform.Find("CreditsClose");
+                if (close != null)
                 {
-                    var anyTmp = FindAnyObjectByType<TextMeshProUGUI>();
-                    tmp.font = anyTmp != null ? anyTmp.font : TMP_Settings.defaultFontAsset;
+                    var closeBtn = close.GetComponent<Button>();
+                    if (closeBtn != null) closeBtn.onClick.AddListener(ToggleCredits);
                 }
-
-                creditsButton = btn;
             }
-
-            // --- Panel credits (ẩn sẵn) ---
-            if (canvas.transform.Find("CreditsPanel") != null) return;
-
-            var panel = new GameObject("CreditsPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            panel.transform.SetParent(canvas.transform, false);
-            var prt = (RectTransform)panel.transform;
-            prt.anchorMin = new Vector2(0.5f, 0.5f);
-            prt.anchorMax = new Vector2(0.5f, 0.5f);
-            prt.anchoredPosition = Vector2.zero;
-            prt.sizeDelta = new Vector2(760f, 560f);
-            var pimg = panel.GetComponent<Image>();
-            pimg.color = new Color(0.07f, 0.05f, 0.14f, 1f); // tím đen đục hoàn toàn (R0.9)
-
-            // Text nội dung credits
-            var textGo = new GameObject("CreditsText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-            textGo.transform.SetParent(panel.transform, false);
-            var trt = (RectTransform)textGo.transform;
-            trt.anchorMin = Vector2.zero;
-            trt.anchorMax = Vector2.one;
-            trt.offsetMin = new Vector2(30f, 30f);
-            trt.offsetMax = new Vector2(-30f, -80f); // chừa chỗ nút CLOSE trên
-
-            var text = textGo.GetComponent<TextMeshProUGUI>();
-            text.text = BuildCreditsText();
-            text.fontSize = 22;
-            text.color = new Color(0.85f, 0.82f, 1f, 1f);
-            text.alignment = TextAlignmentOptions.TopLeft;
-            text.raycastTarget = false;
-            text.textWrappingMode = TextWrappingModes.Normal;
-            if (text.font == null)
-            {
-                var anyTmp = FindAnyObjectByType<TextMeshProUGUI>();
-                text.font = anyTmp != null ? anyTmp.font : TMP_Settings.defaultFontAsset;
-            }
-
-            // Nút CLOSE trên panel credits
-            var closeGo = new GameObject("CloseButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            closeGo.transform.SetParent(panel.transform, false);
-            var crt = (RectTransform)closeGo.transform;
-            crt.anchorMin = new Vector2(1f, 1f);
-            crt.anchorMax = new Vector2(1f, 1f);
-            crt.pivot = new Vector2(1f, 1f);
-            crt.anchoredPosition = new Vector2(-20f, -20f);
-            crt.sizeDelta = new Vector2(140f, 52f);
-            var cimg = closeGo.GetComponent<Image>();
-            cimg.color = new Color(0.48f, 0.29f, 1f, 1f);
-            var cbtn = closeGo.GetComponent<Button>();
-            cbtn.transition = Selectable.Transition.ColorTint;
-            cbtn.onClick.AddListener(ToggleCredits);
-
-            var closeLabel = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-            closeLabel.transform.SetParent(closeGo.transform, false);
-            var clrt = (RectTransform)closeLabel.transform;
-            clrt.anchorMin = Vector2.zero;
-            clrt.anchorMax = Vector2.one;
-            clrt.offsetMin = Vector2.zero;
-            clrt.offsetMax = Vector2.zero;
-            var ctmp = closeLabel.GetComponent<TextMeshProUGUI>();
-            ctmp.text = "CLOSE";
-            ctmp.fontSize = 26;
-            ctmp.fontStyle = FontStyles.Bold;
-            ctmp.color = Color.white;
-            ctmp.alignment = TextAlignmentOptions.Center;
-            ctmp.raycastTarget = false;
-            ctmp.textWrappingMode = TextWrappingModes.NoWrap;
-            if (ctmp.font == null)
-            {
-                var anyTmp = FindAnyObjectByType<TextMeshProUGUI>();
-                ctmp.font = anyTmp != null ? anyTmp.font : TMP_Settings.defaultFontAsset;
-            }
-
-            panel.SetActive(false);
-        }
-
-        /// <summary>Nội dung credits — danh sách third-party assets (khớp agent/CREDITS.md).</summary>
-        private static string BuildCreditsText()
-        {
-            return "THIRD-PARTY ASSETS\n\n" +
-                   "Kenney — UI Pack, Space Kit, Particle Pack, Game Icons,\n" +
-                   "   Space Station Kit, Fonts, Audio (CC0 Public Domain)\n" +
-                   "   https://kenney.nl\n\n" +
-                   "Nebula Skyboxes — Skybox cubemaps (Unity Asset Store EULA)\n" +
-                   "SpaceSkies Free by PULSAR BYTES — Skybox (Unity Asset Store EULA)\n" +
-                   "   https://assetstore.unity.com\n\n" +
-                   "Game code, design and gameplay — Void Runner project.\n" +
-                   "Developed with Unity Engine (c) Unity Technologies.\n";
         }
 
         /// <summary>Bật/tắt panel credits (có dimmer giống HowToPlay).</summary>
         private void ToggleCredits()
         {
-            var panel = FindAnyObjectByType<Canvas>()?.transform.Find("CreditsPanel");
+            Canvas canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null) return;
+            Transform panel = canvas.transform.Find("CreditsPanel");
             if (panel == null) return;
 
             bool show = !panel.gameObject.activeSelf;
