@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-12 (v3f.7.2) — VẪN HÌNH VUÔNG: đọc shader URP 17.4 thật mới ra sự thật
+
+**Triệu chứng:** user: "vẫn là hình vuông, chỉ nhỏ hơn; lửa = 1 dãy hình vuông cam nối nhau, ko thấy tên lửa".
+
+**Root cause (lần này ĐỌC SHADER THẬT, không đoán — bài học R3.1 nâng cấp):**
+- File thật trong URP 17.4 là `Shaders/Particles/ParticlesUnlit.shader` (Shader name vẫn "Universal Render Pipeline/Particles/Unlit" — Shader.Find OK, KHÔNG phải lỗi tìm shader).
+- `_SrcBlend("__src", Float) = 1.0`, `_DstBlend("__dst", Float) = 0.0` → **default = One/Zero = OPAQUE**.
+- **KHÔNG có keyword `_ALPHABLEND_ON`** — fix v3f.7.1 bật keyword KHÔNG TỒN TẠI → vô tác dụng.
+- **KHÔNG có lệnh `Blend [...]`** trong pass → set property gì cũng vẫn OPAQUE → hạt LUÔN VUÔNG.
+
+**Fix:** bỏ hẳn URP Particles — dùng **`Sprites/Default`**: `Blend One OneMinusSrcAlpha` CỐ ĐỊNH + nhân vertex color (startColor) + `[PerRendererData] _MainTex` → KHÔNG cần cấu hình gì, chắc chắn TRÒN. Một fix ăn hết: sao trôi + lửa tên lửa + coin burst + vệt khói bọ.
+
+**BÀI HỌC R3.1 (tối thượng):** khi hiệu ứng material chưa đúng → **đọc shader thật trong Library/PackageCache** (đường dẫn `Shaders/Particles/ParticlesUnlit.shader`, lưu ý tên file có thể khác tên shader display). Đừng đoán property/keyword từ trí nhớ — 2 lần đoán sai liên tiếp đều do đó.
+
+Tinh chỉnh kèm: exhaust size 0.24→0.18 + lifetime 0.35→0.3 → tia lửa thanh mảnh, không thành "cục nối nhau".
+
 ## 2026-08-12 (v3f.7.1) — Sao trôi thành HÌNH VUÔNG + lửa văng lung tung
 
 **Triệu chứng:** user: "sao trôi quá to + hình ô vuông, nếu thật là ô vuông thì bỏ luôn; lửa bắn ít đi, đừng văng lên trời loạn quá".

@@ -2,7 +2,6 @@ using DG.Tweening;
 using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Rendering;
 using VoidRunner.Core;
 using VoidRunner.Core.Player;
 using VoidRunner.Core.World;
@@ -395,32 +394,22 @@ namespace VoidRunner.Systems.VFX
         }
 
         /// <summary>
-        /// Material mềm alpha blend (Particles/Unlit) — dùng cho burst, hạt, khói.
+        /// Material mềm alpha blend — dùng cho burst, hạt, khói, sao trôi.
         /// internal static để các hệ thống khác (PlayerController exhaust...) tái sử dụng, không duplicate.
         ///
-        /// R3.1 lesson (v3f.7): SHADER "Universal Render Pipeline/Particles/Additive" KHÔNG TỒN TẠI
-        /// trong URP (chỉ Lit / Simple Lit / Unlit) → Shader.Find trả null → new Material(null) = error
-        /// shader MÀU TÍM. Check SHADER trước khi new Material (check mat.shader == null KHÔNG bắt được
-        /// vì error shader không phải null) — đây chính là nguồn gốc "vệt tím" user báo.
+        /// R3.1 lesson (v3f.7): SHADER "Universal Render Pipeline/Particles/Additive" KHÔNG TỒN TẠI trong
+        /// URP → Shader.Find null → new Material(null) = error shader MÀU TÍM. Check Shader TRƯỚC.
         ///
-        /// v3f.7.1 (user: "sao hình ô vuông"): new Material() từ URP shader KHÔNG bật sẵn alpha blending
-        /// (keyword _ALPHABLEND_ON tắt → render OPAQUE) → texture tròn hiện thành HÌNH VUÔNG TRẮNG.
-        /// Phải tự cấu hình blend: _BlendMode=0 (Alpha) + _SrcBlend/_DstBlend + keyword + renderQueue.
+        /// v3f.7.2 (user: "vẫn hình vuông"): ĐỌC SHADER THẬT URP 17.4 (ParticlesUnlit.shader) phát hiện:
+        ///   - _SrcBlend/_DstBlend default = One/Zero → new Material mặc định OPAQUE;
+        ///   - KHÔNG có keyword _ALPHABLEND_ON (v3f.7.1 bật keyword không tồn tại = vô tác dụng);
+        ///   - KHÔNG có lệnh Blend [...] trong pass → set property gì cũng vẫn OPAQUE → hạt LUÔN VUÔNG.
+        /// ⇒ BỎ HẲN URP Particles — dùng Sprites/Default: Blend One OneMinusSrcAlpha CỐ ĐỊNH + nhân vertex
+        /// color (startColor) + [PerRendererData] _MainTex → KHÔNG cần cấu hình, chắc chắn TRÒN.
         /// </summary>
         internal static Material CreateSoftParticleMaterial()
         {
-            Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-            if (shader == null) shader = Shader.Find("Sprites/Default");
-            var mat = new Material(shader);
-
-            // Alpha blend đúng cho texture tròn (HasProperty guard — Sprites/Default fallback vốn đã blend)
-            if (mat.HasProperty("_BlendMode")) mat.SetFloat("_BlendMode", 0f); // 0 = Alpha
-            if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
-            if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
-            mat.EnableKeyword("_ALPHABLEND_ON");
-            mat.SetOverrideTag("RenderType", "Transparent");
-            mat.renderQueue = (int)RenderQueue.Transparent;
-
+            var mat = new Material(Shader.Find("Sprites/Default"));
             mat.mainTexture = BuildSoftTexture();
             return mat;
         }

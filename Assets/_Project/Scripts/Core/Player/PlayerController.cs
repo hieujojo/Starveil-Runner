@@ -438,9 +438,9 @@ namespace VoidRunner.Core.Player
             var main = ps.main;
             main.loop = true;
             main.playOnAwake = true;
-            main.startLifetime = 0.35f;
+            main.startLifetime = 0.3f;
             main.startSpeed = -8f; // hướng về sau (-Z)
-            main.startSize = 0.24f;
+            main.startSize = 0.18f;
             main.startColor = new Color(1f, 0.55f, 0.12f, 0.85f);
             main.maxParticles = 80;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
