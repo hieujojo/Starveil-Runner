@@ -72,7 +72,8 @@ namespace VoidRunner.Core.World
         {
             Debug.Log($"[DiagObstacle] ĐÃ TẠO {data.name} tại lane x={x}");
             GameObject obstacle = Instantiate(data.prefab, tile.transform);
-            obstacle.transform.localPosition = new Vector3(x, 0f, Random.Range(0f, tile.Length * 0.6f));
+            // y=0.5: obstacle nằm trên mặt road (road surface ở y≈0.05) — trigger nên không cần vật lý đặt xuống
+            obstacle.transform.localPosition = new Vector3(x, 0.5f, Random.Range(0f, tile.Length * 0.6f));
 
             Obstacle comp = obstacle.GetComponent<Obstacle>();
             if (comp == null)

@@ -21,13 +21,83 @@ namespace VoidRunner.Core.World
         /// <summary>Material dùng chung cho mọi lane marker (tạo 1 lần, tông cyan neon).</summary>
         private static Material _laneMat;
 
+        /// <summary>Material road tối (fallback).</summary>
+        private static Material _roadMat;
+
         public float Length => length;
 
         private void Awake()
         {
-            // Ép đúng chiều dài — prefab cũ scale z=0 (tile vô hình) là bug gây mất cảm giác chuyển động
-            transform.localScale = new Vector3(roadHalfWidth * 2f, 0.1f, length);
+            // ⚠️ KHÔNG scale ROOT tile (bug 2026-08-11 — gốc rễ "không thấy vật cản/xu"):
+            // Unity nhân scale của parent vào VỊ TRÍ lẫn KÍCH THƯỚC của mọi con → obstacle/coin spawn
+            // tại lane x=3 thực tế ở world x=42 (xa ngoài đường ±7) và bị dẹt cao 0.1 → vô hình.
+            // Root luôn scale (1,1,1); road visual phải là CHILD "Road" có scale riêng.
+            transform.localScale = Vector3.one;
+            EnsureRoadVisual();
             BuildLaneMarkers();
+        }
+
+        /// <summary>
+        /// Road visual nằm trên child "Road" (cube roadHalfWidth*2 × 0.1 × length).
+        /// Di chuyển mesh/material từ root (prefab cũ scale z=0 vô hình) xuống child;
+        /// bỏ collider root (1×1×1 solid gây bump khi tile recycle). Idempotent.
+        /// </summary>
+        private void EnsureRoadVisual()
+        {
+            Transform road = transform.Find("Road");
+
+            if (road == null)
+            {
+                var rootMf = GetComponent<MeshFilter>();
+                var rootMr = GetComponent<MeshRenderer>();
+
+                if (rootMf != null && rootMr != null)
+                {
+                    var go = new GameObject("Road");
+                    go.transform.SetParent(transform, false);
+                    var mf = go.AddComponent<MeshFilter>();
+                    mf.sharedMesh = rootMf.sharedMesh;
+                    var mr = go.AddComponent<MeshRenderer>();
+                    mr.sharedMaterial = rootMr.sharedMaterial;
+                    mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    go.transform.localScale = new Vector3(roadHalfWidth * 2f, 0.1f, length);
+                }
+                else
+                {
+                    // Fallback: primitive cube + material tối (không phụ thuộc prefab)
+                    var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    go.name = "Road";
+                    go.transform.SetParent(transform, false);
+                    go.transform.localScale = new Vector3(roadHalfWidth * 2f, 0.1f, length);
+                    var col = go.GetComponent<Collider>();
+                    if (col != null) Destroy(col);
+                    go.GetComponent<MeshRenderer>().sharedMaterial = CreateRoadMaterial();
+                }
+            }
+            else
+            {
+                road.localScale = new Vector3(roadHalfWidth * 2f, 0.1f, length);
+            }
+
+            // Dọn root: bỏ mesh cube cũ (scale z=0 vô hình) + collider solid 1×1×1
+            MeshFilter rmf = GetComponent<MeshFilter>();
+            if (rmf != null) Destroy(rmf);
+            MeshRenderer rmr = GetComponent<MeshRenderer>();
+            if (rmr != null) Destroy(rmr);
+            Collider rcol = GetComponent<Collider>();
+            if (rcol != null) Destroy(rcol);
+        }
+
+        /// <summary>Material road tối (fallback khi prefab không có material).</summary>
+        private static Material CreateRoadMaterial()
+        {
+            if (_roadMat != null) return _roadMat;
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
+            _roadMat = shader != null ? new Material(shader) : new Material(Shader.Find("Standard"));
+            _roadMat.color = new Color(0.1f, 0.08f, 0.16f, 1f);
+            _roadMat.SetFloat("_Metallic", 0f);
+            _roadMat.SetFloat("_Smoothness", 0.4f);
+            return _roadMat;
         }
 
         /// <summary>Tạo 2 vạch neon 2 mép + vạch đứt đoạn giữa đường (con của tile → trượt cùng tile).</summary>
@@ -81,11 +151,12 @@ namespace VoidRunner.Core.World
 
         public void Deactivate()
         {
-            // Dọn obstacle/pickup con về pool — GIỮ lane markers (cảm giác chuyển động liên tục)
+            // Dọn obstacle/pickup con về pool — GIỮ lane markers + ROAD visual (road là child scale riêng,
+            // không được xóa khi recycle — bug 2026-08-11 nếu xóa thì tile hết mặt đường sau vòng đầu)
             for (int i = transform.childCount - 1; i >= 0; i--)
             {
                 Transform child = transform.GetChild(i);
-                if (child.name == "LaneMarker") continue;
+                if (child.name == "LaneMarker" || child.name == "Road") continue;
                 Destroy(child.gameObject);
             }
             gameObject.SetActive(false);
