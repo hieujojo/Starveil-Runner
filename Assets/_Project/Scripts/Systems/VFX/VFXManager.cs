@@ -65,7 +65,6 @@ namespace VoidRunner.Systems.VFX
         private int _popupIndex;
         private TrailRenderer _voidTrail;
         private Transform _voidTransform;
-        private Camera _cam;
         private ScoreSystem _scoreSystem;
 
         private void Awake()
@@ -101,7 +100,6 @@ namespace VoidRunner.Systems.VFX
             var pc = FindAnyObjectByType<PlayerController>();
             if (pc != null) _player = pc.transform;
 
-            _cam = Camera.main;
             _scoreSystem = FindAnyObjectByType<ScoreSystem>(); // chỉ để đọc Multiplier cho popup
 
             // Burst system dùng chung một material mềm (tạo runtime, không cần asset)
@@ -137,7 +135,8 @@ namespace VoidRunner.Systems.VFX
 
             // Điểm popup nhân theo combo (khớp ScoreSystem: coinScore × multiplier)
             int multiplier = _scoreSystem != null ? _scoreSystem.Multiplier : 1;
-            ShowPopup(worldPos, $"+{popupScore * multiplier}");
+            // worldPos vẫn dùng cho burst hạt — popup điểm thì nằm VỊ TRÍ CỐ ĐỊNH ngoài đường
+            ShowPopup($"+{popupScore * multiplier}");
         }
 
         private void HandlePowerUpActivated(PowerUpType type)
@@ -251,11 +250,16 @@ namespace VoidRunner.Systems.VFX
             }
         }
 
-        /// <summary>Hiện popup "+10" tại vị trí coin trên màn hình — bay lên rồi mờ dần (DOTween, pool).</summary>
-        private void ShowPopup(Vector3 worldPos, string text)
+        /// <summary>
+        /// Hiện popup điểm ở VỊ TRÍ CỐ ĐỊNH NGOÀI ĐƯỜNG (fix 2026-08-11 — user: "+10 chèn thẳng
+        /// vào UI che obstacle/coin, đặt ra khỏi trục đường chơi"). Trước đây popup hiện ngay tại
+        /// vị trí coin qua WorldToScreenPoint → chữ điểm nằm TRÊN đường, che vật cản phía trước
+        /// → người chơi không thấy kịp để né. Giờ popup nằm lệch về bên phải cạnh ScorePanel
+        /// (khu vực không có gameplay) — vẫn dễ đọc nhưng không bao giờ che đường.
+        /// </summary>
+        private void ShowPopup(string text)
         {
             if (_popups == null || _popups.Length == 0 || _canvas == null) return;
-            if (_cam == null) return;
 
             var tmp = _popups[_popupIndex];
             _popupIndex = (_popupIndex + 1) % _popups.Length;
@@ -265,9 +269,13 @@ namespace VoidRunner.Systems.VFX
             tmp.alpha = 1f;
             tmp.rectTransform.localScale = Vector3.one;
 
-            // World → screen: popup hiện đúng chỗ coin bị nhặt (góc trên vì coin nằm phía trước)
-            Vector3 screen = _cam.WorldToScreenPoint(worldPos + Vector3.up * 0.5f);
-            tmp.rectTransform.position = screen;
+            // Vị trí cố định: BÊN PHẢI ScorePanel (anchor 0.5,1 @ (260,-60)) — ngoài vùng panel
+            // (panel trải x ±180) + ngoài trục đường chơi, không bao giờ che obstacle/coin
+            tmp.rectTransform.anchorMin = new Vector2(0.5f, 1f);
+            tmp.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            tmp.rectTransform.pivot = new Vector2(0.5f, 1f);
+            Vector2 basePos = new Vector2(260f, -60f);
+            tmp.rectTransform.anchoredPosition = basePos;
 
             // Kill tween cũ nếu popup này đang được tái sử dụng
             DOTween.Kill(tmp);
@@ -275,7 +283,7 @@ namespace VoidRunner.Systems.VFX
 
             // Bay lên + bounce scale + mờ dần, xong tắt lại để dùng pool
             var seq = DOTween.Sequence();
-            seq.Append(tmp.rectTransform.DOMove(screen + Vector3.up * popupFloatDistance, popupDuration)
+            seq.Append(tmp.rectTransform.DOAnchorPos(basePos + Vector2.up * popupFloatDistance, popupDuration)
                 .SetEase(Ease.OutCubic));
             seq.Join(tmp.rectTransform.DOScale(1.15f, 0.08f).SetEase(Ease.OutBack));
             seq.Join(tmp.DOFade(0f, popupDuration).SetDelay(popupDuration * 0.5f));

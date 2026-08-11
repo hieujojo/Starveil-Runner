@@ -39,6 +39,7 @@ namespace VoidRunner.UI
             howToPlayPanel?.SetActive(false);
             RefreshBestScore();
             RefreshSoundLabel();
+            EnsureCloseButton(); // nút CLOSE trên panel — đóng popup rõ ràng (không chỉ click dimmer)
 
             if (playButton != null) playButton.onClick.AddListener(PlayGame);
             if (howToPlayButton != null) howToPlayButton.onClick.AddListener(ToggleHowToPlay);
@@ -83,6 +84,61 @@ namespace VoidRunner.UI
                 // Panel luôn vẽ TRÊN dimmer (SetAsLastSibling) — menu phía sau tối lại, text đọc rõ
                 howToPlayPanel.transform.SetAsLastSibling();
                 if (_dimmer != null) _dimmer.transform.SetAsFirstSibling();
+            }
+        }
+
+        /// <summary>
+        /// Tạo nút "CLOSE" góc phải panel HowToPlay (fix 2026-08-11 — user: "HowToPlay ổn nhưng
+        /// không có nút để tắt"). Trước đây chỉ có cách click vùng tối (dimmer) — user không rõ.
+        /// Tạo bằng code, idempotent (transform.Find kiểm tra trước khi tạo).
+        /// </summary>
+        private void EnsureCloseButton()
+        {
+            if (howToPlayPanel == null) return;
+            if (howToPlayPanel.transform.Find("CloseButton") != null) return;
+
+            // Nút nền
+            var go = new GameObject("CloseButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            go.transform.SetParent(howToPlayPanel.transform, false);
+
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = new Vector2(1f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(1f, 1f);
+            rt.anchoredPosition = new Vector2(-24f, -24f);
+            rt.sizeDelta = new Vector2(150f, 56f);
+
+            var img = go.GetComponent<Image>();
+            img.color = new Color(0.48f, 0.29f, 1f, 1f); // tím — tông nút phụ (khớp HowToPlayButton)
+
+            var btn = go.GetComponent<Button>();
+            btn.onClick.AddListener(ToggleHowToPlay);
+            btn.transition = Selectable.Transition.ColorTint;
+
+            // Label con
+            var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            label.transform.SetParent(go.transform, false);
+
+            var lrt = (RectTransform)label.transform;
+            lrt.anchorMin = Vector2.zero;
+            lrt.anchorMax = Vector2.one;
+            lrt.offsetMin = new Vector2(10f, 4f);
+            lrt.offsetMax = new Vector2(-10f, -4f);
+
+            var tmp = label.GetComponent<TextMeshProUGUI>();
+            tmp.text = "CLOSE";
+            tmp.fontSize = 32;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.color = Color.white;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
+
+            // Fallback font: dùng font của text TMP bất kỳ trong scene (thường Kenney Future)
+            if (tmp.font == null)
+            {
+                var anyTmp = FindAnyObjectByType<TextMeshProUGUI>();
+                tmp.font = anyTmp != null ? anyTmp.font : TMP_Settings.defaultFontAsset;
             }
         }
 

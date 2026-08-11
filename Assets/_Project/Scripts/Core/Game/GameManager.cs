@@ -1,3 +1,4 @@
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using VoidRunner.Core.Player;
@@ -45,6 +46,7 @@ namespace VoidRunner.Core
         private void Start()
         {
             ResolveReferences();
+            EnsureCameraRig();
             StartRun();
         }
 
@@ -55,6 +57,33 @@ namespace VoidRunner.Core
             if (voidChase == null) voidChase = FindAnyObjectByType<VoidChase>();
             // Ghi chú 2026-08-11: PlayerController tự đọc InputReader.MoveInput trực tiếp
             // (đè giữ = trượt liên tục) — không còn wiring lane event rời rạc ở đây.
+        }
+
+        /// <summary>
+        /// Camera KHÔNG được trôi ngang theo tàu (bug 2026-08-11: "cảnh vật di chuyển theo"):
+        /// tạo CameraRig (khóa X=0) giữa camera và player, CinemachineCamera theo dõi rig thay vì player.
+        /// Idempotent — chạy lại không nhân đôi.
+        /// </summary>
+        private void EnsureCameraRig()
+        {
+            if (player == null) return;
+
+            var cam = FindAnyObjectByType<CinemachineCamera>();
+            if (cam == null) return;
+
+            var rig = FindAnyObjectByType<CameraRig>();
+            if (rig == null)
+            {
+                var go = new GameObject("CameraRig");
+                rig = go.AddComponent<CameraRig>();
+            }
+            rig.target = player.transform;
+
+            // Chỉ gán một lần nếu camera đang bám thẳng vào player
+            if (cam.Follow == null || cam.Follow == player.transform)
+            {
+                cam.Follow = rig.transform;
+            }
         }
 
         public void StartRun()

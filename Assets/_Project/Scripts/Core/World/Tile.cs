@@ -15,8 +15,12 @@ namespace VoidRunner.Core.World
     {
         [SerializeField] private float length = 10f;
         // Road rộng (fix 2026-08-11 — user: "đường quá nhỏ"): half 7 → 9 (cả đường 18 đơn vị),
-        // khớp Ground scale x=18 + laneWidth=3. Đồng bộ mọi nơi: AmbientScroller roadHalfWidth=9.
+        // khớp Ground scale x=18. Đồng bộ mọi nơi: AmbientScroller roadHalfWidth=9.
         [SerializeField] private float roadHalfWidth = 9f;
+        // Bề rộng 1 lane (đồng bộ PlayerController/ObstacleManager/PickupSpawner = 4.5) —
+        // dùng để vẽ vạch chia 3 lane đúng vị trí lane thật (fix 2026-08-11 vòng 2: vạch xanh
+        // phải rộng theo road mới, không còn 1 vạch giữa lệch so với lane thật).
+        [SerializeField] private float laneWidth = 4.5f;
 
         /// <summary>Material dùng chung cho mọi lane marker (tạo 1 lần, tông cyan neon).</summary>
         private static Material _laneMat;
@@ -100,7 +104,11 @@ namespace VoidRunner.Core.World
             return _roadMat;
         }
 
-        /// <summary>Tạo 2 vạch neon 2 mép + vạch đứt đoạn giữa đường (con của tile → trượt cùng tile).</summary>
+        /// <summary>
+        /// Vẽ vạch neon: 2 vạch liền 2 MÉP road + vạch đứt phân chia 3 lane ở ±(laneWidth/2)
+        /// (con của tile → trượt cùng tile). Fix 2026-08-11 vòng 2: vạch chia giờ khớp lane thật
+        /// (dải xanh dương rộng theo road 18m) — trước đây chỉ có 1 vạch giữa cố định x=0.
+        /// </summary>
         private void BuildLaneMarkers()
         {
             EnsureMaterial();
@@ -109,10 +117,15 @@ namespace VoidRunner.Core.World
             CreateMarker(new Vector3(-roadHalfWidth + 0.4f, 0.06f, 0f), new Vector3(0.25f, 0.05f, length));
             CreateMarker(new Vector3(roadHalfWidth - 0.4f, 0.06f, 0f), new Vector3(0.25f, 0.05f, length));
 
-            // Vạch đứt đoạn giữa đường — đoạn dài 2.5, nghỉ 2.5 → trượt rõ rệt
-            for (float z = -length / 2f; z < length / 2f; z += 5f)
+            // Vạch đứt chia lane: giữa lane 0-1 (x = -laneWidth/2) và lane 1-2 (x = +laneWidth/2)
+            // — vị trí ranh giới lane thật (lane ở -laneWidth, 0, +laneWidth)
+            for (int side = -1; side <= 1; side += 2)
             {
-                CreateMarker(new Vector3(0f, 0.06f, z + 1.25f), new Vector3(0.3f, 0.05f, 2.5f));
+                float x = side * laneWidth * 0.5f;
+                for (float z = -length / 2f; z < length / 2f; z += 5f)
+                {
+                    CreateMarker(new Vector3(x, 0.06f, z + 1.25f), new Vector3(0.3f, 0.05f, 2.5f));
+                }
             }
         }
 

@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-11 — Vòng 8: nút CLOSE HowToPlay + camera trôi ngang theo tàu + popup +N che đường + lane rộng 4.5
+
+> User: HowToPlay ổn nhưng KHÔNG có nút tắt; road rộng rồi thì dải 3 lane xanh cũng phải rộng theo (ko vượt road); bấm di chuyển mà cảnh vật di chuyển theo tàu; popup điểm "+10" chèn thẳng vào UI che obstacle/coin → phải ra khỏi trục đường.
+
+### Root cause & fix (commit `…`)
+
+- **HowToPlay không có nút tắt** — chỉ có click dimmer (vùng tối). Fix: `MainMenuManager.EnsureCloseButton()` — tạo Button "CLOSE" tím góc phải panel (anchor 1,1 @ (-24,-24), 150×56, label TMP fallback font) bằng code, idempotent (`transform.Find("CloseButton")`).
+- **Camera TRÔI NGANG theo tàu ("cảnh vật di chuyển theo")** — `CinemachineCamera.TrackingTarget = Player` + `CinemachineFollow` bám CẢ trục X → tàu đổi lane (x di chuyển) → camera xoay/trôi theo → trên màn hình CẢNH VẬT di chuyển, tàu gần như đứng giữa. Fix: `CameraRig.cs` (mới) — LateUpdate ép `position = (0, target.y, target.z)` (KHÓA X=0); `GameManager.EnsureCameraRig()` (Start, idempotent): tạo rig nếu thiếu + `cam.Follow = rig.transform`. Camera luôn đứng giữa đường, chỉ tàu di chuyển trên màn hình.
+- **Popup điểm "+N" che đường** — `VFXManager.ShowPopup` dùng `WorldToScreenPoint(vị trí coin)` → chữ "+10" nằm TRÊN đường, che obstacle/coin phía trước (người chơi không thấy kịp để né). Fix: popup về VỊ TRÍ CỐ ĐỊNH ngoài đường — anchor (0.5,1) @ **(260,-60)** (bên phải ScorePanel, ngoài vùng panel ±180 — góp ý reviewer: (150,-50) vẫn nằm trong panel); bỏ hẳn WorldToScreenPoint + `_cam`. Vẫn giữ burst hạt tại vị trí coin.
+- **Dải phân cách 3 lane xanh chưa rộng theo road 18m** — laneWidth vẫn 3 (lane ở ±3) trong khi road ±9, vạch chia chỉ 1 vạch giữa x=0. Fix: laneWidth 3→**4.5** đồng bộ scene (PlayerController 4246, ObstacleManager 1261, PickupSpawner 1361) + `Tile.laneWidth=4.5` → vạch đứt chia lane ở **±laneWidth/2 = ±2.25** (giữa lane -4.5/0/+4.5), vẫn trong road ±9 (không vượt trục chính).
+
+### Bài học — **QUY TẮC MỚI**
+
+- **Camera follow không được bám trục X khi player đổi lane** — endless runner 3-lane: camera phải đứng giữa đường (khóa X=0, chỉ bám Z/Y), qua RIG trung gian; nếu camera bám thẳng player, đổi lane = cảnh vật trôi theo, mất cảm giác tàu đang rẽ + khó căn lane. Dấu hiệu: "bấm di chuyển mà cảnh vật di chuyển".
+- **Popup/feedback điểm KHÔNG đặt tại vị trí world của coin/obstacle** (WorldToScreenPoint) — chữ điểm nằm trên đường che tầm nhìn né tránh. Đặt vị trí CỐ ĐỊNH ngoài vùng gameplay (cạnh HUD, ngoài vùng panel — kiểm tra sizeDelta panel trước khi chọn offset).
+- **Popup/overlay bật/tắt phải có nút đóng rõ ràng (CLOSE/X)** — chỉ click ra ngoài (dimmer) là không đủ, user không biết. Nút tạo bằng code idempotent (transform.Find trước khi tạo).
+- **Lane width và vạch chia lane phải khớp nhau** — laneWidth 4.5 → vạch chia ở ±2.25 (ranh giới giữa lane thật), không phải vạch giữa cố định x=0 khi road đã rộng. Đồng bộ: laneWidth scene ×3 + Tile.laneWidth + vạch marker.
+
+---
+
 ## 2026-08-11 — Vòng 7: HowToPlay vẫn khó đọc + road rộng 18m + di chuyển phản hồi tức thì
 
 > User test kỹ (400+ log), báo: HowToPlay chưa được fix, cảnh vật 2 bên vô hồn (đề xuất tải background), road vẫn nhỏ, di chuyển chưa mượt (muốn bấm = đi 1 tí, đè lâu = rẽ sang).
