@@ -135,6 +135,12 @@ namespace VoidRunner.Core.World
             // (PlayerController), obstacle đã gọi (Obstacle.Awake) — ENEMY bị SÓT → thêm (R3.16 self-heal).
             MaterialFixer.EnsureURPMaterials(enemy);
 
+            // FIX 2026-08-12 v3f.9.3 (user: "con bọ vẫn màu trắng"): prefab Flying Beetle tham chiếu
+            // material 3d5d520e (41 lần) nhưng KHÔNG tồn tại trong project → các phần đó render
+            // material mặc định TRẮNG. Ép mọi renderer dùng chung material nâu (từ Body đã convert,
+            // texture nâu thật của model) — KHÔNG đổi màu, chỉ sửa material missing.
+            EnsureEnemyBrownMaterial(enemy);
+
             // FIX 2026-08-12 v3f.9.2 (user: "cho con bọ màu nâu đậm"): texture gốc của Flying Beetle
             // ĐÃ LÀ nâu đậm (phân tích pixel: 36.5% RGB 48,16,16 + ~17% nâu — tên file "orange" chỉ là
             // tên cũ, cam = 0%) nhưng scene vũ trụ tối làm nó nhìn như đen. KHÔNG đổi màu material
@@ -172,6 +178,40 @@ namespace VoidRunner.Core.World
             // ⚠️ KHÔNG ép mỗi frame (R4.17): enemy có Animator — ghi đè localRotation mỗi frame
             // sẽ đánh nhau với root motion của animation.
             enemy.transform.localRotation = Quaternion.Euler(0f, enemyYaw, 0f);
+        }
+
+        /// <summary>
+        /// v3f.9.3 (user: "con bọ vẫn màu trắng"): prefab tham chiếu material missing (3d5d520e, 41 lần)
+        /// → ép mọi renderer dùng chung material có texture nâu thật (Body.mat đã convert qua
+        /// MaterialFixer). Idempotent + an toàn null. KHÔNG đổi màu — vẫn texture gốc của model.
+        /// </summary>
+        private static void EnsureEnemyBrownMaterial(GameObject enemy)
+        {
+            // Tìm material đã convert có _BaseMap (texture nâu thật) làm material chung
+            Material brown = null;
+            foreach (var r in enemy.GetComponentsInChildren<Renderer>())
+            {
+                if (brown != null) break;
+                if (r == null) continue;
+                foreach (var m in r.sharedMaterials)
+                {
+                    if (m != null && m.HasProperty("_BaseMap") && m.GetTexture("_BaseMap") != null)
+                    {
+                        brown = m;
+                        break;
+                    }
+                }
+            }
+            if (brown == null) return; // không tìm thấy texture — giữ nguyên
+
+            // Ép mọi renderer dùng material nâu (che hết slot missing → hết trắng)
+            foreach (var r in enemy.GetComponentsInChildren<Renderer>())
+            {
+                if (r == null) continue;
+                Material[] mats = r.sharedMaterials;
+                for (int i = 0; i < mats.Length; i++) mats[i] = brown;
+                r.sharedMaterials = mats;
+            }
         }
 
         /// <summary>
