@@ -2,6 +2,15 @@
 
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
+## 2026-08-12 (hướng quay con bọ + duplicate + bóng) - v3f.10
+
+> User: "con bọ đang quay mặt sai hướng, cho quay lại rồi build; kiểm tra logic có duplicate con bọ không (có lúc thấy 2 con đè nhau); con bọ có bóng, làm bóng với tàu luôn (khó quá thì thôi)".
+
+- **Hướng quay sai:** model Flying Beetle forward là -Z → với enemyYaw=0 bọ quay LƯNG về player. Fix: xoay hướng trên CONTAINER "EnemyModel" (localRotation = Euler(0, enemyYaw, 0), mặc định 180°) thay vì set trên chính prefab — Animator (clip flying/atack) có thể ghi đè rotation mỗi frame, set trên prefab không chắc chắn. Container nằm NGOÀI Animator → hướng luôn đúng. Scene Game.unity: enemyYaw 0→180. Nếu test vẫn sai (giả định model -Z), chỉnh enemyYaw trong Inspector (serialized field — không cần sửa code).
+- **Duplicate "2 con bọ" — kết luận điều tra (không có code duplicate thật):** chỉ 1 EnemyChase trong scene, applyRootMotion=0, prefab có 131 mesh = 1 model duy nhất, guard idempotent đã có. Nguyên nhân thật: (1) VỆT KHÓI TrailRenderer quá dài (0.6s) + rộng (1.4) + đặc (alpha 0.55) → khi bọ đổi lane nhanh vệt uốn cong ĐÈ LÊN thân bọ → nhìn như con thứ 2 → giảm còn 0.35s / 0.9 / alpha 0.28; (2) rủi ro runtime child "Enemy" cũ còn sót qua lần chơi sau (Enter Play Mode Options → Reload Scene: Off) — guard mới tìm "EnemyModel" không thấy con cũ → dựng thêm 1 con → thêm bước DỌN legacy "Enemy" trước guard (Destroy nếu tồn tại).
+- **Bóng cho con bọ + tàu:** light shadow thật quá mờ (intensity 0.8) → dùng BÓNG MỀM (blob shadow) mới `Utils/BlobShadow.cs`: quad đen mờ (alpha 0.38, Sprites/Default + texture radial) quay mặt lên, gắn vào ROOT (không nghiêng theo banking tàu), y = root.y - 0.98 (track y=0), scale theo bounds renderer ×1.25, filter TrailRenderer/ParticleSystemRenderer, idempotent. Tắt shadowCastingMode của model bọ + tàu (tránh 2 bóng đè). Đắt nhất chỉ 1 material + 1 texture tạo 1 lần — rẻ cho WebGL/mobile.
+- **Bài học (R7.19):** (1) model 3rd-party có thể có forward -Z — khi "quay mặt sai" đừng set rotation trên object có Animator (animation override mỗi frame), hãy bọc container bên ngoài Animator; (2) khi đổi tên guard idempotent phải DỌN legacy child cũ kẻo duplicate; (3) TrailRenderer trên object chuyển hướng nhanh có thể gây ảo giác "2 vật đè nhau" — giảm time/width/alpha trước khi nghi ngờ logic spawn.
+
 ## 2026-08-12 (tối ưu build WebGL) - Build 125MB → mục tiêu ~40-60MB
 
 > User: "nén lại là 128mb á, có nặng quá không, có điểm nào chưa tối ưu à" → chọn "Tối ưu đầy đủ rồi build lại".

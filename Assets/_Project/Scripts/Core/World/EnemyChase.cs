@@ -68,8 +68,8 @@ namespace VoidRunner.Core.World
         [Tooltip("Chiều cao chuẩn hóa của enemy (đơn vị) — FIX 2026-08-12 v3f.5.3: 2.2→2.6 (user: \"cho con bọ to lên\" — lần 2); vẫn sau player nên không che tàu")]
         [SerializeField] private float enemyTargetHeight = 2.6f;
 
-        [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng (0 = model forward +Z về phía player).")]
-        [SerializeField] private float enemyYaw = 0f;
+        [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng. FIX 2026-08-12 v3f.10: mặc định 180 — Flying Beetle forward là -Z, phải quay 180° mới nhìn về player (+Z).")]
+        [SerializeField] private float enemyYaw = 180f;
 
         [Header("Cơ chế bắt (hit lần 2)")]
         [SerializeField, Tooltip("Hệ số vỗ cánh nhanh hơn khi đụng obstacle lần 1 (Animator.speed)")]
@@ -124,11 +124,29 @@ namespace VoidRunner.Core.World
             MeshRenderer rootMr = GetComponent<MeshRenderer>();
             if (rootMr != null) rootMr.enabled = false;
 
-            Transform existing = transform.Find("Enemy");
+            // Dọn legacy "Enemy" từ code cũ (guard mới tìm "EnemyModel") — nếu runtime child còn
+            // sót qua lần chơi sau (vd Enter Play Mode Options → Reload Scene: Off) thì guard mới
+            // không thấy "EnemyModel" → dựng thêm 1 con nữa → 2 con bọ đè nhau. Dọn trước khi build.
+            Transform legacy = transform.Find("Enemy");
+            if (legacy != null) Destroy(legacy.gameObject);
+
+            Transform existing = transform.Find("EnemyModel");
             if (existing != null) return; // idempotent — đã dựng rồi
 
             GameObject enemy = Instantiate(enemyPrefab, transform);
             enemy.name = "Enemy";
+
+            // FIX 2026-08-12 v3f.10 (user: "con bọ quay mặt đi sai hướng"): model Flying Beetle
+            // forward là -Z → muốn nhìn về player (+Z) phải quay 180°. Xoay hướng trên CONTAINER
+            // "EnemyModel" thay vì chính prefab — Animator (clip flying/atack) có thể ghi đè
+            // rotation mỗi frame, set trên prefab không chắc chắn. Container nằm NGOÀI Animator
+            // → hướng quay luôn đúng dù animation có tự xoay bên trong.
+            var model = new GameObject("EnemyModel");
+            model.transform.SetParent(transform, false);
+            model.transform.localRotation = Quaternion.Euler(0f, enemyYaw, 0f);
+            enemy.transform.SetParent(model.transform, false);
+            enemy.transform.localPosition = Vector3.zero;
+            enemy.transform.localRotation = Quaternion.identity; // Animator tự lo chuyển động bên trong
 
             // FIX 2026-08-12 v3f.5 (user: "sao con bọ màu tím vậy — màu gốc đâu phải tím"): model 3rd-party
             // (Flying Beetle) dùng shader Standard Built-in → TÍM/MAGENTA trong URP. Tàu đã gọi MaterialFixer
@@ -174,10 +192,14 @@ namespace VoidRunner.Core.World
                 enemy.transform.localScale = Vector3.one * s;
             }
 
-            // Quay mặt về hướng player (player luôn phía +Z so với enemy) — set 1 LẦN khi build.
-            // ⚠️ KHÔNG ép mỗi frame (R4.17): enemy có Animator — ghi đè localRotation mỗi frame
-            // sẽ đánh nhau với root motion của animation.
-            enemy.transform.localRotation = Quaternion.Euler(0f, enemyYaw, 0f);
+            // Bóng mềm dưới bọ (v3f.10 — user: "con bọ có bóng, làm bóng với tàu luôn"): tắt
+            // shadow thật của model (light soft shadow quá mờ + tránh 2 bóng đè nhau) → thay
+            // bằng quad đen mờ trên track (rẻ hơn, chắc chắn thấy trên dải track xanh).
+            foreach (var r in enemy.GetComponentsInChildren<Renderer>())
+            {
+                if (r != null) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+            BlobShadow.Attach(transform); // gắn vào ROOT — không nghiêng theo rotation model
         }
 
         /// <summary>

@@ -311,6 +311,7 @@ namespace VoidRunner.Core.Player
                 if (oldExhaust != null) DestroyImmediate(oldExhaust.gameObject);
                 _flameLight = CreateFlameLight(existing, new Vector3(0f, 0.12f, -0.85f));
                 _flameTrail = CreateFlameTrail(existing, new Vector3(0f, 0.12f, -1.05f));
+                BlobShadow.Attach(transform); // v3f.10: bóng mềm cho tàu (idempotent — đã có thì thôi)
                 return;
             }
 
@@ -353,6 +354,10 @@ namespace VoidRunner.Core.Player
             EnsureShipLight(ship.transform);
 
             _ship = ship.transform;
+
+            // v3f.10 (user: "con bọ có bóng, làm bóng với tàu luôn"): bóng mềm — primitive parts
+            // đã shadowCastingMode Off sẵn, thêm quad đen mờ dưới tàu trên track.
+            BlobShadow.Attach(transform);
 
             // Cache renderer của toàn bộ thân tàu (cho hiệu ứng nhấp nháy khi đụng obstacle)
             _shipRenderers = _ship.GetComponentsInChildren<MeshRenderer>();
@@ -424,6 +429,14 @@ namespace VoidRunner.Core.Player
             // bám theo tàu — track tối đen, không có UI đè; tàu mờ vì THIẾU ÁNH SÁNG. Light này
             // chiếu sáng thân tàu + halo quanh, tàu nổi bật hơn mọi thứ xung quanh.
             EnsureShipLight(ship.transform);
+
+            // v3f.10 (user: "con bọ có bóng, làm bóng với tàu luôn"): tắt shadow thật của model
+            // (tránh 2 bóng đè — light shadow mờ) + blob đen mờ trên track (nhẹ, chắc thấy).
+            foreach (var r in ship.GetComponentsInChildren<Renderer>())
+            {
+                if (r != null) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+            BlobShadow.Attach(transform);
 
             _ship = ship.transform;
             _shipRenderers = _ship.GetComponentsInChildren<MeshRenderer>();

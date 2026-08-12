@@ -50,9 +50,13 @@ namespace VoidRunner.Systems.VFX
         [SerializeField] private Color popupColor = new Color(1f, 0.85f, 0.2f, 1f);
 
         [Header("Enemy trail")]
-        [SerializeField] private float trailTime = 0.6f;
-        [SerializeField] private float trailStartWidth = 1.4f;
-        [SerializeField] private Color trailColor = new Color(0.05f, 0.05f, 0.1f, 0.55f);
+        // FIX 2026-08-12 v3f.10 (user: "có vài khoảnh khắc thấy 2 con bọ đè lên nhau"): vệt khói
+        // cũ quá dài (0.6s) + quá rộng (1.4) + quá đặc (alpha 0.55) → khi bọ đổi lane nhanh,
+        // vệt uốn cong ĐÈ LÊN thân bọ → nhìn như con bọ thứ 2. Giảm: ngắn + mảnh + mờ hơn
+        // (vẫn giữ hiệu ứng khói đuổi theo nhưng không còn ảo giác 2 con).
+        [SerializeField] private float trailTime = 0.35f;
+        [SerializeField] private float trailStartWidth = 0.9f;
+        [SerializeField] private Color trailColor = new Color(0.05f, 0.05f, 0.1f, 0.28f);
 
         // NOTE (v3f.7): LỬA TÊN LỬA nằm ở PlayerController (Thruster + hạt exhaust cam) —
         // KHÔNG tạo vệt trail ở VFXManager nữa (vệt cũ dùng shader Additive không tồn tại trong

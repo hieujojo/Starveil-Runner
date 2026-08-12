@@ -662,9 +662,9 @@ MonoBehaviour:
   popupFloatDistance: 70
   popupDuration: 0.7
   popupColor: {r: 1, g: 0.85, b: 0.2, a: 1}
-  trailTime: 0.6
-  trailStartWidth: 1.4
-  trailColor: {r: 0.05, g: 0.05, b: 0.1, a: 0.55}
+  trailTime: 0.35
+  trailStartWidth: 0.9
+  trailColor: {r: 0.05, g: 0.05, b: 0.1, a: 0.28}
 --- !u!114 &288287889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2982,7 +2982,7 @@ MonoBehaviour:
   closeScale: 1.2
   enemyPrefab: {fileID: 1174681552261998, guid: cda9515b23e2f454b9c8d645acee645e, type: 3}
   enemyTargetHeight: 2.6
-  enemyYaw: 0
+  enemyYaw: 180
   hitSpeedUp: 2
   catchDelay: 1.1
 --- !u!135 &2067106722
