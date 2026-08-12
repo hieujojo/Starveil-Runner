@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-08-12 (G3.5 hotfix) — 4 lỗi CS0103 `_pauseButton does not exist` trong PauseManager
+
+**Triệu chứng:** sau commit G3.5, Unity báo 4 lỗi đỏ `error CS0103: The name '_pauseButton' does not exist` tại `PauseManager.cs(116/122)`.
+
+**Root cause:** khi thêm fix reviewer "ẩn nút II khi Game Over + hiện lại khi Restart" (HandleGameOver/HandleRestart), tôi dùng biến `_pauseButton` nhưng **QUÊN khai báo field** `private Button _pauseButton;` — và `EnsurePauseButton` cũng **không gán** `_pauseButton = btn` (chỉ AddListener). Compile error do biến không tồn tại + nếu chỉ thêm field mà quên gán thì ref luôn null (ẩn/hiện nút vô tác dụng).
+
+**Fix:** (1) thêm field `_pauseButton`; (2) `EnsurePauseButton` gán `_pauseButton = btn` khi tạo mới + `_pauseButton = existing.GetComponent<Button>()` khi đã tồn tại (idempotent vẫn cache được).
+
+**Bài học — QUY TẮC MỚI (R7.13):** sau khi viết/sửa file mới, **grep lại MỌI biến instance dùng trong file có được khai báo + gán ở mọi nhánh (tạo mới lẫn đã tồn tại) không** — lỗi "dùng biến quên khai báo" dễ lọt khi thêm code mới vào file vừa viết. Compile log CS0103 = biến không tồn tại trong context (thiếu field/local); đừng chỉ thêm field mà quên gán ở nhánh cache.
+
+---
+
 ## 2026-08-12 — FEATURE MỚI: Pause overlay + Volume slider + Swipe mobile (G3.5)
 
 > User: "thêm màn hình pause (nút nhỏ bấm được hoặc ESC), âm thanh có ở cả MainMenu lẫn Pause, nút bật/tắt cũ → thanh slide kéo được, xong thì tối ưu mobile — thêm cách vuốt".

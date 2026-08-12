@@ -27,6 +27,7 @@ namespace VoidRunner.UI
 
         private Canvas _canvas;
         private GameObject _overlay;
+        private Button _pauseButton;
         private bool _isPaused;
         private float _timeScaleBefore = 1f;
 
@@ -142,7 +143,11 @@ namespace VoidRunner.UI
         private void EnsurePauseButton()
         {
             Transform existing = _canvas.transform.Find("PauseButton");
-            if (existing != null) return;
+            if (existing != null)
+            {
+                _pauseButton = existing.GetComponent<Button>(); // cache — HandleGameOver/Restart cần
+                return;
+            }
 
             var go = new GameObject("PauseButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             go.transform.SetParent(_canvas.transform, false);
@@ -176,6 +181,8 @@ namespace VoidRunner.UI
             tmp.raycastTarget = false;
             tmp.textWrappingMode = TextWrappingModes.NoWrap;
             AssignFallbackFont(tmp);
+
+            _pauseButton = btn; // lưu ref — HandleGameOver ẩn / HandleRestart hiện lại
         }
 
         private void EnsureOverlay()
