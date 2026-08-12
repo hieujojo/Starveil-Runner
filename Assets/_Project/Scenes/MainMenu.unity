@@ -454,6 +454,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 406369630}
   m_CullTransparentMesh: 1
+--- !u!1 &491733354
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 491733356}
+  - component: {fileID: 491733355}
+  m_Layer: 0
+  m_Name: FPSCounter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &491733355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491733354}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b508ed6c91f782418025d56bb20cd78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VoidRunner.Core::VoidRunner.Utils.FPSCounter
+  visibleOnStart: 1
+  logInterval: 10
+--- !u!4 &491733356
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491733354}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &744814678
 GameObject:
   m_ObjectHideFlags: 0
@@ -1874,7 +1920,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOID RUNNER
+  m_text: STARVEIL RUNNER
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
   m_sharedMaterial: {fileID: 3259595456760285505, guid: c3f245cfa6f530741b6ceea940605aaf, type: 2}
@@ -2117,3 +2163,4 @@ SceneRoots:
   - {fileID: 1964162065}
   - {fileID: 298014300}
   - {fileID: 280512121}
+  - {fileID: 491733356}

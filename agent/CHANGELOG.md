@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-08-12 (pre-production cleanup) — Xóa log debug + commit file còn sót
+
+> User: "hình như có vài file chưa commit, commit luôn đi, nhớ check xem đẩy lên production thì xóa sạch hết log đi nhé".
+
+- **Xóa log:** bỏ `Debug.Log([FPS-LOG] ...)` trong FPSCounter.cs (spam console mỗi 10s, thêm để test FPS — test xong nên xóa trước production). Giữ HUD FPS trên màn hình (bật/tắt F3). Giữ nguyên các Debug.LogWarning/LogError (log lỗi CẤU HÌNH hợp lệ — chỉ hiện khi có bug thật, không spam).
+- **Commit file sót:** MainMenu.unity (gắn FPSCounter + rename title), ProjectSettings (Switch Platform WebGL + preloadedAssets), Kenney Future SDF + LiberationSans Fallback + Mobile_RPAsset (Unity tự sinh), UnityConnectSettings.
+- **Bài học (R7.16):** trước khi build production, `grep -rn 'Debug.Log(' Assets/_Project/Scripts --include='*.cs'` (loại Tests/Editor) — xóa mọi Debug.Log THUẦN (log test/rác); chỉ giữ Debug.LogWarning/LogError cấu hình.
+
+---
+
 ## 2026-08-12 (UI v3.3) — Bỏ nút SELECT trong panel chọn tàu
 
 > User: "bỏ luôn chữ SELECT ở giữa 2 nút mũi tên trái phải trong ship đi, hiển thị tên tàu là được rồi".
