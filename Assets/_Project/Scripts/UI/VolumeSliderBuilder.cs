@@ -40,7 +40,7 @@ namespace VoidRunner.UI
             lrt.anchorMin = new Vector2(0f, 0.5f);
             lrt.anchorMax = new Vector2(0f, 0.5f);
             lrt.pivot = new Vector2(0f, 0.5f);
-            lrt.anchoredPosition = new Vector2(0f, 0f);
+            lrt.anchoredPosition = new Vector2(16f, 0f); // cách mép trái 16px (khoảng trống 2 bên)
             lrt.sizeDelta = new Vector2(110f, 40f);
             var tmp = label.GetComponent<TextMeshProUGUI>();
             tmp.text = "VOLUME";
@@ -52,15 +52,23 @@ namespace VoidRunner.UI
             tmp.textWrappingMode = TextWrappingModes.NoWrap;
             AssignFallbackFont(tmp);
 
-            // Slider (phải — chiếm phần còn lại của container)
+            // 2026-08-12 v3.2 (user: "text trong nút Play/HowToPlay không bao giờ sát mép — muốn volume
+            // cũng vậy; giờ label + slider chạm full width, không chừa khoảng trống 2 bên"):
+            // label cách mép trái 16px, slider cách mép phải 16px (ContentPad) — như padding nút khác.
+            const float ContentPad = 16f;
+            const float LabelWidth = 110f;
+            const float LabelSliderGap = 10f;
+            float sliderWidth = size.x - ContentPad * 2f - LabelWidth - LabelSliderGap;
+
+            // Slider (neo PHẢI — cách mép phải ContentPad, không chạm viền hộp)
             var go = new GameObject("Slider", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Slider));
             go.transform.SetParent(container.transform, false);
             var rt = (RectTransform)go.transform;
-            rt.anchorMin = new Vector2(0f, 0.5f);
+            rt.anchorMin = new Vector2(1f, 0.5f);
             rt.anchorMax = new Vector2(1f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(55f, 0f);   // dịch sang phải sau label 110px
-            rt.sizeDelta = new Vector2(-110f, 30f);       // rộng = size.x - 110 — cao hơn cho hộp to
+            rt.pivot = new Vector2(1f, 0.5f);
+            rt.anchoredPosition = new Vector2(-ContentPad, 0f);
+            rt.sizeDelta = new Vector2(sliderWidth, 30f);
 
             var bg = go.GetComponent<Image>();
             bg.color = new Color(1f, 1f, 1f, 0.18f);      // track nền mờ

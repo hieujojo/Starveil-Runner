@@ -170,7 +170,9 @@ namespace VoidRunner.UI
             nrt.anchorMin = new Vector2(0.5f, 1f);
             nrt.anchorMax = new Vector2(0.5f, 1f);
             nrt.pivot = new Vector2(0.5f, 1f);
-            nrt.anchoredPosition = new Vector2(0f, -525f);
+            // 2026-08-12 v3.2 (user chốt: giữ SELECT giữa hàng mũi tên → tên tàu chuyển XUỐNG DƯỚI
+            // hàng đó, gần đáy panel — gap 15px với mũi tên, cách đáy panel 20px)
+            nrt.anchoredPosition = new Vector2(0f, -650f);
             nrt.sizeDelta = new Vector2(600f, 50f);
             _nameText = nameGo.GetComponent<TextMeshProUGUI>();
             _nameText.fontSize = 36;
