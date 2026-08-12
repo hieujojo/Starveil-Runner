@@ -2,6 +2,14 @@
 
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
+## 2026-08-12 (con bọ rung rung) - v3f.10.2
+
+> User: "sao con bọ cứ rung rung khó nhìn quá".
+
+- **Nguyên nhân (jitter kinh điển của runner game):** (1) Rigidbody player mặc định `interpolation = None` → vị trí chỉ cập nhật ở fixed timestep (50Hz) → chuyển động bậc thang; (2) EnemyChase bám `player.position` trong `Update()` — chạy TRƯỚC camera (Cinemachine dùng LateUpdate) → bọ đọc vị trí player CỦA FRAME TRƯỚC → lệch 1 nhịp so với camera mỗi frame → rung liên tục.
+- **Fix (2 thay đổi đi đôi):** (1) `PlayerController.Awake` → `_rb.interpolation = RigidbodyInterpolation.Interpolate` (vị trí mượt giữa các fixed step — chỉ visual, không đổi vật lý); (2) `EnemyChase.Update` → **`LateUpdate()`** — chạy cùng thời điểm camera → bọ bám đúng vị trí player visual, đồng bộ với camera.
+- **Bài học (R7.19c):** object bám theo player di chuyển bằng Rigidbody (không interpolation) PHẢI: (1) bật `RigidbodyInterpolation.Interpolate` cho rigidbody player; (2) dùng `LateUpdate` (cùng nhịp camera) thay vì `Update` — nếu không bị rung/giật 1 frame so với nền. Lỗi "rung rung" thường là vấn đề THỨ TỰ UPDATE, không phải animation.
+
 ## 2026-08-12 (bóng con bọ mất + animation chậm) - v3f.10.1
 
 > User: "cho animation con bọ chậm lại tí; sao lúc chưa fix còn thấy bóng con bọ mà chừ sau khi sửa mất bóng luôn".

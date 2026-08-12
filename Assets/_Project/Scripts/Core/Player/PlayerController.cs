@@ -90,6 +90,12 @@ namespace VoidRunner.Core.Player
             _rb.constraints = RigidbodyConstraints.FreezeRotation;
             _rb.angularVelocity = Vector3.zero;
 
+            // v3f.10.2 (user: "con bọ cứ rung rung khó nhìn"): bật Interpolation cho rigidbody
+            // player — mặc định None = vị trí chỉ cập nhật ở fixed timestep (50Hz) → tàu + con bọ
+            // (bám player.position) + camera đều giật bậc thang → rung. Interpolate = vị trí mượt
+            // giữa các fixed step (visual), không đổi vật lý collision.
+            _rb.interpolation = RigidbodyInterpolation.Interpolate;
+
             BuildSpaceship();
         }
 

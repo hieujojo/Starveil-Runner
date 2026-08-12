@@ -362,7 +362,11 @@ namespace VoidRunner.Core.World
             GameEvents.RaiseGameOver();
         }
 
-        private void Update()
+        // v3f.10.2 (user: "con bọ cứ rung rung khó nhìn"): Update → LATEUPDATE. Trong Update,
+        // bọ đọc player.position CỦA FRAME TRƯỚC (camera Cinemachine chạy LateUpdate) → mỗi frame
+        // bọ lệch 1 nhịp so với camera → rung. LateUpdate chạy cùng thời điểm camera → đồng bộ.
+        // Kèm player Rigidbody interpolation (PlayerController) — 2 fix đi đôi hết jitter.
+        private void LateUpdate()
         {
             if (player == null) return;
             if (GameManager.Instance == null || GameManager.Instance.State != GameState.Playing) return;
