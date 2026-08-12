@@ -2,6 +2,16 @@
 
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
+## 2026-08-12 (bọ to hơn + drone spawn đồng đều theo độ khó) - v3f.10.3
+
+> User: "khiến con bọ to lên 1 chút nữa; cho các drone được spawn hợp lý theo từng độ khó — tránh cảm giác trống trải hoặc dày đặc mà mọi thứ được đồng đều".
+
+- **Bọ to hơn:** `enemyTargetHeight 2.6 → 2.9` (code + scene Game.unity) — vẫn sau player nên không che tàu.
+- **Drone spawn đồng đều (thay Random thuần):** trước đây `TrySpawn` dùng `Random.value > spawnChance` — xác suất ĐỘC LẬP giữa các tile → variance cao: nhiều tile trống liên tiếp (cảm giác trống trải) hoặc nhiều tile dày liên tiếp (dày đặc). Fix bằng **LINEAR SCHEDULING**: `_spawnAccumulator += CurrentSpawnChance` mỗi tile; đạt ≥1 thì spawn (trừ 1) → mật độ trung bình ĐÚNG bằng xác suất difficulty (0.45→0.75) nhưng phân bố ĐỀU tuyệt đối — không bao giờ trống/dày cụm. Reset accumulator khi OnGameStarted/OnRestart.
+- **Số lane chặn theo độ khó (góp ý reviewer):** đầu game chủ yếu 1 drone/lane (dễ né) — `twoLaneChance = InverseLerp(0.45,0.75,chance)*0.6` → cuối game 60% tile chặn 2 lane (khó dần). Luôn ≥1 lane trống.
+- **Spacing z cùng tile:** 2 drone cùng tile đặt z ∈ [0, len*0.35] và [len*0.4, len*0.65] → luôn cách nhau ≥0.5m, không cụm 1 chỗ.
+- **Bài học (R7.19d):** "mật độ đều" ≠ tăng/giảm con số xác suất — random độc lập giữa các lần spawn luôn tạo cụm (binomial). Dùng bộ tích lũy (linear scheduling) cho mật độ trung bình đúng + phân bố đều; thêm biến "cường độ" (số lane chặn) lerp theo difficulty thay vì chỉ 1 con số xác suất.
+
 ## 2026-08-12 (con bọ rung rung) - v3f.10.2
 
 > User: "sao con bọ cứ rung rung khó nhìn quá".

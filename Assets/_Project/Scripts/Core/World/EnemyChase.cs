@@ -65,8 +65,8 @@ namespace VoidRunner.Core.World
         [Tooltip("Flying Beetle (Assets/Flying Beetle/prefab) — có Animator, instantiate là bay. Tool Setup Enemy tự gán.")]
         [SerializeField] private GameObject enemyPrefab;
 
-        [Tooltip("Chiều cao chuẩn hóa của enemy (đơn vị) — FIX 2026-08-12 v3f.5.3: 2.2→2.6 (user: \"cho con bọ to lên\" — lần 2); vẫn sau player nên không che tàu")]
-        [SerializeField] private float enemyTargetHeight = 2.6f;
+        [Tooltip("Chiều cao chuẩn hóa của enemy (đơn vị) — FIX 2026-08-12 v3f.5.3: 2.2→2.6; v3f.10.3: 2.6→2.9 (user: \"cho con bọ to lên 1 chút nữa\"); vẫn sau player nên không che tàu")]
+        [SerializeField] private float enemyTargetHeight = 2.9f;
 
         [Tooltip("Xoay thêm quanh Y (độ) nếu model quay mặt sai hướng. FIX 2026-08-12 v3f.10: mặc định 180 — Flying Beetle forward là -Z, phải quay 180° mới nhìn về player (+Z).")]
         [SerializeField] private float enemyYaw = 180f;

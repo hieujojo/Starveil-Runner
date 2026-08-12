@@ -2981,7 +2981,7 @@ MonoBehaviour:
   baseScale: 1
   closeScale: 1.2
   enemyPrefab: {fileID: 1174681552261998, guid: cda9515b23e2f454b9c8d645acee645e, type: 3}
-  enemyTargetHeight: 2.6
+  enemyTargetHeight: 2.9
   enemyYaw: 180
   hitSpeedUp: 2
   catchDelay: 1.1
