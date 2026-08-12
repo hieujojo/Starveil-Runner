@@ -12,9 +12,8 @@
 
 - **3 lane vô tận, road rộng 18m**: bấm `A`/`D` (hoặc mũi tên) = nhảy ngay 1 lane; **đè giữ** = trượt liên tục qua nhiều lane; nhả = tự về giữa lane — phản hồi tức thì, né chướng ngại vật mượt mà. **📱 Mobile: vuốt trái/phải để đổi lane** (và kéo chuột trên desktop cũng được)
 - **Enemy = Flying Beetle đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Enemy **tiến sát** (phình to, đe dọa); né sạch 10–15s → Enemy **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Enemy nuốt chửng = **Game Over**. Đụng obstacle → tàu **nhấp nháy** (feedback rõ ràng)
-- **Chướng ngại vật**: **rào chắn trạm (Fence)** + **drone bảo vệ (Robot_Guardian)** gắn ngẫu nhiên theo weight, **luôn chừa ≥1 lane an toàn** + **safe zone 20m đầu game** (không obstacle — không chết tức thì)
+- **Chướng ngại vật**: **drone bảo vệ (Robot_Guardian — Sci fi Drones)** với đèn đỏ cảnh báo + lơ lửng — spawn **đồng đều theo độ khó** (linear scheduling: mật độ trung bình đúng xác suất 0.45→0.75, không cụm trống/dày), đầu game 1 drone/tile → cuối game hay chặn 2 lane, **luôn chừa ≥1 lane an toàn** + **safe zone 20m đầu game**
 - **Coin & Power-up**: gom coin tăng điểm (hàng coin **không bao giờ đè lên obstacle** — chọn lane khác), nhặt power-up (Shield / Magnet / Slow-mo)
-- **Obstacle**: **rào chắn trạm vũ trụ** (Fence — 3D Scifi Kit Starter Kit) + **drone Guardian** (Sci fi Drones) — chạy tool `Tools/Void Runner/Setup Obstacle = SciFi (Fence + Drone Guardian)` để tạo prefab + gán vào 2 ObstacleData (Ramp → Barrier, DynamicBox → Drone)
 - **Độ khó công bằng**: tốc độ nền tăng dần + combo multiplier — cái chết do **lỗi của bạn**, không phải ngẫu nhiên
 
 ---
@@ -40,7 +39,7 @@
 | Audio + Save | `AudioManager` singleton + `SaveSystem` (PlayerPrefs) | ✅ |
 | Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Enemy, đụng obstacle → tàu nhấp nháy, coin không đè obstacle, **Point Light cyan bám tàu (nổi bật)** | ✅ |
 | Test tự động | **Unity Test Framework — 24 test + 5 PlayMode test Enemy 2 nấc** | ✅ |
-| Deploy | **WebGL build → itch.io / Unity Play** | ⏳ Giai đoạn 3 |
+| Deploy | **WebGL build (Gzip) → [itch.io](https://lothric11.itch.io/starveil-runner) + [Unity Play](https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl)** | ✅ Live 2026-08-12 |
 
 ---
 
@@ -67,11 +66,11 @@
 1. Mở project bằng **Unity Hub**
 2. Mở scene `Assets/_Project/Scenes/Game.unity`
 3. Bấm **▶ Play** — hoặc `File → Build Settings` để build cho nền tảng bạn muốn
-4. Build WebGL: đổi platform sang **WebGL**, chọn **Compression Format: Brotli**, rồi Build
+4. Build WebGL: đổi platform sang **WebGL**, chọn **Compression Format: Gzip** (⚠️ KHÔNG dùng Brotli — itch.io không serve `.br` đúng header → trắng màn hình, xem CHANGELOG R7.18), rồi Build
 
-> 🌐 **Chơi thử online** (link sẽ được cập nhật khi hoàn tất Giai đoạn 3):
-> - [itch.io](https://itch.io) — *chưa publish*
-> - [Unity Play](https://play.unity.com) — *chưa publish*
+> 🌐 **Chơi thử online — LIVE 2026-08-12:**
+> - 🎮 [itch.io — Starveil Runner](https://lothric11.itch.io/starveil-runner)
+> - 🎮 [Unity Play — Starveil Runner](https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl)
 
 ---
 
@@ -106,8 +105,8 @@ Assets/_Project/
 | **G1** | Core gameplay: lane switching, tile spawner (object pool), Enemy chase, obstacle | ✅ Code xong |
 | **G2** | Hệ thống: Score (combo), UI, Power-up, Audio, Save, Difficulty | ✅ Code xong |
 | **G2.5** | **Refactor gameplay theo review user** (Enemy 2 nấc, player tàu vũ trụ, track vô tận, UI English, best score ẩn) | ✅ Hoàn thành (2026-08-11) |
-| **G3** | Polish & Deploy: VFX, post-processing, WebGL → itch.io / Unity Play, README | ⏳ Tuning FPS Editor PASS — chờ build WebGL |
-| **G3.5** | Pause overlay (ESC + nút II) · slider âm lượng (MainMenu + Pause) · swipe mobile | ✅ Code xong — chờ test |
+| **G3** | Polish & Deploy: VFX, post-processing, WebGL → itch.io / Unity Play, README | ✅ Hoàn thành — **LIVE cả 2 nền tảng** (2026-08-12) |
+| **G3.5** | Pause overlay (ESC + nút II) · slider âm lượng (MainMenu + Pause) · swipe mobile | ✅ Hoàn thành — test OK trên web |
 
 ---
 

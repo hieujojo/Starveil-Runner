@@ -2,6 +2,15 @@
 
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
+## 2026-08-12 (🎉 DEPLOY HOÀN TẤT) - Game LIVE trên itch.io + Unity Play
+
+> User: "deploy thành công rồi, check thử ... cập nhật toàn bộ docs .md và readme đi, mọi thứ hoàn thành".
+
+- **itch.io (chính):** https://lothric11.itch.io/starveil-runner — ✅ LIVE, đã verify bằng browser: trang hiện đúng, bấm Run game → Unity WebGL khởi tạo thành công sau ~90s load 132MB, KHÔNG white screen (Gzip hoạt động — xác nhận fix R7.18 đúng). Console chỉ còn 3 shader debug warning vô hại (CoreCopy/StencilDitherMaskSeed/HDRDebugView — "not supported on this GPU" của môi trường headless, không ảnh hưởng gameplay).
+- **Unity Play (dự phòng):** https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl — ✅ LIVE (publish qua WebGL Publisher — package `com.unity.connect.share` đã cài, log import Unity.Play.Publisher.Editor OK).
+- **Đã cập nhật docs:** README (2 link live + Compression Gzip thay Brotli + bỏ chi tiết rào chắn cũ — obstacle = drone duy nhất từ v3f.5) · PLAN.md (tick toàn bộ G3/G3.5 + DoD, header "HOÀN THÀNH") · CHANGELOG (entry này). Repo sạch, đã push.
+- **Bài học (R7.19f):** khi publish itch.io lần đầu NHỚ tick nút công khai (Visibility = Public) — để mặc định Draft thì người khác (kể cả tab ẩn danh) thấy 404. Unity Play: cần cài package WebGL Publisher qua Package Manager (không có sẵn), publish miễn phí cho Unity Personal, giới hạn build <1GB.
+
 ## 2026-08-12 (pre-deploy) - Log đỏ _pauseButton là CŨ + Compression 2→1 (Gzip)
 
 > User: "còn 1 log đỏ fix luôn rồi build lại rồi deploy, cả itch.io và unity play luôn nhé".

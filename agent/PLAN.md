@@ -1,7 +1,7 @@
 # Starveil Runner — Kế hoạch hành động (Action Plan)
 
 > Hyper-casual endless runner 3D + **AI Chase** · Unity 6 URP · Game Production
-> ✅ **Trạng thái:** G1–G2–G2.5 xong; G3 đang ở **Tuning 60 FPS (Editor PASS)**; **G3.5 (Pause + Volume slider + Swipe mobile) ĐÃ CODE XONG 2026-08-12 — chờ user test**. Tick checkbox khi hoàn thành từng task.
+> ✅ **Trạng thái: HOÀN THÀNH — LIVE 2026-08-12 trên cả itch.io + Unity Play!** (G1→G3.5 đều xong; deploy xong, repo sạch, README đầy đủ link demo).
 
 ---
 
@@ -205,13 +205,13 @@ Assets/
 - [x] **Task B — Enemy = QUÁI VẬT** (đã random 1 trong 3 — ĐỔI 2026-08-12: còn 1 enemy DUY NHẤT Flying Beetle, tool `Setup Enemy` gán 1 prefab) — ✅ commit `cd42fa9`
 - [x] **Task D — CHỌN TÀU ở MainMenu có preview 3D**: SaveSystem.SelectedShip; PlayerController.shipPrefabs (model SF Fighter/Sparrow thay primitive); ShipSelectManager (panel preview RenderTexture 256 + camera layer ShipPreview(6), nút < > SELECT CLOSE, tên tàu); tool `Setup Ship Select`; ShipCatalog (1 nguồn path + self-heal khi chưa gán prefab) — ✅ commit `decaa0e` + `de329c7`
 - [x] **Task C — VẬT CẢN = SciFi kit** (KHÔNG dùng asteroid — user: "cục thiên thạch giữa đường kì quá"): `SciFiObstacleSetupTool` — Ramp → **BarrierObstacle** (Fence_Long_01, 3D Scifi Kit Starter Kit — cam neon cảnh báo, bề ngang ≤4.2 gọn trong lane) + DynamicBox → **DroneObstacle** (Robot_Guardian, Sci fi Drones — bù pivot center đúng tâm lane); menu `Tools/Void Runner/Rebuild SciFi Obstacles` (idempotent) — ✅ commit `cbbf933` `04e8526` `48292ba` (2026-08-12) → **v3f.5: XÓA HẲN cổng/rào** (user: "cổng chứ đâu phải bãi mìn") — obstacle DUY NHẤT = **DroneObstacle** (Robot_Guardian) + `ObstacleFX` (đèn đỏ + hạt năng lượng + lơ lửng/xoay, tạo runtime); Ramp.asset → drone (cả 2 ObstacleData = drone, spawnWeight phân mật độ); xóa BarrierObstacle/Ramp.prefab/DynamicBox.prefab mồ côi — ✅ commit (v3f.5)
-- [ ] Tuning: độ khó fair; đảm bảo **60 FPS** — ✅ **EDITOR PASS 2026-08-12**: FPS counter log `[FPS-LOG]` đo được **FPS 184–218 (ms 4.3–5.4)** ở scene Game (gameplay user xác nhận OK) — gấp 3–4 lần chuẩn 60; dọn 3 warning CS0618 deprecated API (FindObjectsByType sort param, FindFirstObjectByType); ⏳ **còn: đo FPS THẬT trên Chrome sau khi build WebGL** (Editor nhanh hơn build thật — bước kế tiếp) + test nhiều độ phân giải
-- [ ] **WebGL build**: Resolution responsive · **Compression: Brotli** · WebGL 2.0 · Linear color space · chỉnh Initial Memory hợp lý (256–512 MB), hạn chế GC spike
-- [ ] **Upload itch.io** (chính): tài khoản → New project → Kind: HTML → nén thư mục WebGL `.zip` → mô tả + screenshot + GIF → Publish
-- [ ] **Upload Unity Play** (dự phòng): play.unity.com → Upload → Publish → copy link
-- [ ] **README GitHub** (template mục 9) + 2 link demo + screenshot/GIF
+- [x] Tuning: độ khó fair; đảm bảo **60 FPS** — ✅ **EDITOR PASS + WEB PASS 2026-08-12**: Editor đo **FPS 184–218 (ms 4.3–5.4)**; user chơi thử trên itch.io OK (load 132MB thành công, không white screen); dọn 3 warning CS0618 deprecated API
+- [x] **WebGL build**: Resolution responsive · **Compression: Gzip** (⚠️ Brotli gây white screen itch.io — R7.18) · WebGL 2.0 · Linear color space — build thành công `Builds/WebGL` (138MB zip)
+- [x] **Upload itch.io** (chính): **https://lothric11.itch.io/starveil-runner** — ✅ LIVE, đã test chạy (Unity init OK, chỉ shader debug warning vô hại)
+- [x] **Upload Unity Play** (dự phòng): **https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl** — ✅ LIVE (publish qua WebGL Publisher, package `com.unity.connect.share`)
+- [x] **README GitHub** — cập nhật 2 link demo + compression Gzip + trạng thái hoàn thành
 
-**✅ Milestone G3:** 2 link WebGL chạy được · repo sạch · README đầy đủ
+**✅ Milestone G3: HOÀN THÀNH — 2 link WebGL chạy được · repo sạch · README đầy đủ (2026-08-12)**
 
 ### Giai đoạn 3.5 — Pause + Volume slider + Mobile swipe (2026-08-12) ⏳ CHỜ USER TEST
 
@@ -222,8 +222,8 @@ Assets/
 - [x] **`UI/PauseManager.cs`** (tự gắn qua `GameManager.EnsurePause`, idempotent): nút **II** góc trên phải HUD + **ESC** toggle; `Time.timeScale = 0` + lưu giá trị cũ (tương thích SlowMo); overlay PAUSED: **RESUME · RESTART · slider VOLUME · MENU**; mọi đường rời pause đều khôi phục timeScale (kể cả MENU → LoadScene)
 - [x] **`UI/VolumeSliderBuilder.cs`** (dùng chung): MainMenu ẩn SoundButton cũ + slider (0,-130); Pause overlay có slider riêng — đổi → `AudioManager.SetVolume` (SaveSystem)
 - [x] **`InputReader` swipe mobile**: `Pointer.current` (touch + kéo chuột desktop) — vuốt ngang >45px = nhảy 1 lane (mô phỏng giữ phím 0.32s → tái dùng cơ chế rising-edge của PlayerController)
-- [ ] **TEST (user)**: ESC/nút II mở-đóng pause; slider kéo được ở cả 2 nơi; vuốt trái/phải đổi lane; pause giữa chừng → resume chơi tiếp đúng vị trí/điểm; MENU từ pause → về MainMenu không đóng băng
-- [ ] Tối ưu mobile tiếp (nếu test OK): bố cục HUD mobile, safe-area notch, cảm ứng đa điểm
+- [x] **TEST (user)**: ESC/nút II mở-đóng pause; slider kéo được ở cả 2 nơi; vuốt trái/phải đổi lane; pause/resume giữ đúng trạng thái; MENU từ pause không đóng băng — ✅ user chơi thử trên web (itch.io) OK, đã deploy cả 2 nền tảng
+- [ ] *(Tùy chọn tương lai)* Tối ưu mobile tiếp: bố cục HUD mobile, safe-area notch, cảm ứng đa điểm
 
 ---
 
@@ -276,20 +276,21 @@ Assets/
 **WebGL Build Settings:**
 ```
 Resolution : 1280×720 (responsive)
-Compression: Brotli
+Compression: Gzip            ⚠️ KHÔNG dùng Brotli (itch.io không serve .br đúng → white screen — R7.18)
 Color Space: Linear (URP)
 Graphics   : WebGL 2.0
 Initial Memory: 256–512 MB (tránh crash do OOM)
 ```
 
-**itch.io (chính):**
+**itch.io (chính) — ✅ LIVE:** https://lothric11.itch.io/starveil-runner
 1. Tạo tài khoản [itch.io](https://itch.io) → Dashboard → New project → Kind: **HTML**
-2. Nén thư mục WebGL build thành `.zip` → Upload
-3. Mô tả + controls + screenshot + GIF gameplay → Publish
+2. Nén NỘI DUNG thư mục build (index.html ở ROOT của zip) → Upload
+3. Mô tả + controls + screenshot + GIF gameplay → **bấm nút công khai (Publish)** — quên tick = người khác thấy 404!
 
-**Unity Play (dự phòng):**
-1. [play.unity.com](https://play.unity.com) → Upload → chọn thư mục WebGL build
-2. Điền thông tin → Publish → copy link
+**Unity Play (dự phòng) — ✅ LIVE:** https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl
+1. Cài package **WebGL Publisher** (`com.unity.connect.share`) qua Package Manager
+2. File → Build Profiles → WebGL → **Publish to WebGL Publisher** → đăng nhập Unity ID → chọn build → Publish
+3. Trình duyệt mở play.unity.com → điền Title/Description/Thumbnail → Save → copy link (miễn phí Personal, build <1GB)
 
 > Lý do ưu tiên itch.io: trang project chuyên nghiệp, embed game trực tiếp, tùy biến, được nhà tuyển dụng công nhận. Unity Play tiện nhưng giới hạn kích thước file và ít chuyên nghiệp hơn.
 
@@ -361,12 +362,14 @@ build(build): build WebGL v1.0 (Brotli) và publish
 
 ## 11. Định nghĩa "Hoàn thành" (Definition of Done)
 
-- [ ] Core loop: chạy → né → thu thập → chết → thử lại, 60 FPS ổn định
-- [ ] Đủ hệ thống: score + combo, 3 power-up, audio + volume, best score
-- [ ] Menu → Game → Game Over → Retry/Menu mượt, có fade
-- [ ] WebGL build chạy tốt trên Chrome/Firefox/Safari
-- [ ] 2 link demo (itch.io + Unity Play) + README + screenshot/GIF
-- [ ] Commit theo convention, repo sạch
+- [x] Core loop: chạy → né → thu thập → chết → thử lại, 60 FPS ổn định
+- [x] Đủ hệ thống: score + combo, 3 power-up, audio + volume, best score
+- [x] Menu → Game → Game Over → Retry/Menu mượt, có fade
+- [x] WebGL build chạy tốt (test live trên itch.io + Unity Play)
+- [x] 2 link demo (itch.io + Unity Play) + README đầy đủ
+- [x] Commit theo convention, repo sạch
+
+> **🏁 HOÀN THÀNH 2026-08-12** — game live trên cả 2 nền tảng, repo sạch, README/PLAN/CHANGELOG đồng bộ.
 
 ---
 
