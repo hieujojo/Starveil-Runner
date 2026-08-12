@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-08-12 (UI v3.3) — Bỏ nút SELECT trong panel chọn tàu
+
+> User: "bỏ luôn chữ SELECT ở giữa 2 nút mũi tên trái phải trong ship đi, hiển thị tên tàu là được rồi".
+
+- **Thay đổi:** xóa ConfirmButton (SELECT) ở giữa 2 mũi tên → tên tàu (ShipName) chuyển lên CÙNG HÀNG 2 mũi tên (y=-575, rộng 320, cao 62), thay đúng vị trí nút SELECT cũ.
+- **Logic kèm theo:** vì không còn nút xác nhận → đổi tàu (SelectPrev/SelectNext) là **lưu ngay SaveSystem.SelectedShip** (trước đây chỉ RefreshPreview, phải bấm SELECT mới lưu).
+- **Bài học (R7.15):** khi xóa 1 nút/UI, phải xử lý luôn hành động mà nút đó đảm nhận (ở đây: lưu selection) — không để chức năng đó mất hút.
+
+---
+
 ## 2026-08-12 (G3.5 UI v3 — SAU KHI USER REJECT) — Volume = hộp đặc + làm đẹp PANEL CHỌN TÀU
 
 > User reject commit `08f1df8`: "reject lại code ngay, bạn thấy toàn bộ hộp chứa của play và how to play chứ, làm tương tự với volume; sao bạn còn sửa cả ship và credits nữa vậy, ý tôi là UI ở trong nút ship á".

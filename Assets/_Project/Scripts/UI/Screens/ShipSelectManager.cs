@@ -9,7 +9,8 @@ namespace VoidRunner.UI
 {
     /// <summary>
     /// Task D (2026-08-11): panel CHỌN TÀU ở MainMenu — preview 3D xoay (RenderTexture + camera
-    /// layer ShipPreview), 2 nút mũi tên chuyển SF Fighter ⇄ Sparrow, nút chọn lưu SaveSystem.SelectedShip.
+    /// layer ShipPreview), 2 nút mũi tên chuyển SF Fighter ⇄ Sparrow, tên tàu hiển thị giữa 2 mũi tên.
+    /// v3.3: bỏ nút SELECT — đổi tàu là lưu luôn SaveSystem.SelectedShip.
     /// Tạo bằng code idempotent — không cần kéo thả scene. PlayerController đọc SelectedShip khi vào game.
     ///
     /// Cấu trúc (tạo lúc Start, ẩn sẵn):
@@ -170,10 +171,11 @@ namespace VoidRunner.UI
             nrt.anchorMin = new Vector2(0.5f, 1f);
             nrt.anchorMax = new Vector2(0.5f, 1f);
             nrt.pivot = new Vector2(0.5f, 1f);
-            // 2026-08-12 v3.2 (user chốt: giữ SELECT giữa hàng mũi tên → tên tàu chuyển XUỐNG DƯỚI
-            // hàng đó, gần đáy panel — gap 15px với mũi tên, cách đáy panel 20px)
-            nrt.anchoredPosition = new Vector2(0f, -650f);
-            nrt.sizeDelta = new Vector2(600f, 50f);
+            // 2026-08-12 v3.3 (user: "bỏ luôn chữ SELECT giữa 2 nút mũi tên, hiển thị tên tàu là được"):
+            // tên tàu nằm CÙNG HÀNG 2 mũi tên (y=-575) — thay vị trí nút SELECT cũ (giữa 2 mũi tên,
+            // cao 62 = cao mũi tên, rộng 320 vừa khoảng trống giữa 2 mũi tên: -160..+160)
+            nrt.anchoredPosition = new Vector2(0f, -575f);
+            nrt.sizeDelta = new Vector2(320f, 62f);
             _nameText = nameGo.GetComponent<TextMeshProUGUI>();
             _nameText.fontSize = 36;
             _nameText.fontStyle = FontStyles.Bold;
@@ -183,44 +185,9 @@ namespace VoidRunner.UI
             _nameText.textWrappingMode = TextWrappingModes.NoWrap;
             AssignFallbackFont(_nameText);
 
-            // Nút mũi tên trái / phải
+            // Nút mũi tên trái / phải (tên tàu nằm giữa 2 mũi tên — v3.3, không còn nút SELECT)
             CreateArrowButton(panel.transform, "PrevButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-225f, -575f), "<");
             CreateArrowButton(panel.transform, "NextButton", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(225f, -575f), ">");
-
-            // Nút chọn (xác nhận)
-            var confirmGo = new GameObject("ConfirmButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            confirmGo.transform.SetParent(panel.transform, false);
-            // 2026-08-12 v3 (user: "nút SELECT nhỏ lại 1 chút, để cùng hàng với 2 nút mũi tên"):
-            // 360x56 ở đáy → 220x62 ở GIỮA hàng mũi tên (y=-575, cùng cao 62, không đè mũi tên:
-            // mũi trái mép phải -160, SELECT mép trái -110 → gap 50px)
-            var crt = (RectTransform)confirmGo.transform;
-            crt.anchorMin = new Vector2(0.5f, 0.5f);
-            crt.anchorMax = new Vector2(0.5f, 0.5f);
-            crt.pivot = new Vector2(0.5f, 0.5f);
-            crt.anchoredPosition = new Vector2(0f, -575f);
-            crt.sizeDelta = new Vector2(220f, 62f);
-            var cimg = confirmGo.GetComponent<Image>();
-            cimg.color = new Color(0.2f, 0.75f, 1f, 1f);
-            var cbtn = confirmGo.GetComponent<Button>();
-            cbtn.transition = Selectable.Transition.ColorTint;
-            cbtn.onClick.AddListener(Confirm);
-
-            var clabel = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-            clabel.transform.SetParent(confirmGo.transform, false);
-            var clrt = (RectTransform)clabel.transform;
-            clrt.anchorMin = Vector2.zero;
-            clrt.anchorMax = Vector2.one;
-            clrt.offsetMin = Vector2.zero;
-            clrt.offsetMax = Vector2.zero;
-            var ctmp = clabel.GetComponent<TextMeshProUGUI>();
-            ctmp.text = "SELECT";
-            ctmp.fontSize = 34;
-            ctmp.fontStyle = FontStyles.Bold;
-            ctmp.color = Color.white;
-            ctmp.alignment = TextAlignmentOptions.Center;
-            ctmp.raycastTarget = false;
-            ctmp.textWrappingMode = TextWrappingModes.NoWrap;
-            AssignFallbackFont(ctmp);
 
             // Nút đóng — dấu X nhỏ góc trên phải (fix 2026-08-12: nút CLOSE to che chữ)
             var closeGo = new GameObject("CloseButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
@@ -424,22 +391,19 @@ namespace VoidRunner.UI
             return Keyboard.current != null && Keyboard.current[key].wasPressedThisFrame;
         }
 
+        // v3.3 (user bỏ nút SELECT): đổi tàu = LƯU NGAY SaveSystem.SelectedShip (không cần bấm xác nhận nữa)
         private void SelectPrev()
         {
             _selected = (_selected - 1 + ShipNames.Length) % ShipNames.Length;
+            SaveSystem.SelectedShip = _selected;
             RefreshPreview();
         }
 
         private void SelectNext()
         {
             _selected = (_selected + 1) % ShipNames.Length;
-            RefreshPreview();
-        }
-
-        private void Confirm()
-        {
             SaveSystem.SelectedShip = _selected;
-            TogglePanel(); // đóng
+            RefreshPreview();
         }
 
         private void TogglePanel()
