@@ -19,7 +19,7 @@ namespace VoidRunner.EditorTools
         public static void AddFpsCounter()
         {
             // 1. Đã có rồi thì chỉ bật + chọn.
-            FPSCounter existing = Object.FindFirstObjectByType<FPSCounter>();
+            FPSCounter existing = Object.FindAnyObjectByType<FPSCounter>();
             if (existing != null)
             {
                 existing.visibleOnStart = true;

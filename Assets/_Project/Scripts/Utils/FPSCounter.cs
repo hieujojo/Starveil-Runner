@@ -33,7 +33,7 @@ namespace VoidRunner.Utils
         {
             // Anti-duplicate: object này (ví dụ bản scene Game) thấy bản cũ từ MainMenu đang
             // DontDestroyOnLoad → tự hủy, giữ đúng 1 counter duy nhất.
-            FPSCounter[] all = FindObjectsByType<FPSCounter>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            FPSCounter[] all = FindObjectsByType<FPSCounter>(FindObjectsInactive.Include);
             if (all.Length > 1)
             {
                 Destroy(gameObject);

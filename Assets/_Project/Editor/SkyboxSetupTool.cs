@@ -123,7 +123,7 @@ namespace VoidRunner.EditorTools
             // ⚠️ BẮT BUỘC: camera phải ClearFlags = Skybox (m_ClearFlags: 1) — nếu đang Solid Color (2)
             // thì skybox không bao giờ được vẽ (bug 2026-08-11: gán xong không thấy).
             int cameras = 0;
-            foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include))
             {
                 if (cam.clearFlags != CameraClearFlags.Skybox)
                 {

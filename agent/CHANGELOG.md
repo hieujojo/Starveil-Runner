@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-08-12 (3 warning CS0618 — API FindObjectsByType cũ) — Console dọn sạch
+
+**Triệu chứng:** sau khi thêm FPS counter, Console có 3 warning `CS0618: ... has been deprecated` (API cũ bị deprecate trong Unity 6): `FindObjectsByType<T>(FindObjectsInactive, FindObjectsSortMode)` (FPSCounter.cs + SkyboxSetupTool.cs) và `FindFirstObjectByType<T>()` (FPSInjectTool.cs).
+
+**Root cause:** Unity 6 mới deprecate overload có `FindObjectsSortMode` (InstanceID sẽ thay bằng EntityId) và deprecate `FindFirstObjectByType` (phụ thuộc thứ tự InstanceID).
+
+**Fix:** bỏ tham số sort → `FindObjectsByType<T>(FindObjectsInactive)`; `FindFirstObjectByType` → `FindAnyObjectByType` (không phụ thuộc thứ tự).
+
+**Bài học:** (1) API Unity 6: `FindObjectsOfType` → `FindObjectsByType`, `FindFirstObjectByType` → `FindAnyObjectByType`, đừng truyền `FindObjectsSortMode` nữa. (2) Warning `CS0618 obsolete` là dấu hiệu API sắp bị gỡ — nên sửa ngay khi thấy, không để tồn đọng.
+
+---
+
 ## 2026-08-12 (FPS counter xuyên scene) — Counter biến mất khi vào Game scene
 
 **Triệu chứng:** user: "FPS chỉ hiện ở MainMenu, vào chơi không thấy".
