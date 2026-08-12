@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-08-12 — FEATURE MỚI: Pause overlay + Volume slider + Swipe mobile (G3.5)
+
+> User: "thêm màn hình pause (nút nhỏ bấm được hoặc ESC), âm thanh có ở cả MainMenu lẫn Pause, nút bật/tắt cũ → thanh slide kéo được, xong thì tối ưu mobile — thêm cách vuốt".
+
+### Quyết định kiến trúc (đã hỏi user — user chọn phương án 1)
+
+- **Pause = OVERLAY ngay trong scene Game** (KHÔNG tách scene riêng): runner vô tận sinh track/bọ/điểm procedural — tách scene sẽ mất toàn bộ trạng thái (vị trí tàu, bọ, điểm, track). Overlay + `Time.timeScale = 0` giữ nguyên mọi thứ. **Bài học (R7.12 mới): với game procedural (track vô tận), "màn hình pause" phải là overlay đóng băng thời gian chứ KHÔNG phải scene riêng — hỏi user khi họ nói "thêm 1 scene" để giải thích rủi ro mất trạng thái.**
+
+### Triển khai
+
+- **`GameState.Paused`** (enum GameManager) + `SetPaused(bool)` — chỉ cho phép Playing↔Paused, không đụng Menu/GameOver.
+- **NEW `UI/PauseManager.cs`** (GameManager.EnsurePause tự gắn, idempotent): nút nhỏ **"II"** góc trên phải HUD + phím **ESC** → toggle. `Pause()`: lưu `_timeScaleBefore = Time.timeScale` (tương thích **SlowMo** của PowerUpSystem) → `timeScale = 0` → hiện overlay (nền vũ trụ tối + panel PAUSED: RESUME · RESTART · slider VOLUME · MENU). `GoToMenu` PHẢI khôi phục timeScale TRƯỚC khi LoadScene (nếu không MainMenu mới đóng băng theo). OnDisable an toàn: nếu đang pause mà bị hủy (đổi scene) → tự resume.
+- **NEW `UI/VolumeSliderBuilder.cs`** (dùng chung): label VOLUME + slider kéo 0..1 → `AudioManager.SetVolume` (lưu SaveSystem). MainMenu: **ẩn nút SoundButton cũ** (scene vẫn giữ object — chỉ `SetActive(false)`) + dựng slider ở (0,-130) dưới cột nút. Pause overlay: dựng slider trong panel.
+- **`InputReader` — swipe mobile**: dùng `Pointer.current` của Input System (bắt cả TOUCH lẫn kéo CHUỘT desktop để test web dễ). Giữ + kéo ngang quá 45px → mô phỏng giữ phím hướng đó 0.32s → PlayerController xử lý như "vừa bấm" = nhảy 1 lane. Ngưỡng 45px đủ để bấm nút UI không gây swipe nhầm.
+
+### Bài học (quy tắc mới)
+
+1. **Time.timeScale = 0 không dừng Update()** — các system gated `State == Playing` (EnemyChase/DifficultyManager) mới tự đứng yên; thứ gì không gate phải dựa vào timeScale hoặc gate rõ.
+2. **Nhớ KHÔI PHỤC timeScale khi rời pause bằng mọi đường** (RESUME / RESTART / MENU / GameOver / OnDisable) — quên 1 đường = scene sau đóng băng. Lưu giá trị CŨ chứ không cứng `= 1` (SlowMo!).
+3. **Overlay UI dựng bằng code phải là con của Canvas và `SetAsLastSibling` khi mở** — nếu không HUD/game over vẽ lên trên (đúng pattern dimmer MainMenu đã rút ra).
+4. **Slider uGUI dựng bằng code**: cần `fillRect` (Fill Area → Fill) + `handleRect` (Handle Slide Area → Handle) + `SetValueWithoutNotify` TRƯỚC khi subscribe `onValueChanged` (tránh ghi đè không cần thiết lúc build).
+5. **Swipe dùng `Pointer.current`** thay vì `Touchscreen.current` — 1 code ăn cả touch mobile lẫn chuột desktop (dễ test web trước khi lên thiết bị thật).
+
+---
+
 ## 2026-08-12 (Cleanup ~4.5GB) — Xóa asset pack không dùng, AUDIT GUID trước khi xóa
 
 **Triệu chứng:** repo nặng (~10GB) — user: "đọc lại toàn bộ file/assets, cái nào không dùng thì xóa, phải xem thật kỹ logic/file có được dùng ở đâu không trước khi xóa".

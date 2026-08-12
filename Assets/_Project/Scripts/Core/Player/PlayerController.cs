@@ -163,6 +163,11 @@ namespace VoidRunner.Core.Player
         {
             if (_isDead) return;
 
+            // FIX 2026-08-12 (góp ý reviewer): gate theo State — đồng bộ với EnemyChase/Difficulty.
+            // Khi Paused: FixedUpdate vẫn chạy dù timeScale=0 → đè A/D sẽ đổi _targetX (nhảy 1 lane
+            // khi resume). Gate Playing = không nhận input khi pause, không nhảy lane bất ngờ.
+            if (GameManager.Instance != null && GameManager.Instance.State != GameState.Playing) return;
+
             // ---- Cơ chế (fix 2026-08-11 vòng 2, user: "bấm/đè phải phản hồi ngay"):
             //   • CẠNH LÊN (vừa bấm)   → nhảy NGAY 1 lane theo hướng phím (tap = di chuyển 1 tí)
             //   • ĐÈ GIỮ              → trượt liên tục qua nhiều lane (đè càng lâu càng rẽ sang)

@@ -10,7 +10,7 @@
 
 ## 🎮 Gameplay
 
-- **3 lane vô tận, road rộng 18m**: bấm `A`/`D` (hoặc mũi tên) = nhảy ngay 1 lane; **đè giữ** = trượt liên tục qua nhiều lane; nhả = tự về giữa lane — phản hồi tức thì, né chướng ngại vật mượt mà
+- **3 lane vô tận, road rộng 18m**: bấm `A`/`D` (hoặc mũi tên) = nhảy ngay 1 lane; **đè giữ** = trượt liên tục qua nhiều lane; nhả = tự về giữa lane — phản hồi tức thì, né chướng ngại vật mượt mà. **📱 Mobile: vuốt trái/phải để đổi lane** (và kéo chuột trên desktop cũng được)
 - **Enemy = Flying Beetle đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Enemy **tiến sát** (phình to, đe dọa); né sạch 10–15s → Enemy **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Enemy nuốt chửng = **Game Over**. Đụng obstacle → tàu **nhấp nháy** (feedback rõ ràng)
 - **Chướng ngại vật**: **rào chắn trạm (Fence)** + **drone bảo vệ (Robot_Guardian)** gắn ngẫu nhiên theo weight, **luôn chừa ≥1 lane an toàn** + **safe zone 20m đầu game** (không obstacle — không chết tức thì)
 - **Coin & Power-up**: gom coin tăng điểm (hàng coin **không bao giờ đè lên obstacle** — chọn lane khác), nhặt power-up (Shield / Magnet / Slow-mo)
@@ -29,7 +29,9 @@
 | Obstacle cấu hình được | **ScriptableObject** (`ObstacleData`) + gắn ngẫu nhiên theo weight, luôn chừa ≥1 lane trống, safe zone 20m đầu game | ✅ |
 | Giao tiếp hệ thống | **C# Event-driven** (`GameEvents`) — decoupled, không coupling trực tiếp | ✅ |
 | State machine | `GameManager` (Menu / Playing / GameOver / Restart) | ✅ |
-| Input hiện đại | **Unity Input System** — bấm = nhảy 1 lane tức thì, đè giữ = trượt liên tục (Subway Surfers), A/D + mũi tên | ✅ |
+| Input hiện đại | **Unity Input System** — bấm = nhảy 1 lane tức thì, đè giữ = trượt liên tục (Subway Surfers), A/D + mũi tên + **swipe mobile** (`Pointer` — touch + kéo chuột) | ✅ |
+| Pause | **Overlay trong scene** (nút II góc phải + phím ESC) — `Time.timeScale = 0`, giữ nguyên trạng thái; RESUME · RESTART · slider VOLUME · MENU | ✅ |
+| Âm lượng | **Slider kéo** (thay nút bật/tắt) — có ở cả MainMenu lẫn màn hình Pause, lưu qua PlayerPrefs | ✅ |
 | Camera điện ảnh | **Cinemachine** (Framing Transposer) | ✅ |
 | Kiến trúc | **Clean Architecture**: `UI → Systems → Core`, folder `Assets/_Project/` | ✅ |
 | Điểm số / combo | event-driven `ScoreSystem` | ✅ |
@@ -44,13 +46,17 @@
 
 ## 🕹️ Điều khiển
 
-| Phím | Hành động |
+| Phím / Thao tác | Hành động |
 |---|---|
 | `A` / `←` | Bấm: nhảy 1 lane trái · Đè giữ: trượt trái liên tục |
 | `D` / `→` | Bấm: nhảy 1 lane phải · Đè giữ: trượt phải liên tục |
+| `Esc` | Pause / Resume (mở màn hình Pause) |
+| Nút `II` (góc trên phải) | Pause / Resume (cho touch mobile) |
+| Vuốt trái / phải (📱 touch hoặc kéo chuột) | Đổi lane theo hướng vuốt |
 | `R` | Restart (khi Game Over) |
 
 > 🌐 **Ngôn ngữ UI:** toàn bộ text in-game (SCORE, COMBO, GAME OVER, RETRY...) dùng **tiếng Anh**.
+> 📱 **Mobile:** điều khiển bằng vuốt — bấm nút `II` để pause, kéo **slider VOLUME** chỉnh âm lượng.
 
 ---
 
@@ -100,7 +106,8 @@ Assets/_Project/
 | **G1** | Core gameplay: lane switching, tile spawner (object pool), Enemy chase, obstacle | ✅ Code xong |
 | **G2** | Hệ thống: Score (combo), UI, Power-up, Audio, Save, Difficulty | ✅ Code xong |
 | **G2.5** | **Refactor gameplay theo review user** (Enemy 2 nấc, player tàu vũ trụ, track vô tận, UI English, best score ẩn) | ✅ Hoàn thành (2026-08-11) |
-| **G3** | Polish & Deploy: VFX, post-processing, WebGL → itch.io / Unity Play, README | ⏳ |
+| **G3** | Polish & Deploy: VFX, post-processing, WebGL → itch.io / Unity Play, README | ⏳ Tuning FPS Editor PASS — chờ build WebGL |
+| **G3.5** | Pause overlay (ESC + nút II) · slider âm lượng (MainMenu + Pause) · swipe mobile | ✅ Code xong — chờ test |
 
 ---
 

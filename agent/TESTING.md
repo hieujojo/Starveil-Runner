@@ -1,6 +1,6 @@
 # TESTING — Hướng dẫn kiểm thử Starveil Runner
 
-> Cập nhật: 2026-08-12 · Giai đoạn hiện tại: **Tuning 60 FPS** (G3)
+> Cập nhật: 2026-08-12 · Giai đoạn hiện tại: **Tuning 60 FPS (Editor PASS) + G3.5 Pause/Slider/Swipe — chờ user test**
 > Cách dùng: làm từng bước từ trên xuống, đánh dấu ✅/❌, gửi log + ảnh về cho AI review.
 
 ---
@@ -60,7 +60,7 @@
 - [ ] Chọn tàu: bấm **◀ ▶** (cả phím mũi tên lẫn **bấm chuột vào nút**) → tàu preview đổi đúng, tên tàu đổi
 - [ ] How To Play: bấm → popup mở có nền đen mờ + **nút ✕** đóng được, không che mất chữ
 - [ ] Credits: bấm → hiển thị đủ, đóng được
-- [ ] Sound: bấm → icon ON/OFF đổi, có nhạc khi vào game
+- [ ] **Âm lượng (slider — mới)**: kéo được ngay tại MainMenu, âm thanh đổi theo; kéo về 0 = tắt; khi vào Game giá trị giữ nguyên (lưu SaveSystem)
 - [ ] Nút Play → vào được scene Game (không cần test từng scene riêng)
 
 ### B. Gameplay (scene Game)
@@ -78,6 +78,23 @@
 - [ ] MainMenu → Play → chết → RETRY → chơi tiếp đúng vị trí bắt đầu cố định
 - [ ] MainMenu → Play → chết → MENU → về menu không lỗi
 - [ ] Chơi lại nhiều lần liên tiếp: không lỗi, không lag tăng dần, coin/obstacle spawn đúng
+
+### D. Pause (mới — G3.5)
+- [ ] **Bấm nút II** (góc trên phải) → game đóng băng (tàu/bọ/điểm đứng yên), overlay PAUSED hiện (nền vũ trụ tối che hết HUD)
+- [ ] **Bấm ESC** → mở/đóng pause như nút II (cả 2 chiều)
+- [ ] Nút **RESUME** (hoặc ESC lần nữa) → chơi tiếp ĐÚNG vị trí, điểm, bọ — không reset
+- [ ] Nút **RESTART** từ pause → chơi lại từ đầu đúng vị trí cố định, không bị đóng băng
+- [ ] **Slider VOLUME trong pause**: kéo được khi game đang đứng yên, âm thanh đổi ngay
+- [ ] Nút **MENU** từ pause → về MainMenu CHẠY BÌNH THƯỜNG (không đóng băng — bug kinh điển khi quên trả Time.timeScale)
+- [ ] Không thể mở pause khi đã Game Over (bấm II/ESC vô tác dụng)
+- [ ] Pause khi đang có **SlowMo** (nếu có power-up) → resume vẫn chạy đúng nhịp (không bị "chậm mãi")
+
+### E. Mobile swipe (mới — G3.5)
+- [ ] **Vuốt trái/phải** trên màn hình → tàu nhảy 1 lane đúng hướng
+- [ ] Vuốt nhanh liên tiếp → đổi lane liên tục; vuốt nhẹ dưới ngưỡng → không đổi (không swipe nhầm)
+- [ ] Kéo chuột desktop (test web) cũng hoạt động như vuốt
+- [ ] Bấm nút UI (II / slider) KHÔNG gây swipe nhầm tàu
+- [ ] Trên điện thoại/Emulation: bố cục không tràn, nút II to đủ bấm
 
 ---
 

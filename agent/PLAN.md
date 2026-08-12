@@ -1,7 +1,7 @@
 # Starveil Runner — Kế hoạch hành động (Action Plan)
 
 > Hyper-casual endless runner 3D + **AI Chase** · Unity 6 URP · Game Production
-> ✅ **Trạng thái:** G1–G2–G2.5–G3 xong gần hết — đang ở bước **Tuning 60 FPS** (2026-08-12). Tick checkbox khi hoàn thành từng task.
+> ✅ **Trạng thái:** G1–G2–G2.5 xong; G3 đang ở **Tuning 60 FPS (Editor PASS)**; **G3.5 (Pause + Volume slider + Swipe mobile) ĐÃ CODE XONG 2026-08-12 — chờ user test**. Tick checkbox khi hoàn thành từng task.
 
 ---
 
@@ -55,7 +55,7 @@ Assets/
 │   ├── Scripts/
 │   │   ├── Core/                    # ★ Gameplay thuần — không phụ thuộc UI
 │   │   │   ├── Game/
-│   │   │   │   ├── GameManager.cs   # State machine: Menu → Playing → GameOver
+│   │   │   │   ├── GameManager.cs   # State machine: Menu → Playing → Paused → GameOver (SetPaused)
 │   │   │   │   └── GameEvents.cs    # static events: OnGameOver, OnRestart...
 │   │   │   ├── Player/
 │   │   │   │   ├── PlayerController.cs # Lane switching (viết lại)
@@ -213,6 +213,18 @@ Assets/
 
 **✅ Milestone G3:** 2 link WebGL chạy được · repo sạch · README đầy đủ
 
+### Giai đoạn 3.5 — Pause + Volume slider + Mobile swipe (2026-08-12) ⏳ CHỜ USER TEST
+
+> User: "thêm màn hình pause (nút nhỏ hoặc ESC), âm thanh ở cả MainMenu lẫn Pause, nút bật/tắt → thanh slide, xong tối ưu mobile — thêm cách vuốt".
+> ✅ Quyết định: **Pause = OVERLAY trong scene Game** (user chọn phương án 1 — xem CHANGELOG R7.12: runner procedural không tách scene vì mất trạng thái).
+
+- [x] **`GameState.Paused`** + `GameManager.SetPaused(bool)` (Playing↔Paused) — EnemyChase/DifficultyManager đã gate `== Playing` nên tự đứng yên khi Paused
+- [x] **`UI/PauseManager.cs`** (tự gắn qua `GameManager.EnsurePause`, idempotent): nút **II** góc trên phải HUD + **ESC** toggle; `Time.timeScale = 0` + lưu giá trị cũ (tương thích SlowMo); overlay PAUSED: **RESUME · RESTART · slider VOLUME · MENU**; mọi đường rời pause đều khôi phục timeScale (kể cả MENU → LoadScene)
+- [x] **`UI/VolumeSliderBuilder.cs`** (dùng chung): MainMenu ẩn SoundButton cũ + slider (0,-130); Pause overlay có slider riêng — đổi → `AudioManager.SetVolume` (SaveSystem)
+- [x] **`InputReader` swipe mobile**: `Pointer.current` (touch + kéo chuột desktop) — vuốt ngang >45px = nhảy 1 lane (mô phỏng giữ phím 0.32s → tái dùng cơ chế rising-edge của PlayerController)
+- [ ] **TEST (user)**: ESC/nút II mở-đóng pause; slider kéo được ở cả 2 nơi; vuốt trái/phải đổi lane; pause giữa chừng → resume chơi tiếp đúng vị trí/điểm; MENU từ pause → về MainMenu không đóng băng
+- [ ] Tối ưu mobile tiếp (nếu test OK): bố cục HUD mobile, safe-area notch, cảm ứng đa điểm
+
 ---
 
 ## 5. Spec kỹ thuật file-by-file (tham chiếu khi code)
@@ -230,6 +242,9 @@ Assets/
 | `SaveSystem` | Lưu dữ liệu | `PlayerPrefs.GetInt/SetInt` wrapper — dễ thay bằng JSON sau |
 | `DifficultyManager` | Độ khó | `AnimationCurve` speed theo score; mật độ obstacle; speed cap |
 | `UIManager` | HUD + panel | Lắng nghe `OnScoreChanged` (event — không coupling); DOTween fade |
+| `PauseManager` (mới) | Pause overlay | Nút II + ESC → `Time.timeScale = 0` (lưu giá trị cũ — SlowMo); RESUME/RESTART/MENU + slider volume; mọi đường rời pause PHẢI khôi phục timeScale |
+| `VolumeSliderBuilder` (mới) | Slider âm lượng | uGUI Slider dựng code: fillRect + handleRect + `SetValueWithoutNotify` trước subscribe; dùng chung MainMenu + Pause |
+| `InputReader` | Input | Keyboard (2DVector) + **swipe** `Pointer.current` (touch + chuột) >45px = 1 lane |
 
 ---
 

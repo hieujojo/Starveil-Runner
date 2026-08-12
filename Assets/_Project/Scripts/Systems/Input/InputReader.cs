@@ -15,7 +15,18 @@ namespace VoidRunner.Systems.Input
     {
         private InputAction _moveAction;
 
-        /// <summary>Trạng thái phím hiện tại — đọc mỗi frame (x = -1/0/+1).</summary>
+        // ---- Swipe (mobile 2026-08-12 — user: "tối ưu cho mobile, thêm cách vuốt là được") ----
+        // Dùng Pointer của Input System (bắt cả TOUCH lẫn kéo CHUỘT desktop → test trên web dễ).
+        // Vuốt ngang quá ngưỡng → mô phỏng giữ phím hướng đó ~0.32s → PlayerController xử lý như
+        // "vừa bấm" (nhảy 1 lane ngay) + trượt nhẹ — cảm giác đúng kiểu Subway Surfers.
+        private const float SwipeThresholdPx = 45f;
+        private const float SwipeHoldDuration = 0.32f;
+        private Vector2 _pointerStart;
+        private bool _pointerDown;
+        private float _swipeHold;
+        private float _swipeDir;
+
+        /// <summary>Trạng thái phím hiện tại — đọc mỗi frame (x = -1/0/+1). Gộp bàn phím + swipe.</summary>
         public Vector2 MoveInput { get; private set; }
 
         private void Awake()
@@ -41,8 +52,62 @@ namespace VoidRunner.Systems.Input
 
         private void Update()
         {
-            if (_moveAction == null) return;
-            MoveInput = _moveAction.ReadValue<Vector2>();
+            Vector2 keyboard = _moveAction != null ? _moveAction.ReadValue<Vector2>() : Vector2.zero;
+            HandleSwipe();
+
+            float x = 0f;
+            if (Mathf.Abs(keyboard.x) > 0.1f)
+            {
+                x = keyboard.x;
+                _swipeHold = 0f; // phím đè — hủy swipe còn dư (tránh cộng hướng)
+            }
+            else if (_swipeHold > 0f)
+            {
+                x = _swipeDir;
+                _swipeHold -= Time.unscaledDeltaTime; // unscaled — hết hạn kể cả khi pause
+            }
+            MoveInput = new Vector2(x, 0f);
+        }
+
+        /// <summary>
+        /// Theo dõi Pointer (touch/chuột): giữ + kéo ngang quá 45px → 1 swipe hướng đó.
+        /// Ngưỡng đủ lớn để bấm nút UI (pause, slider...) không gây swipe nhầm.
+        /// </summary>
+        private void HandleSwipe()
+        {
+            Pointer ptr = Pointer.current;
+            if (ptr == null) return;
+
+            Vector2 pos = ptr.position.ReadValue();
+            if (ptr.press.wasPressedThisFrame)
+            {
+                // FIX 2026-08-12 (góp ý reviewer): bỏ qua swipe khi bấm BẮT ĐẦU trên UI
+                // (nút pause II, slider volume...) — kéo slider cũng sinh delta ngang >45px,
+                // không bỏ qua sẽ vô tình đổi lane khi resume.
+                if (UnityEngine.EventSystems.EventSystem.current != null &&
+                    UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+                {
+                    _pointerDown = false;
+                    return;
+                }
+                _pointerDown = true;
+                _pointerStart = pos;
+                return;
+            }
+
+            if (_pointerDown && ptr.press.isPressed)
+            {
+                float dx = pos.x - _pointerStart.x;
+                if (Mathf.Abs(dx) >= SwipeThresholdPx)
+                {
+                    _pointerDown = false;   // 1 cử chỉ = 1 swipe
+                    _swipeDir = Mathf.Sign(dx);
+                    _swipeHold = SwipeHoldDuration;
+                }
+                return;
+            }
+
+            if (!ptr.press.isPressed) _pointerDown = false;
         }
     }
 }

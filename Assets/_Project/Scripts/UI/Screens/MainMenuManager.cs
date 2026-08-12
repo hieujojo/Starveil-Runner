@@ -2,7 +2,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using VoidRunner.Systems.Audio;
 using VoidRunner.Systems.Save;
 
 namespace VoidRunner.UI
@@ -17,7 +16,8 @@ namespace VoidRunner.UI
         [Header("Nút (kéo thả)")]
         [SerializeField] private Button playButton;
         [SerializeField] private Button howToPlayButton;
-        [SerializeField] private Button soundButton;
+        [SerializeField, Tooltip("2026-08-12: chỉ dùng để ẨN đi — thay bằng slider âm lượng (VolumeSliderBuilder)")]
+        private Button soundButton;
         [SerializeField] private Button creditsButton; // tạo bằng code (EnsureCreditsButton)
 
         [Header("Panel")]
@@ -25,7 +25,6 @@ namespace VoidRunner.UI
 
         [Header("Text")]
         [SerializeField] private TextMeshProUGUI bestScoreText;
-        [SerializeField] private TextMeshProUGUI soundButtonText;
 
         [Header("Scene")]
         [SerializeField, Tooltip("Tên scene Game (khớp tên file .unity)")]
@@ -39,14 +38,13 @@ namespace VoidRunner.UI
         {
             howToPlayPanel?.SetActive(false);
             RefreshBestScore();
-            RefreshSoundLabel();
             EnsureCloseButton(); // nút CLOSE trên panel — đóng popup rõ ràng (không chỉ click dimmer)
             EnsureCredits();    // nút CREDITS + panel credits (tạo bằng code, idempotent)
             EnsureShipSelect(); // Task D: panel chọn ship (preview 3D, lưu SaveSystem.SelectedShip)
+            EnsureVolumeSlider(); // 2026-08-12: thay nút bật/tắt âm thanh bằng slider kéo
 
             if (playButton != null) playButton.onClick.AddListener(PlayGame);
             if (howToPlayButton != null) howToPlayButton.onClick.AddListener(ToggleHowToPlay);
-            if (soundButton != null) soundButton.onClick.AddListener(ToggleSound);
             if (creditsButton != null) creditsButton.onClick.AddListener(ToggleCredits);
         }
 
@@ -54,7 +52,6 @@ namespace VoidRunner.UI
         {
             if (playButton != null) playButton.onClick.RemoveListener(PlayGame);
             if (howToPlayButton != null) howToPlayButton.onClick.RemoveListener(ToggleHowToPlay);
-            if (soundButton != null) soundButton.onClick.RemoveListener(ToggleSound);
             if (creditsButton != null) creditsButton.onClick.RemoveListener(ToggleCredits);
         }
 
@@ -263,19 +260,27 @@ namespace VoidRunner.UI
             if (_dimmer != null) _dimmer.SetActive(false);
         }
 
-        /// <summary>Bật/tắt âm thanh (0 hoặc 1) — lưu qua SaveSystem, áp ngay qua AudioManager.</summary>
-        private void ToggleSound()
+        /// <summary>
+        /// 2026-08-12 (user: "âm thanh chỉ có 1 nút bật tắt, muốn 1 thanh slide kéo được"):
+        /// ẩn nút SoundButton cũ + dựng slider âm lượng ĐÚNG vị trí nút cũ (0, -60).
+        /// ⚠️ FIX overlap (góp ý reviewer): ban đầu đặt (0,-130) nhưng BestScoreText ở (0,-160)
+        /// (rect 600×50 → top -135) → đè 18px. (0,-60) nằm giữa HowToPlay (y=24) và Best (y=-160)
+        /// — không chạm gì (HowTo bottom -14 vs slider top -37; slider bottom -83 vs Best top -135).
+        /// Idempotent.
+        /// </summary>
+        private void EnsureVolumeSlider()
         {
-            float next = SaveSystem.Volume > 0.01f ? 0f : 1f;
-            if (AudioManager.Instance != null)
-            {
-                AudioManager.Instance.SetVolume(next);
-            }
-            else
-            {
-                SaveSystem.Volume = next; // AudioManager chưa có (scene menu) — tự ghi để khi vào Game đọc đúng
-            }
-            RefreshSoundLabel();
+            if (soundButton != null) soundButton.gameObject.SetActive(false);
+            if (soundButton == null) return;
+
+            Canvas canvas = soundButton.GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+            if (canvas.transform.Find("VolumeSlider") != null) return;
+
+            VolumeSliderBuilder.Build(
+                canvas.transform, "VolumeSlider",
+                new Vector2(0f, -60f), new Vector2(360f, 46f),
+                new Color(0.2f, 0.75f, 1f, 1f)); // cyan — khớp tông nút chính
         }
 
         private void RefreshBestScore()
@@ -291,12 +296,5 @@ namespace VoidRunner.UI
             }
         }
 
-        private void RefreshSoundLabel()
-        {
-            if (soundButtonText != null)
-            {
-                soundButtonText.text = SaveSystem.Volume > 0.01f ? "SOUND: ON" : "SOUND: OFF";
-            }
-        }
     }
 }

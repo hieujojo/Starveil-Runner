@@ -4,10 +4,11 @@ using UnityEngine.InputSystem;
 using VoidRunner.Core.Player;
 using VoidRunner.Core.World;
 using VoidRunner.Systems.VFX;
+using VoidRunner.UI;
 
 namespace VoidRunner.Core
 {
-    public enum GameState { Menu, Playing, GameOver }
+    public enum GameState { Menu, Playing, Paused, GameOver }
 
     /// <summary>
     /// State machine và orchestrator của game:
@@ -49,6 +50,7 @@ namespace VoidRunner.Core
             ResolveReferences();
             EnsureCameraRig();
             EnsureSpaceFX();
+            EnsurePause(); // 2026-08-12: màn hình Pause (ESC + nút II, overlay trong scene) — idempotent
             StartRun();
         }
 
@@ -118,6 +120,27 @@ namespace VoidRunner.Core
             GameEvents.RaiseGameStarted();
         }
 
+        /// <summary>
+        /// Chuyển trạng thái Paused (PauseManager điều khiển Time.timeScale + overlay UI).
+        /// Chỉ cho phép Playing→Paused và Paused→Playing — không đụng Menu/GameOver.
+        /// </summary>
+        public void SetPaused(bool paused)
+        {
+            if (paused && State == GameState.Playing) State = GameState.Paused;
+            else if (!paused && State == GameState.Paused) State = GameState.Playing;
+        }
+
+        /// <summary>
+        /// Gắn PauseManager (ESC + nút II + overlay) — idempotent, chạy lại không nhân đôi.
+        /// </summary>
+        private void EnsurePause()
+        {
+            if (transform.Find("PauseManager") != null) return;
+            var go = new GameObject("PauseManager");
+            go.transform.SetParent(transform, false);
+            go.AddComponent<PauseManager>();
+        }
+
         public void Restart()
         {
             if (tileSpawner == null) return;
@@ -134,7 +157,9 @@ namespace VoidRunner.Core
 
         private void Update()
         {
-            // G1: phím R restart (tạm — G2 thay bằng nút UI)
+            // G1: phím R restart (tạm — G2 thay bằng nút UI). 2026-08-12: guard Playing —
+            // không restart khi đang Pause (tránh dựng track khi timeScale=0) hay GameOver/Menu.
+            if (State != GameState.Playing) return;
             if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
             {
                 Restart();
