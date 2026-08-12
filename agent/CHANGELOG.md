@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-08-12 (v3f.8) — "LỬA" vẫn là Ô VUÔNG CAM NỐI NHAU: thủ phạm là CUBE "Thruster", không phải hạt
+
+**Triệu chứng:** user: "các hạt sao đã oke nhưng tên lửa vẫn kì — các ô vuông cam nhỏ hơn nối liền nhau; cái tên lửa sau tàu đang render bằng effect gì vậy, đổi sang effect mới đi".
+
+**Root cause:** sau v3f.7.2, hạt exhaust ĐÃ tròn (Sprites/Default — sao trôi xác nhận tròn). Nhưng user vẫn thấy "ô vuông cam" = **cube "Thruster"** (CreatePart cube 0.18×0.7, material _flameMat emissive cam, scale flicker PerlinNoise 22Hz) — cube vuông phát sáng + flicker + Bloom → nhìn như dãy ô vuông cam nối nhau. Sao tròn vì là hạt; cube vuông vì LÀ CUBE.
+
+**Fix (v3f.8 — đổi sang effect mới):**
+- **Bỏ hẳn cube Thruster** → thay bằng **Light cam Point lập lòe** (CreateFlameLight, intensity 1.5 × PerlinNoise) + hạt exhaust giữ nguyên tròn nhưng nâng cấp: rate 35→55, size 0.14 **nở rộng ×1.8 theo thời gian sống** (sizeOverLifetime) + **mờ dần** (colorOverLifetime gradient trắng-vàng → cam → trong suốt) = hình lưỡi lửa thật.
+- **Self-heal**: BuildSpaceship — nếu tàu cũ còn "Thruster" cube / "Exhaust" material cũ → Destroy rồi dựng lại hiệu ứng mới (idempotent, chạy lại an toàn).
+- DIAG log `[DIAG-FLAME]` (1 lần/play) in shader + texture thực tế để xác nhận — XÓA sau khi user test OK.
+
+**Bài học:** phân biệt HẠT (ParticleSystem) vs HÌNH (Mesh primitive) khi debug VFX — "ô vuông cam" có thể là cube phát sáng chứ không phải hạt vuông. Luôn nêu rõ "cái gì đang hiển thị" (mesh vs particle) khi user báo lỗi hình ảnh.
+
+---
+
 ## 2026-08-12 (v3f.7.2) — VẪN HÌNH VUÔNG: đọc shader URP 17.4 thật mới ra sự thật
 
 **Triệu chứng:** user: "vẫn là hình vuông, chỉ nhỏ hơn; lửa = 1 dãy hình vuông cam nối nhau, ko thấy tên lửa".

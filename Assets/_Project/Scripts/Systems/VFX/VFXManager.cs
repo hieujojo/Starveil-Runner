@@ -407,11 +407,19 @@ namespace VoidRunner.Systems.VFX
         /// ⇒ BỎ HẲN URP Particles — dùng Sprites/Default: Blend One OneMinusSrcAlpha CỐ ĐỊNH + nhân vertex
         /// color (startColor) + [PerRendererData] _MainTex → KHÔNG cần cấu hình, chắc chắn TRÒN.
         /// </summary>
+        // Cache static (v3f.8 — reviewer): 1 texture + 1 material dùng chung cho mọi hệ hạt,
+        // không tạo 32×32 Texture2D mới mỗi lần gọi (trước đây 5 lần lúc start = 5 texture).
+        private static Material _cachedSoftMaterial;
+
         internal static Material CreateSoftParticleMaterial()
         {
-            var mat = new Material(Shader.Find("Sprites/Default"));
-            mat.mainTexture = BuildSoftTexture();
-            return mat;
+            if (_cachedSoftMaterial == null)
+            {
+                var mat = new Material(Shader.Find("Sprites/Default"));
+                mat.mainTexture = BuildSoftTexture();
+                _cachedSoftMaterial = mat;
+            }
+            return _cachedSoftMaterial;
         }
     }
 }
