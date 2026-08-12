@@ -188,12 +188,15 @@ namespace VoidRunner.UI
             // Nút chọn (xác nhận)
             var confirmGo = new GameObject("ConfirmButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             confirmGo.transform.SetParent(panel.transform, false);
+            // 2026-08-12 v3 (user: "nút SELECT nhỏ lại 1 chút, để cùng hàng với 2 nút mũi tên"):
+            // 360x56 ở đáy → 220x62 ở GIỮA hàng mũi tên (y=-575, cùng cao 62, không đè mũi tên:
+            // mũi trái mép phải -160, SELECT mép trái -110 → gap 50px)
             var crt = (RectTransform)confirmGo.transform;
-            crt.anchorMin = new Vector2(0.5f, 0f);
-            crt.anchorMax = new Vector2(0.5f, 0f);
-            crt.pivot = new Vector2(0.5f, 0f);
-            crt.anchoredPosition = new Vector2(0f, 24f);
-            crt.sizeDelta = new Vector2(360f, 56f); // FIX reviewer 2026-08-12: cao 64@y30 → top chạm mũi tên (11px overlap) — hạ 56@y24
+            crt.anchorMin = new Vector2(0.5f, 0.5f);
+            crt.anchorMax = new Vector2(0.5f, 0.5f);
+            crt.pivot = new Vector2(0.5f, 0.5f);
+            crt.anchoredPosition = new Vector2(0f, -575f);
+            crt.sizeDelta = new Vector2(220f, 62f);
             var cimg = confirmGo.GetComponent<Image>();
             cimg.color = new Color(0.2f, 0.75f, 1f, 1f);
             var cbtn = confirmGo.GetComponent<Button>();

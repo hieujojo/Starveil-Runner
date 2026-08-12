@@ -230,7 +230,7 @@ namespace VoidRunner.UI
             CreateText(panel.transform, "Title", new Vector2(0f, 235f), "PAUSED", 52, new Color(1f, 0.85f, 0.3f, 1f));
             CreateButton(panel.transform, "ResumeButton", new Vector2(0f, 120f), "RESUME", new Color(0.2f, 0.75f, 1f, 1f), Resume);
             CreateButton(panel.transform, "RestartButton", new Vector2(0f, 45f), "RESTART", new Color(0.48f, 0.29f, 1f, 1f), RestartGame);
-            VolumeSliderBuilder.Build(panel.transform, "VolumeSlider", new Vector2(0f, -40f), new Vector2(380f, 60f), new Color(0.2f, 0.75f, 1f, 1f));
+            VolumeSliderBuilder.Build(panel.transform, "VolumeSlider", new Vector2(0f, -40f), new Vector2(440f, 60f), new Color(0.2f, 0.75f, 1f, 1f)); // v3: nới rộng 380→440
             CreateButton(panel.transform, "MenuButton", new Vector2(0f, -130f), "MENU", new Color(0.48f, 0.29f, 1f, 1f), GoToMenu);
 
             _overlay = root;

@@ -279,7 +279,7 @@ namespace VoidRunner.UI
 
             VolumeSliderBuilder.Build(
                 canvas.transform, "VolumeSlider",
-                new Vector2(0f, -60f), new Vector2(360f, 76f), // cùng vị trí + cao nút Sound cũ (hộp đặc tím đậm)
+                new Vector2(0f, -60f), new Vector2(440f, 76f), // v3: nới rộng 360→440 (user: "hơi chật") — slider thoáng hơn
                 new Color(0.2f, 0.75f, 1f, 1f)); // cyan — khớp tông nút chính
         }
 
