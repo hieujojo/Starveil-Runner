@@ -1,4 +1,4 @@
-# TESTING — Hướng dẫn kiểm thử Void Runner
+# TESTING — Hướng dẫn kiểm thử Starveil Runner
 
 > Cập nhật: 2026-08-12 · Giai đoạn hiện tại: **Tuning 60 FPS** (G3)
 > Cách dùng: làm từng bước từ trên xuống, đánh dấu ✅/❌, gửi log + ảnh về cho AI review.
@@ -19,7 +19,7 @@
 
 ### Cách 1 — FPS counter trên màn hình (nhanh nhất)
 
-1. Mở scene **MainMenu** → Menu **Tools → Void Runner → Add FPS Counter (Open Scene)** (chạy lại an toàn — idempotent)
+1. Mở scene **MainMenu** → Menu **Tools → Starveil Runner → Add FPS Counter (Open Scene)** (chạy lại an toàn — idempotent)
 2. **PLAY** → góc trái trên hiện: `FPS: 60 (16.6 ms)  GC: 180 MB [F3]`
 3. Bấm **F3** để ẩn/hiện counter
 4. Counter **sống XUYÊN SCENE** (DontDestroyOnLoad + chống trùng) → vào Game/GameOver vẫn thấy

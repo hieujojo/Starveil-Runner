@@ -15,7 +15,7 @@
 
 ## 🎮 Tổng quan
 
-**Void Runner** — endless runner 3D, 3 lane, tự chạy. Player = **tàu vũ trụ nhỏ**. "Hư Không" (The Void) đuổi theo **cơ chế 2 nấc** (Subway Surfers/Temple Run): đụng obstacle lần 1 → Void tiến sát; né sạch 12s → nới lại; **đụng lần 2 trong cửa sổ → Void nuốt → Game Over**. Nhặt coin + power-up, điểm cao nhất lưu lại. UI 100% tiếng Anh.
+**Starveil Runner** — endless runner 3D, 3 lane, tự chạy. Player = **tàu vũ trụ nhỏ**. "Hư Không" (The Void) đuổi theo **cơ chế 2 nấc** (Subway Surfers/Temple Run): đụng obstacle lần 1 → Void tiến sát; né sạch 12s → nới lại; **đụng lần 2 trong cửa sổ → Void nuốt → Game Over**. Nhặt coin + power-up, điểm cao nhất lưu lại. UI 100% tiếng Anh.
 
 ```
 MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
@@ -110,7 +110,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 
 | # | Kiểm tra | Kết quả |
 |---|---|---|
-| A1 | Tựa đề **"VOID RUNNER"** font Kenney Future sắc nét — **CHỈ 1 chữ** (TitleGlow đã xóa hẳn — fix 2026-08-12 v3) | ☐ |
+| A1 | Tựa đề **"STARVEIL RUNNER"** font Kenney Future sắc nét — **CHỈ 1 chữ** (TitleGlow đã xóa hẳn — fix 2026-08-12 v3) | ☐ |
 | A2 | Nền tối tím + hơi sương mù, menu không chói | ☐ |
 | A3 | 3 nút (PLAY / HOW TO PLAY / âm thanh) có sprite Blue + hiệu ứng hover sáng | ☐ |
 | A4 | Best score **ẨN khi lần đầu chơi (= 0)** — chỉ hiện khi đã có điểm thật (R0.6) | ☐ |
@@ -290,7 +290,7 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 
 > ℹ️ **5 gói model trên (SF_Fighter / Sparrow_Fighter / Monster / Flying Beetle / fantasySpider)
 > KHÔNG nằm trong repo** (tổng ~2.5GB — GitHub chặn file >100MB, xem `.gitignore`).
-> Khi clone project cần tự tải lại từ link trên rồi chạy tool `Void Runner → Setup…` để gán lại.
+> Khi clone project cần tự tải lại từ link trên rồi chạy tool `Starveil Runner → Setup…` để gán lại.
 > Nếu thiếu model: game vẫn chạy (fallback: tàu primitive, Void = black hole).
 
 > ℹ️ **Kenney CC0 = Public Domain** — được dùng thoải mái cho mọi mục đích (kể cả thương mại),
@@ -475,7 +475,7 @@ docs(readme): cập nhật README với link demo
 
 ## 5. Bối cảnh project hiện tại (CẬP NHẬT 2026-08-11)
 
-- **Game**: Void Runner — endless runner kiểu Subway Surfers, 3 lane, player = tàu vũ trụ tự bay, Void (kẻ thù) đuổi sau.
+- **Game**: Starveil Runner — endless runner kiểu Subway Surfers, 3 lane, player = tàu vũ trụ tự bay, Void (kẻ thù) đuổi sau.
 - **Cơ chế va chạm**: obstacle KHÔNG giết — đụng lần 1 = Void tiến sát; lần 2 trong cửa sổ 10–15s = Game Over.
 - **Cấu trúc**: Clean Architecture nhẹ — `Core/` (Game, Player, World), `Systems/` (Input, Audio, Save, Score, Difficulty, VFX, PowerUp), `UI/`, `Data/` (ScriptableObjects), `Editor/` (tool tự động hóa), `Tests/`.
 - **Package**: URP (Universal Render Pipeline) + Cinemachine + Input System (asset `InputSystem_Actions.inputactions`) + TextMeshPro + DOTween (Plugins).
@@ -489,6 +489,6 @@ docs(readme): cập nhật README với link demo
 ## 6. Mẹo làm việc với Unity + agent
 
 - User có thể KHÔNG gửi file — thường gửi **ảnh chụp Console/Inspector**. Yêu cầu user gửi log text nếu cần đọc kỹ.
-- Đừng sửa YAML scene thủ công nếu có thể — ưu tiên viết **Editor tool** (`Assets/_Project/Editor/*`) để user chạy qua `Tools → Void Runner`.
+- Đừng sửa YAML scene thủ công nếu có thể — ưu tiên viết **Editor tool** (`Assets/_Project/Editor/*`) để user chạy qua `Tools → Starveil Runner`.
 - File `.meta` của Unity: KHÔNG sửa tay, trừ khi là tạo file mới (Unity tự sinh khi focus).
 - Verify: dùng `grep` đếm `{`/`}` cho C# trước khi kết luận "đúng".

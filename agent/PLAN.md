@@ -1,4 +1,4 @@
-# Void Runner — Kế hoạch hành động (Action Plan)
+# Starveil Runner — Kế hoạch hành động (Action Plan)
 
 > Hyper-casual endless runner 3D + **AI Chase** · Unity 6 URP · Game Production
 > ✅ **Trạng thái:** G1–G2–G2.5–G3 xong gần hết — đang ở bước **Tuning 60 FPS** (2026-08-12). Tick checkbox khi hoàn thành từng task.
@@ -7,7 +7,7 @@
 
 ## 1. Concept game (đã chốt ✅ — cập nhật 2026-08-11 theo review user)
 
-**Void Runner**: nhân vật chạy (tàu/drone — chờ user chốt kiểu) trên đường tile 3 lane vô tận, tự chạy về phía trước. Phía sau, **"Enemy" (Flying Beetle)** — khối bóng tối phình to — đuổi theo kiểu **Subway Surfers / Temple Run**: KHÔNG tự tăng tốc, chỉ TIẾN SÁT khi player đụng vật cản. Đụng 2 lần trong cửa sổ 10–15s → Enemy nuốt → Game Over.
+**Starveil Runner**: nhân vật chạy (tàu/drone — chờ user chốt kiểu) trên đường tile 3 lane vô tận, tự chạy về phía trước. Phía sau, **"Enemy" (Flying Beetle)** — khối bóng tối phình to — đuổi theo kiểu **Subway Surfers / Temple Run**: KHÔNG tự tăng tốc, chỉ TIẾN SÁT khi player đụng vật cản. Đụng 2 lần trong cửa sổ 10–15s → Enemy nuốt → Game Over.
 
 ```
 Chạy + né obstacle (đụng → Enemy tiến sát) → không chạm 10–15s → Enemy nới lại → thu coin/power-up → chạm lần 2 trong cửa sổ → Enemy nuốt → Game Over → thử lại (best score)
@@ -301,7 +301,7 @@ Initial Memory: 256–512 MB (tránh crash do OOM)
 ## 9. README template
 
 ```markdown
-# Void Runner
+# Starveil Runner
 
 > Endless runner 3D + AI chase · Unity 6 URP
 

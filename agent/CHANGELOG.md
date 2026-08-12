@@ -341,7 +341,7 @@ var mat = new Material(shader);
 
 > User: "void runner vẫn còn 2 chữ; khoảng cách play/how to play/sound giảm còn 5-10px; tàu bị mờ — muốn nó nổi bật nhất; con bọ xuất hiện ngay từ đầu nhưng chỉ thấy phần đầu; con bọ có cảnh bắt — chạm 1 lần vỗ nhanh hơn, chạm 2 lần bắt lại rồi mới end game; đừng rung con bọ mà cho nó vỗ cánh; tàu to thêm ~10px"
 
-### 1. "2 chữ VOID RUNNER" vẫn đè nhau (fix lần 2 — lần 1 không ăn)
+### 1. "2 chữ STARVEIL RUNNER" vẫn đè nhau (fix lần 2 — lần 1 không ăn)
 
 - **Nguyên nhân THẬT**: lần trước chỉ sửa `m_IsActive: 0` TRONG FILE scene — nhưng **Unity đang mở scene đó → khi user Ctrl+S, Unity GHI ĐÈ file từ bản trong memory** (vẫn active=1) → chữ glow quay lại.
 - **Bài học (R7.4 mới)**: KHÔNG sửa file `.unity`/`.prefab` khi Unity đang mở scene đó — mọi thay đổi scene phải qua **Editor tool** (chạy trong Unity, modify trực tiếp object) rồi user Ctrl+S.
@@ -437,11 +437,11 @@ var mat = new Material(shader);
 
 ## 2026-08-12 — Refactor Void → Enemy + enemy duy nhất Flying Beetle + tàu to + TitleGlow 2 chữ đè nhau
 
-> User: "sao có 2 chữ VOID RUNNER đè nhau; void chỉ nên dùng 1 kẻ thù duy nhất là model flying carnivorous (note cách model chuyển động); tàu to thêm 1 xíu; enemy đuổi gần nhưng KHÔNG che tàu; đổi void thành enemy cho tốt hơn; xóa code thì dọn sạch".
+> User: "sao có 2 chữ STARVEIL RUNNER đè nhau; void chỉ nên dùng 1 kẻ thù duy nhất là model flying carnivorous (note cách model chuyển động); tàu to thêm 1 xíu; enemy đuổi gần nhưng KHÔNG che tàu; đổi void thành enemy cho tốt hơn; xóa code thì dọn sạch".
 
 ### Root cause từng lỗi + fix (commit `…`)
 
-- **2 chữ "VOID RUNNER" đè nhau (MainMenu)** — `TitleGlow` (text cyan mờ do tool tạo làm hiệu ứng glow) đang render ĐÈ LÊN `TitleText` trắng — cả 2 cùng y=330. Fix: **`m_IsActive: 0`** trên GameObject TitleGlow (ẩn an toàn R0.16 — title trắng đã có Shadow riêng, glow phụ thừa).
+- **2 chữ "STARVEIL RUNNER" đè nhau (MainMenu)** — `TitleGlow` (text cyan mờ do tool tạo làm hiệu ứng glow) đang render ĐÈ LÊN `TitleText` trắng — cả 2 cùng y=330. Fix: **`m_IsActive: 0`** trên GameObject TitleGlow (ẩn an toàn R0.16 — title trắng đã có Shadow riêng, glow phụ thừa).
 - **Enemy = Flying Beetle DUY NHẤT (bỏ random 3 monster)** — user chốt "chỉ 1 kẻ thù là flying carnivorous" = **Flying Beetle** (prefab CÓ Animator controller flying loop → instantiate là cánh vỗ bay liên tục). **Note cách model chuyển động**: enemy KHÔNG cần code điều khiển animation — Animator của prefab tự chạy (flying loop); EnemyChase chỉ điều khiển VỊ TRÍ (bám sau player, đổi lane) + scale phình khi áp sát. ⚠️ KHÔNG ép `localRotation` mỗi frame — đánh nhau với root motion (R4.17).
 - **Enemy đuổi gần nhưng KHÔNG che tàu** — cũ: closeDistance **5m** + closeScale 1.6 + monster 2.6 cao → khi áp sát enemy phủ kín tàu. Fix: closeDistance **7.5m** + closeScale **1.2** + enemyTargetHeight **1.8** (vẫn đe dọa, tàu thấy rõ).
 - **Tàu to thêm 1 xíu** — `shipTargetHeight` 0.9 → **1.1** (code + scene Game).
@@ -459,11 +459,11 @@ var mat = new Material(shader);
 
 ## 2026-08-12 — Fix UI MainMenu vòng 2 (2 ảnh user test): giãn quá + Title 2 dòng + chuột ship + tàu trắng + popup lộ menu
 
-> User: "bạn giãn quá mức cần thiết rồi, chỉ tăng thêm 1 tí so với ban nãy thôi, và đừng xuống dòng chữ VOID RUNNER nữa, cho nó nằm ngang đi; ship bấm phím mũi tên đổi được nhưng bấm CHUỘT thì không đổi; tại sao tàu thành màu TRẮNG; popup how to play có nền đen thì đồng bộ toàn bộ popup còn lại".
+> User: "bạn giãn quá mức cần thiết rồi, chỉ tăng thêm 1 tí so với ban nãy thôi, và đừng xuống dòng chữ STARVEIL RUNNER nữa, cho nó nằm ngang đi; ship bấm phím mũi tên đổi được nhưng bấm CHUỘT thì không đổi; tại sao tàu thành màu TRẮNG; popup how to play có nền đen thì đồng bộ toàn bộ popup còn lại".
 
 ### Root cause từng lỗi + fix (commit `…`)
 
-- **Title "VOID RUNNER" xuống 2 dòng + bị PLAY đè (R..R)** — fontSize **110pt** wrap trong rect 900px → "VOID / RUNNER" 2 dòng, dòng 2 chạm PlayButton. Fix `FixMainMenuSpacing`: fontSize **96** + rect **1100×160** + `textWrappingMode = NoWrap` + đẩy lên **y=330** (cả TitleGlow theo). 1 dòng ngang, không còn đè.
+- **Title "STARVEIL RUNNER" xuống 2 dòng + bị PLAY đè (R..R)** — fontSize **110pt** wrap trong rect 900px → "VOID / RUNNER" 2 dòng, dòng 2 chạm PlayButton. Fix `FixMainMenuSpacing`: fontSize **96** + rect **1100×160** + `textWrappingMode = NoWrap` + đẩy lên **y=330** (cả TitleGlow theo). 1 dòng ngang, không còn đè.
 - **Giãn quá mức** (bản trước Play 160/HowTo 0/Sound -160) — user chỉ muốn tăng 1 tí so với gốc (60/-60/-160). Fix: **Play 120 / HowTo -20 / Sound -150 / Best -250** → gap mép 52/54/37px (gốc 32/24/17). SHIP/CREDITS -320 → **-335** (đồng bộ scene + code runtime `ShipSelectManager` + `MainMenuManager.EnsureCredits`).
 - **Bấm CHUỘT mũi tên không đổi tàu (phím vẫn đổi)** — **DOUBLE-SUBSCRIBE**: `CreateArrowButton` `btn.onClick.AddListener(onClick)` VÀ `CachePanelRefs` `prevBtn.onClick.AddListener(SelectPrev)` → 1 click gọi `SelectPrev` 2 lần → 2 tàu đảo qua rồi về cũ = nhìn như không đổi. Phím hoạt động vì 1 lần/frame. Fix: `CreateArrowButton` **bỏ AddListener** (bỏ cả tham số onClick), `CachePanelRefs` **`RemoveAllListeners()` + AddListener** (idempotent — chạy lại an toàn khi panel đã tồn tại).
 - **Tàu thành màu TRẮNG** (sau fix tím vòng trước) — `MaterialFixer` chỉ copy `_Color`/`_EmissionColor`, **KHÔNG copy texture** → URP/Lit không có `_BaseMap` → render trắng. Fix: copy `_MainTex` → **`_BaseMap`** (+ `_MainTex_ST` scale/offset) + `_BumpMap` → `_BumpMap` (enable `_NORMALMAP`) + `_MetallicGlossMap` (enable `_METALLICSPECGLOSSMAP`) + `_OcclusionMap` (enable `_OCCLUSIONMAP`) + `_Glossiness` → `_Smoothness` + `_Metallic` + `_EmissionMap`. Giữ nguyên vẻ gốc của model.
@@ -486,7 +486,7 @@ var mat = new Material(shader);
 
 - **Tàu TÍM (không phải màu gốc)** — material SF Fighter/Sparrow dùng **shader Standard (Built-in)** (`m_Shader: fileID 45, guid 000...`) → trong URP render tím/magenta (shader không compile). Fix: **NEW `Utils/MaterialFixer.cs`** — convert mọi material không-URP → `Universal Render Pipeline/Lit`, giữ `_Color`/`_EmissionColor`, **cache static** (không leak, không tạo mới mỗi frame); áp dụng trong `PlayerController.BuildModelShip` + `ShipSelectManager.RefreshPreview`.
 - **Không đổi được tàu bằng phím mũi tên** — ShipSelectManager chỉ có nút `<`/`>` bấm chuột, chưa xử lý keyboard. Fix: `Update()` bắt `Keyboard.current[key].wasPressedThisFrame` (←/→ + A/D) — project dùng **Input System only** (activeInputHandler=1) nên KHÔNG dùng legacy `Input.GetKeyDown`.
-- **Popup lộ menu phía sau (VOID RUNNER vẫn thấy)** — `dimmer.SetAsFirstSibling()` chìm dimmer xuống DƯỚI các nút menu → menu vẽ lên trên → không bị tối. Fix: **dimmer `SetAsLastSibling()` TRƯỚC panel** (dimmer trên menu, panel trên dimmer) + alpha 0.85→**0.93**. Select ship CHƯA có dimmer → thêm `ShipSelectDimmer`.
+- **Popup lộ menu phía sau (STARVEIL RUNNER vẫn thấy)** — `dimmer.SetAsFirstSibling()` chìm dimmer xuống DƯỚI các nút menu → menu vẽ lên trên → không bị tối. Fix: **dimmer `SetAsLastSibling()` TRƯỚC panel** (dimmer trên menu, panel trên dimmer) + alpha 0.85→**0.93**. Select ship CHƯA có dimmer → thêm `ShipSelectDimmer`.
 - **Bug ẩn: click dimmer khi Credits mở lại BẬT HowToPlay** — dimmer dùng chung onClick hardcode `ToggleHowToPlay`. Fix: `CloseActivePopup()` đóng popup ĐANG MỞ.
 - **CLOSE to che chữ** (3 chỗ: HowToPlay/Select ship/Credits) → nút **X nhỏ 40-44px** góc trên phải. ⚠️ Dùng chữ `X` (ASCII) KHÔNG dùng `✕` U+2715 — font chỉ pack ASCII 32..126 → ✕ ra ô vuông □ (R5.2).
 - **Nút menu sát nhau** — Play y=60/HowTo -60/Sound -160 → mép-mép chỉ 24-32px. Tool mới **`Fix MainMenu Spacing`** (trong UIOverhaulTool): Play 160/HowTo 0/Sound -160/Best -250 (gap mép 72-84px) + HowToPlayText font 30→**36** + lineSpacing 1.15 + SHIP/CREDITS → -320 (đồng bộ scene + code runtime).
@@ -855,7 +855,7 @@ var mat = new Material(shader);
   1. `UIBuilderHelpers.CreateFontAssetCore` — atlas **1024 → 2048** (đủ ~196 ô → toàn bộ ASCII).
   2. Thêm **`ReadGuid`/`RestoreGuid`**: DeleteAsset+CreateAsset sinh **GUID MỚI** → mọi text trong scene mất font → lưu guid cũ trước khi xóa, restore vào `.meta` mới (Regex thay `guid: [0-9a-f]{32}` + `AssetDatabase.ImportAsset(ForceUpdate)`).
   3. `CreateFontAssetIfMissing` **tự heal**: check `characterTable.Count >= 80` (không chỉ atlasTexture — font thiếu glyph vẫn có atlas) + log số ký tự sau khi tạo để phát hiện sớm.
-- **User cần chạy lại tool** `Tools → Void Runner → Create TMP Font (Kenney Future)` để tái tạo font 2048 (kèm `Refactor: Game Scene` cho HUD layout).
+- **User cần chạy lại tool** `Tools → Starveil Runner → Create TMP Font (Kenney Future)` để tái tạo font 2048 (kèm `Refactor: Game Scene` cho HUD layout).
 
 ### Bài học — **QUY TẮC MỚI**
 
@@ -943,7 +943,7 @@ var mat = new Material(shader);
 
 ### Yêu cầu user (8 điểm)
 
-1. **Player không hợp lý**: game tên "Void Runner" nhưng nhân vật chính là trái banh xanh → đổi player thành chủ thể phù hợp (tàu/drone/phi hành gia — chờ chốt)
+1. **Player không hợp lý**: game tên "Starveil Runner" nhưng nhân vật chính là trái banh xanh → đổi player thành chủ thể phù hợp (tàu/drone/phi hành gia — chờ chốt)
 2. **Đường chạy hết**: track KHÔNG vô tận (Ground tĩnh 400m hoặc tile recycle lỗi) → phải vô tận thật
 3. **Void đuổi kiểu cũ sai**: banh tím tự tăng tốc chậm → chạm player ở mức điểm cố định. User muốn cơ chế **Subway Surfers/Temple Run**: đụng obstacle lần 1 → Void TIẾN SÁT; không chạm 10–15s → Void NỚI LẠI; chạm 2 lần trong cửa sổ → Game Over. Void KHÔNG tự tăng tốc
 4. **KHÔNG thấy màn hình kết thúc game** → điều tra + fix Game Over panel luôn hiện
@@ -1280,7 +1280,7 @@ var mat = new Material(shader);
 
 | # | Lỗi | Bằng chứng (scene) | Mức độ |
 |---|---|---|---|
-| M1 | **Title "VOID RUNNER" bị đè trùng 2 lớp** — `TitleGlow` + `TitleText` đều sz=110 trắng, gần cùng vị trí → chữ nhòe/mất nét | 2 GameObject, cả 2 `m_text: VOID RUNNER`, `y=256` vs `y=260` | 🔴 Cao |
+| M1 | **Title "STARVEIL RUNNER" bị đè trùng 2 lớp** — `TitleGlow` + `TitleText` đều sz=110 trắng, gần cùng vị trí → chữ nhòe/mất nét | 2 GameObject, cả 2 `m_text: STARVEIL RUNNER`, `y=256` vs `y=260` | 🔴 Cao |
 | M2 | **Background `#050A1E` đen xanh** — không hợp tông tím | Image color | 🟡 TB |
 | M3 | **Nút Play/HowToPlay/Sound màu xanh dương** (`#268CFF`, `#1E72E5`, `#1959BF`) — tông lệch | Image colors | 🟡 TB |
 | M4 | **BestScoreText nằm quá thấp** (`y=-260`) — nguy cơ bị cắt màn hình ở độ phân giải thấp | anchoredPosition | 🟢 Thấp |
@@ -1338,7 +1338,7 @@ var mat = new Material(shader);
 
 | # | Vấn đề user báo | Phân tích | Hướng fix đề xuất |
 |---|---|---|---|
-| R3-1 | **Player là "trái banh xanh" không hợp lý** với tên game Void Runner | Player hiện là sphere cyan (`Player.mat`), Rigidbody lăn. Tên game gợi "kẻ chạy" — banh không phù hợp chủ thể | ✅ **ĐÃ CHỐT: tàu vũ trụ nhỏ** — thân cube + cánh (primitive) hoặc model Kenney `craft_speederB` (đã có trong ambient), tông cyan, giữ Rigidbody nhưng bỏ xoay lăn |
+| R3-1 | **Player là "trái banh xanh" không hợp lý** với tên game Starveil Runner | Player hiện là sphere cyan (`Player.mat`), Rigidbody lăn. Tên game gợi "kẻ chạy" — banh không phù hợp chủ thể | ✅ **ĐÃ CHỐT: tàu vũ trụ nhỏ** — thân cube + cánh (primitive) hoặc model Kenney `craft_speederB` (đã có trong ambient), tông cyan, giữ Rigidbody nhưng bỏ xoay lăn |
 | R3-2 | **Đường chạy 1 mức cố định rồi HẾT — không vô tận** | Track dựa trên TileSpawner pool recycle (đúng thiết kế vô tận) NHƯNG có `Ground` tĩnh 400m → khi player chạy quá 400m, hết nền → cảm giác "hết đường". Hoặc tile recycle có lỗi | Verify tile recycle thật (player chạy > 400m không hết). Nếu Ground tĩnh là giới hạn → bỏ/tách: nền phải vô hạn hoặc vô hình, track do tile quyết định |
 | R3-3 | **Void đuổi theo là "banh tím", tốc độ tăng rất chậm, sẽ chạm player ở 1 mức điểm cố định** | VoidChase hiện giữ khoảng cách 9m→1.5m co dần theo thời gian (60s) — tức là "chạy đủ lâu là chết", không phản ánh skill người chơi | ✅ **ĐÃ CHỐT: 2 nấc cố định** (R0.4): nền 9m → đụng lần 1 → 5m → né sạch 10–15s → nới về 9m → đụng lần 2 trong cửa sổ → Game Over. Void không tự tăng tốc |
 | R3-4 | **KHÔNG thấy màn hình kết thúc game** | UIManager có trong scene (grep thấy 1) + GameOverPanel có trong scene (1). Có thể GameOverPanel không hiện vì: player chết do Void nuốt nhưng event/panel không chạy, hoặc panel bị che, hoặc field chưa gán | Điều tra: (1) `GameEvents.RaiseGameOver` có được gọi khi Void nuốt không; (2) `UIManager.ShowGameOver` có chạy không; (3) GameOverPanel có bị che/bị ẩn. Fix cho panel luôn hiện khi GameOver |
@@ -1347,7 +1347,7 @@ var mat = new Material(shader);
 
 | # | Vấn đề user báo | Phân tích | Hướng fix đề xuất |
 |---|---|---|---|
-| R3-5 | **Tiếng Việt/Tiếng Anh lộn xộn** — cần thống nhất TIẾNG ANH trong gameplay | Game scene: `SCORE`, `GAME OVER`, `MENU` (EN) nhưng `CAO NHẤT`, `CHƠI LẠI`? (Việt). MainMenu: `VOID RUNNER`, `PLAY`, `HOW TO PLAY` (EN) + âm thanh (Việt) | **Toàn bộ text gameplay = TIẾNG ANH**: SCORE, COMBO, GAME OVER, RETRY, MENU, BEST, HIGH SCORE, SOUND: ON/OFF. MainMenu cũng tiếng Anh (đồng nhất) |
+| R3-5 | **Tiếng Việt/Tiếng Anh lộn xộn** — cần thống nhất TIẾNG ANH trong gameplay | Game scene: `SCORE`, `GAME OVER`, `MENU` (EN) nhưng `CAO NHẤT`, `CHƠI LẠI`? (Việt). MainMenu: `STARVEIL RUNNER`, `PLAY`, `HOW TO PLAY` (EN) + âm thanh (Việt) | **Toàn bộ text gameplay = TIẾNG ANH**: SCORE, COMBO, GAME OVER, RETRY, MENU, BEST, HIGH SCORE, SOUND: ON/OFF. MainMenu cũng tiếng Anh (đồng nhất) |
 | R3-6 | **Nút âm thanh: text bị thụt vào trong, viền xanh bo tròn, quá chật** | SoundButton (MainMenu) — text `ÂM THANH: BẬT` bị thụt so với viền button (padding âm/quá nhỏ), layout chật | Fix layout nút: padding text hợp lý (không sát viền), size button đủ rộng, căn giữa. Kiểm tra RectTransform + padding |
 | R3-7 | **Best score hiển thị ngay từ đầu (bằng 0) — vô nghĩa** | MainMenuManager.RefreshBestScore luôn set text `ĐIỂM CAO NHẤT: 0` | Chỉ hiển thị best score khi `SaveSystem.BestScore > 0` (đã chơi và có điểm). Lần đầu chơi → ẩn text hoặc hiện placeholder |
 | R3-8 | *(đi kèm)* Game Over panel có thể chưa hiện được đúng (liên quan R3-4) | — | Test toàn bộ luồng chết → panel → retry/menu sau khi fix R3-4 |
@@ -1355,7 +1355,7 @@ var mat = new Material(shader);
 ## ✅ Vòng 4 — ĐÃ FIX (2026-08-11 — thực thi Giai đoạn 2.5, user đã duyệt plan)
 
 > User duyệt toàn bộ docs → code theo R0.1–R0.8. Code xong + commit + push.
-> ⚠️ User còn phải CHẠY TOOL `Tools → Void Runner → Refactor: Both Scenes` + Ctrl+S để scene áp dụng
+> ⚠️ User còn phải CHẠY TOOL `Tools → Starveil Runner → Refactor: Both Scenes` + Ctrl+S để scene áp dụng
 > (Ground 6000m, English texts, SoundButton layout) rồi test tay.
 
 | # | Vấn đề | Fix | Trạng thái |
