@@ -290,11 +290,11 @@ namespace VoidRunner.Systems.VFX
 
             // Vị trí cố định: BÊN PHẢI ScorePanel (anchor 0.5,1 @ (240,-60)) — ngoài vùng panel
             // (panel trải x ±180) + ngoài trục đường chơi, không bao giờ che obstacle/coin
-            // (v3f.9.3: user "+10 hơi xa màn hình — cho gần lại 1 tí" 260→240)
+            // (v3f.9.3: 260→240; v3f.9.4: user "cho gần thêm 1 tí nữa, chỉ 1 tí" 240→228)
             tmp.rectTransform.anchorMin = new Vector2(0.5f, 1f);
             tmp.rectTransform.anchorMax = new Vector2(0.5f, 1f);
             tmp.rectTransform.pivot = new Vector2(0.5f, 1f);
-            Vector2 basePos = new Vector2(240f, -60f);
+            Vector2 basePos = new Vector2(228f, -60f);
             tmp.rectTransform.anchoredPosition = basePos;
 
             // Kill tween cũ nếu popup này đang được tái sử dụng

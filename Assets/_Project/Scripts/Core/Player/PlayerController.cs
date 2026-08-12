@@ -450,7 +450,7 @@ namespace VoidRunner.Core.Player
 
             var trail = go.AddComponent<TrailRenderer>();
             trail.time = 0.18f;             // vệt ngắn — chạy nhanh sẽ kéo dài tự nhiên như lưỡi lửa
-            trail.startWidth = 0.34f;
+            trail.startWidth = 0.45f;       // v3f.9.4: user "lửa to thêm 1 tí" 0.34→0.45
             trail.endWidth = 0.02f;
             trail.minVertexDistance = 0.08f;
             trail.numCornerVertices = 4;
