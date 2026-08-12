@@ -5,20 +5,6 @@
 
 ---
 
-## 2026-08-12 (G3.5 UI polish) — Volume slider vào border + nút SHIP/CREDITS có viền (UITheme dùng chung)
-
-> User: "cho cái volume vào 1 cái border đi; có ý tưởng gì cho nút ship ko — cho nó đẹp lên chút, hơi xấu, chủ yếu các chi tiết ngoài lề như cạnh viền thôi".
-
-**Thay đổi:**
-- **NEW `UI/UITheme.cs`** — helper theme dùng chung: bảng màu tông (PanelBg/ButtonBg/Cyan/CyanFaint/Purple/Gold) + `AddBorder` (viền 4 cạnh — TÁCH TỪ CreditsPanelBuilder.AddBorder cũ, xóa bản private trùng lặp) + `AddEdgeAccent` (vạch accent dọc sát mép, idempotent theo tên).
-- **Slider volume** (VolumeSliderBuilder — ăn cả MainMenu lẫn Pause overlay): bọc vào hộp nền tối (0.04,0.03,0.1,0.85) + viền cyan mờ 2px; container bg `raycastTarget=false` (không chặn click).
-- **Nút SHIP** (ShipSelectManager): nền phẳng cyan → **nền tối + viền cyan neon 2px + 2 vạch accent dọc 2 mép**; label dịch vào 24px không chạm accent.
-- **Nút CREDITS** (CreditsPanelBuilder): làm TƯƠNG TỰ với tông tím (đồng bộ cặp nút cùng hàng — không lệch style).
-
-**Bài học:** (1) Khi có 1 pattern UI lặp lại (viền neon) ở nhiều builder → tách helper dùng chung (UITheme) thay vì copy-paste (code reuse — đúng rule). (2) Thay đổi style cho 1 nút trong 1 cặp nút cùng hàng → làm đồng bộ cả cặp, tránh lệch tông.
-
----
-
 ## 2026-08-12 (G3.5 hotfix) — 4 lỗi CS0103 `_pauseButton does not exist` trong PauseManager
 
 **Triệu chứng:** sau commit G3.5, Unity báo 4 lỗi đỏ `error CS0103: The name '_pauseButton' does not exist` tại `PauseManager.cs(116/122)`.

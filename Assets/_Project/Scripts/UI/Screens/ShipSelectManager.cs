@@ -72,26 +72,19 @@ namespace VoidRunner.UI
             rt.anchoredPosition = new Vector2(-160f, -245f); // CÙNG HÀNG với CREDITS (bên phải 160) — SHIP bên trái (Fix Spacing 2026-08-12 v3: theo layout mới Best -160)
             rt.sizeDelta = new Vector2(300f, 56f);
 
-            // 2026-08-12 (user: "cho nút ship đẹp lên chút, hơi xấu — chủ yếu chi tiết ngoài lề như
-            // cạnh viền"): nền tối + viền cyan neon + 2 vạch accent dọc sát mép (UITheme dùng chung
-            // — đồng bộ với nút CREDITS cùng hàng). Label dịch vào 24px để không chạm accent.
             var img = go.GetComponent<Image>();
-            img.color = UITheme.ButtonBg;
+            img.color = new Color(0.15f, 0.65f, 0.9f, 1f); // cyan — nút chính phụ, nổi bật hơn tím
 
             var btn = go.GetComponent<Button>();
             btn.transition = Selectable.Transition.ColorTint;
-
-            UITheme.AddBorder(go.transform, rt.sizeDelta, 2f, UITheme.Cyan);
-            UITheme.AddEdgeAccent(go.transform, "AccentL", false, UITheme.Cyan);
-            UITheme.AddEdgeAccent(go.transform, "AccentR", true, UITheme.Cyan);
 
             var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             label.transform.SetParent(go.transform, false);
             var lrt = (RectTransform)label.transform;
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = new Vector2(24f, 4f);
-            lrt.offsetMax = new Vector2(-24f, -4f);
+            lrt.offsetMin = new Vector2(10f, 4f);
+            lrt.offsetMax = new Vector2(-10f, -4f);
 
             var tmp = label.GetComponent<TextMeshProUGUI>();
             tmp.text = "SHIP";
