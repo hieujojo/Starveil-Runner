@@ -2,6 +2,14 @@
 
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
+## 2026-08-12 (pre-deploy) - Log đỏ _pauseButton là CŨ + Compression 2→1 (Gzip)
+
+> User: "còn 1 log đỏ fix luôn rồi build lại rồi deploy, cả itch.io và unity play luôn nhé".
+
+- **Log đỏ `CS0103 _pauseButton` = LOG CŨ, không phải lỗi hiện tại:** bằng chứng — (1) lỗi nằm ở dòng 27980/49642 (GIỮA file Editor.log, không phải cuối); (2) SAU nó có nhiều lần "Reloading assemblies ... for play mode" = compile thành công nhiều lần; (3) PauseManager.cs hiện tại ĐÃ có field `_pauseButton` (dòng 39) + gán ở cả 2 nhánh EnsurePauseButton; (4) 8 dòng cuối log sạch (unload assets + licensing). Không có lỗi runtime thật nào sau dòng 27982. → User chỉ cần **Clear Console** trong Unity, KHÔNG cần sửa code.
+- **`webGLCompressionFormat` bị đổi 0→2 (Brotli)** (Unity tự đổi — ProjectSettings.asset đã modified từ lâu trong git status): Brotli từng gây WHITE SCREEN trên itch.io (R7.18) → đổi lại thành **1 (Gzip)** — itch.io serve `.gz` với header Content-Encoding: gzip chuẩn (đa số game WebGL trên itch.io dùng Gzip), Unity Play cũng hỗ trợ; file nhẹ hơn Disabled. **Nếu Unity ghi đè lại khi mở**: Player Settings → Publishing Settings → Compression Format = **Gzip** (bắt buộc trước khi Build).
+- **Bài học (R7.19e):** trước mỗi lần build production PHẢI grep lại `webGLCompressionFormat` trong ProjectSettings.asset (Unity có thể tự đổi về Brotli khi mở Build Settings); log đỏ trong Console có thể là lỗi CŨ — kiểm tra vị trí dòng lỗi trong Editor.log + mark "Reloading assemblies" sau đó trước khi fix.
+
 ## 2026-08-12 (bọ to hơn + drone spawn đồng đều theo độ khó) - v3f.10.3
 
 > User: "khiến con bọ to lên 1 chút nữa; cho các drone được spawn hợp lý theo từng độ khó — tránh cảm giác trống trải hoặc dày đặc mà mọi thứ được đồng đều".
