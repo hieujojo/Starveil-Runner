@@ -315,8 +315,6 @@ namespace VoidRunner.Core.Player
             if (shipPrefabs != null && idx >= 0 && idx < shipPrefabs.Length) prefab = shipPrefabs[idx];
             // Self-heal (R4.18): chưa gán prefab trong scene (tool chưa chạy) → tự tải qua ShipCatalog
             if (prefab == null) prefab = ShipCatalog.Load(idx);
-            // [DIAG-TẠM] xác nhận tàu đang dùng là model nào (hay primitive) — XÓA sau khi test OK
-            Debug.Log("[DIAG-SHIP] " + (prefab != null ? "model=" + prefab.name : "primitive"));
             if (prefab != null)
             {
                 BuildModelShip(prefab);
