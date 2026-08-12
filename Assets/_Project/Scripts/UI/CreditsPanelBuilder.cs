@@ -33,19 +33,25 @@ namespace VoidRunner.UI
             rt.anchoredPosition = anchoredPos;
             rt.sizeDelta = size;
 
+            // 2026-08-12 (user: "chủ yếu chi tiết ngoài lề như cạnh viền"): nền tối + viền tím neon
+            // + 2 vạch accent — đồng bộ với nút SHIP cùng hàng (cùng UITheme).
             var img = go.GetComponent<Image>();
-            img.color = new Color(0.48f, 0.29f, 1f, 1f); // tím — tông nút phụ
+            img.color = UITheme.ButtonBg;
 
             var btn = go.GetComponent<Button>();
             btn.transition = Selectable.Transition.ColorTint;
+
+            UITheme.AddBorder(go.transform, size, 2f, UITheme.Purple);
+            UITheme.AddEdgeAccent(go.transform, "AccentL", false, UITheme.Purple);
+            UITheme.AddEdgeAccent(go.transform, "AccentR", true, UITheme.Purple);
 
             var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             label.transform.SetParent(go.transform, false);
             var lrt = (RectTransform)label.transform;
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = new Vector2(10f, 4f);
-            lrt.offsetMax = new Vector2(-10f, -4f);
+            lrt.offsetMin = new Vector2(24f, 4f);
+            lrt.offsetMax = new Vector2(-24f, -4f);
 
             var tmp = label.GetComponent<TextMeshProUGUI>();
             tmp.text = "CREDITS";
@@ -76,9 +82,9 @@ namespace VoidRunner.UI
             prt.sizeDelta = new Vector2(760f, 660f); // to hơn (fix 2026-08-12: chữ 20 nhỏ khó đọc → 22 + dòng thoáng)
 
             var pimg = panel.GetComponent<Image>();
-            pimg.color = new Color(0.06f, 0.04f, 0.12f, 1f); // tím đen — đục hoàn toàn (R0.9)
-            // Viền cyan neon mờ — tông game
-            AddBorder(panel.transform, new Vector2(760f, 660f));
+            pimg.color = UITheme.PanelBg; // tím đen — đục hoàn toàn (R0.9)
+            // Viền cyan neon mờ — tông game (dùng chung UITheme — code reuse)
+            UITheme.AddBorder(panel.transform, new Vector2(760f, 660f), 3f, UITheme.CyanFaint);
 
             // Tiêu đề
             var title = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
@@ -150,31 +156,6 @@ namespace VoidRunner.UI
 
             panel.SetActive(false);
             return panel;
-        }
-
-        /// <summary>Viền cyan neon mờ quanh panel (2 Image mỏng trái/phải hoặc khung).</summary>
-        private static void AddBorder(Transform parent, Vector2 panelSize)
-        {
-            // Khung: 4 cạnh mỏng màu cyan — đơn giản là 2 sọc ngang đỉnh/đáy + 2 sọc dọc
-            float t = 3f;
-            CreateBorderStrip(parent, "BorderTop", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -t * 0.5f), new Vector2(panelSize.x, t));
-            CreateBorderStrip(parent, "BorderBottom", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, t * 0.5f), new Vector2(panelSize.x, t));
-            CreateBorderStrip(parent, "BorderLeft", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(t * 0.5f, 0f), new Vector2(t, panelSize.y));
-            CreateBorderStrip(parent, "BorderRight", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-t * 0.5f, 0f), new Vector2(t, panelSize.y));
-        }
-
-        private static void CreateBorderStrip(Transform parent, string name, Vector2 aMin, Vector2 aMax, Vector2 pos, Vector2 size)
-        {
-            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            go.transform.SetParent(parent, false);
-            var rt = (RectTransform)go.transform;
-            rt.anchorMin = aMin;
-            rt.anchorMax = aMax;
-            rt.anchoredPosition = pos;
-            rt.sizeDelta = size;
-            var img = go.GetComponent<Image>();
-            img.color = new Color(0.35f, 0.85f, 1f, 0.35f); // cyan mờ
-            img.raycastTarget = false;
         }
 
         /// <summary>Nội dung credits — danh sách third-party assets (khớp agent/CREDITS.md).</summary>

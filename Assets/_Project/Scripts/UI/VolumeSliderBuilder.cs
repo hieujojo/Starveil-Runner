@@ -18,7 +18,7 @@ namespace VoidRunner.UI
         /// <summary>Dựng slider âm lượng dưới parent. Trả về Slider để gọi tiếp nếu cần.</summary>
         public static Slider Build(Transform parent, string name, Vector2 anchoredPos, Vector2 size, Color accent)
         {
-            var container = new GameObject(name, typeof(RectTransform));
+            var container = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             container.transform.SetParent(parent, false);
             var crt = (RectTransform)container.transform;
             crt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -26,6 +26,14 @@ namespace VoidRunner.UI
             crt.pivot = new Vector2(0.5f, 0.5f);
             crt.anchoredPosition = anchoredPos;
             crt.sizeDelta = size;
+
+            // 2026-08-12 (user: "cho cái volume vào 1 cái border"): nền tối + viền cyan neon
+            // mờ — khớp phong cách panel/credits (UITheme.AddBorder dùng chung). raycastTarget=false
+            // để không chặn click xuyên xuống (label đã raycast=false; slider con tự nhận click).
+            var containerBg = container.GetComponent<Image>();
+            containerBg.color = new Color(0.04f, 0.03f, 0.1f, 0.85f);
+            containerBg.raycastTarget = false;
+            UITheme.AddBorder(container.transform, size, 2f, UITheme.CyanFaint);
 
             // Label VOLUME (trái)
             var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
