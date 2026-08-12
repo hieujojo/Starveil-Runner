@@ -114,6 +114,10 @@ namespace VoidRunner.UI
             var pimg = panel.GetComponent<Image>();
             pimg.color = new Color(0.06f, 0.04f, 0.12f, 1f); // tím đen đục
 
+            // 2026-08-12 (user: "ý tôi là UI ở trong nút ship — chủ yếu chi tiết ngoài lề như cạnh viền"):
+            // viền cyan neon quanh panel — giống Credits panel (AddNeonBorder dùng chung trong file)
+            AddNeonBorder(panel.transform, prt.sizeDelta, 3f, new Color(0.35f, 0.85f, 1f, 0.35f));
+
             // Tiêu đề
             var title = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             title.transform.SetParent(panel.transform, false);
@@ -132,6 +136,19 @@ namespace VoidRunner.UI
             ttmp.raycastTarget = false;
             AssignFallbackFont(ttmp);
 
+            // Gạch chân vàng mờ dưới tiêu đề (chi tiết ngoài lề — 2026-08-12)
+            var underline = new GameObject("Underline", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            underline.transform.SetParent(panel.transform, false);
+            var urt = (RectTransform)underline.transform;
+            urt.anchorMin = new Vector2(0.5f, 1f);
+            urt.anchorMax = new Vector2(0.5f, 1f);
+            urt.pivot = new Vector2(0.5f, 1f);
+            urt.anchoredPosition = new Vector2(0f, -78f); // dưới title (title đáy ~-72)
+            urt.sizeDelta = new Vector2(320f, 3f);
+            var uimg = underline.GetComponent<Image>();
+            uimg.color = new Color(1f, 0.85f, 0.3f, 0.8f);
+            uimg.raycastTarget = false;
+
             // Khung preview (RawImage)
             var previewGo = new GameObject("Preview", typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage));
             previewGo.transform.SetParent(panel.transform, false);
@@ -142,6 +159,9 @@ namespace VoidRunner.UI
             prt2.anchoredPosition = new Vector2(0f, -92f);
             prt2.sizeDelta = new Vector2(480f, 400f);
             _previewImage = previewGo.GetComponent<RawImage>();
+
+            // Khung viền "viewfinder" quanh preview (chi tiết ngoài lề — 2026-08-12)
+            AddNeonBorder(previewGo.transform, prt2.sizeDelta, 2f, new Color(0.35f, 0.85f, 1f, 0.55f));
 
             // Tên tàu đang chọn
             var nameGo = new GameObject("ShipName", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
@@ -273,6 +293,8 @@ namespace VoidRunner.UI
             img.color = new Color(0.3f, 0.2f, 0.6f, 1f);
             var btn = go.GetComponent<Button>();
             btn.transition = Selectable.Transition.ColorTint;
+            // Viền cyan cho nút mũi tên (chi tiết ngoài lề — 2026-08-12)
+            AddNeonBorder(go.transform, rt.sizeDelta, 2f, new Color(0.35f, 0.85f, 1f, 0.9f));
             // ⚠️ KHÔNG AddListener ở đây — CachePanelRefs() đảm nhận (tránh double-subscribe,
             // bug 2026-08-12 "bấm chuột mũi tên không đổi tàu" — fix ở CachePanelRefs).
 
@@ -457,6 +479,29 @@ namespace VoidRunner.UI
             btn.onClick.AddListener(TogglePanel);
             go.SetActive(false);
             _dimmer = go;
+        }
+
+        /// <summary>Viền 4 cạnh neon quanh 1 RectTransform — chi tiết ngoài lề (giống Credits panel).</summary>
+        private static void AddNeonBorder(Transform parent, Vector2 size, float thickness, Color color)
+        {
+            CreateBorderStrip(parent, "BorderTop", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -thickness * 0.5f), new Vector2(size.x, thickness), color);
+            CreateBorderStrip(parent, "BorderBottom", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, thickness * 0.5f), new Vector2(size.x, thickness), color);
+            CreateBorderStrip(parent, "BorderLeft", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(thickness * 0.5f, 0f), new Vector2(thickness, size.y), color);
+            CreateBorderStrip(parent, "BorderRight", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-thickness * 0.5f, 0f), new Vector2(thickness, size.y), color);
+        }
+
+        private static void CreateBorderStrip(Transform parent, string name, Vector2 aMin, Vector2 aMax, Vector2 pos, Vector2 size, Color color)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.transform.SetParent(parent, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = aMin;
+            rt.anchorMax = aMax;
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = size;
+            var img = go.GetComponent<Image>();
+            img.color = color;
+            img.raycastTarget = false;
         }
 
         private static void SetLayerRecursively(GameObject go, int layer)

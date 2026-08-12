@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-12 (G3.5 UI v3 — SAU KHI USER REJECT) — Volume = hộp đặc + làm đẹp PANEL CHỌN TÀU
+
+> User reject commit `08f1df8`: "reject lại code ngay, bạn thấy toàn bộ hộp chứa của play và how to play chứ, làm tương tự với volume; sao bạn còn sửa cả ship và credits nữa vậy, ý tôi là UI ở trong nút ship á".
+
+### Bài học (R7.14 — QUAN TRỌNG): hiểu đúng phạm vi trước khi sửa UI
+
+- **Tôi đã sai ở đâu:** (1) bọc volume bằng viền MẢNH 2px — trong khi nút Play/HowToPlay là HỘP CHỨA ĐẶC (solid box); (2) tự ý sửa CẢ nút SHIP + CREDITS trong menu — user CHỈ nói "nút ship" và ý là **UI bên trong panel chọn tàu** (panel mở ra khi bấm SHIP), KHÔNG phải nút menu.
+- **Cách đúng:** hỏi user khi không chắc (ask_user — user chọn "Panel chọn tàu") + chỉ sửa ĐÚNG phạm vi được xác nhận; không lan sang thành phần lân cận.
+- **Revert commit đã push** = `git revert <sha>` (tạo commit revert sạch, giữ lịch sử) chứ KHÔNG `git reset` (commit đã push lên remote).
+
+### Đã làm lại (v3)
+
+- **Volume slider** = hộp chứa ĐẶC (solid màu BtnDark tím đậm 0.29,0.17,0.54 — khớp màu nút menu, đúng vị trí + cao 76 như nút Sound cũ): MainMenu 360×76, Pause 380×60. BỎ viền mảnh.
+- **Panel chọn tàu (ShipSelectPanel)** làm đẹp — chỉ chi tiết ngoài lề: (1) viền cyan neon 3px quanh panel (giống Credits); (2) gạch chân vàng dưới title SELECT SHIP; (3) khung "viewfinder" cyan quanh preview ảnh; (4) viền cyan 2px cho 2 nút mũi tên < >. Helper AddNeonBorder/CreateBorderStrip private trong file (user reject UITheme — không tạo file mới).
+- Nút SHIP + CREDITS trong menu: **GIỮ NGUYÊN** (đã revert về màu phẳng như cũ).
+
+---
+
 ## 2026-08-12 (G3.5 hotfix) — 4 lỗi CS0103 `_pauseButton does not exist` trong PauseManager
 
 **Triệu chứng:** sau commit G3.5, Unity báo 4 lỗi đỏ `error CS0103: The name '_pauseButton' does not exist` tại `PauseManager.cs(116/122)`.
