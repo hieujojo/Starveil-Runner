@@ -2,6 +2,17 @@
 
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
+## 2026-08-12 (tối ưu build WebGL) - Build 125MB → mục tiêu ~40-60MB
+
+> User: "nén lại là 128mb á, có nặng quá không, có điểm nào chưa tối ưu à" → chọn "Tối ưu đầy đủ rồi build lại".
+
+- **Nguyên nhân build nặng:** import texture/model chất lượng cao. Top thủ phạm: Nebula Skyboxes 4 file EXR cubemap (873MB thô, maxTextureSize 2048), G-spot_Lab (350MB), SpaceSkies Free (483MB - chỉ dùng Purple_2K), Sci_fi_Drones (223MB - chỉ dùng Robot_Guardian), Sparrow mask1/2 (96MB, 0 refs).
+- **Cách xử lý:** tool mới `Editor/BuildOptimizerTool.cs` (Tools/Void Runner/Optimize Build), idempotent, xóa FILE trước FOLDER (tránh missing ref), fail-safe Robot_Guardian.prefab: (1) Xóa asset 0 refs đã verify: G-spot_Lab, SpaceSkies Demo/Skybox_1/Skybox_2 + texture 1K/4K + Purple_1K/4K mats (giữ Purple_2K), Drone khác Robot_Guardian (prefab/model/mat/texture) + Show_Assets.unity demo, Sparrow mask1/2, folder rác fantasySpider/_Recovery/OlegWER. (2) Giảm maxTextureSize 2048→1024 cho 4 EXR Nebula (KHÔNG xóa - NebulaChanger đang dùng đổi skybox theo difficulty) + texture Sparrow tif + Flying Beetle tga + Robot_Guardian png.
+- **Lưu ý:** EXR cubemap HDR dù giảm 1K vẫn nặng; nếu cần nhẹ hơn nữa có thể giảm tiếp xuống 512 hoặc đổi skybox động thành 2 material.
+- **Bài học (R7.17):** trước khi xóa asset phải check REFS ĐẦY ĐỦ (scene + prefab + material + asset + code path) - ở đây phát hiện Nebula KHÔNG xóa được vì NebulaChanger.cs (enabled trong Game.unity) xoay 4 material theo difficulty. Grep GUID phải kiểm tra biến có rỗng không (biến rỗng → grep match mọi file = dương tính giả).
+
+---
+
 
 ---
 
