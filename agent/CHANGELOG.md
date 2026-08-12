@@ -2,6 +2,14 @@
 
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
+## 2026-08-12 (bóng con bọ mất + animation chậm) - v3f.10.1
+
+> User: "cho animation con bọ chậm lại tí; sao lúc chưa fix còn thấy bóng con bọ mà chừ sau khi sửa mất bóng luôn".
+
+- **Mất bóng con bọ — nguyên nhân chính xác:** bóng user thấy trước fix là SHADOW THẬT từ light (soft shadow, road URP receiveShadows On). v3f.10 tôi tắt `shadowCastingMode` của bọ + thay bằng blob (offset 0.98) — nhưng road là CUBE scale y=0.1 (top y=0.05), blob đặt y=1-0.98=0.02 → CHÌM dưới mặt road (0.05) → vô hình. Fix: (1) bọ KHÔI PHỤC shadow thật (bỏ `shadowCastingMode Off`, bỏ blob bọ) — trả đúng trạng thái đã hoạt động; (2) tàu giữ blob nhưng sửa offset 0.98→0.93 (blob y=0.07 = trên road 0.02, hiển thị) + alpha 0.38→0.5 (road tối — đậm hơn mới thấy).
+- **Animation chậm lại:** `_animator.speed` 1.25→1.0 (tốc độ gốc clip flying — vỗ cánh tự nhiên, không loạn). Khi đụng vật cản lần 1 vẫn vỗ NHANH 2x (hitSpeedUp — chức năng "chạm 1 lần vỗ nhanh hơn" giữ nguyên).
+- **Bài học (R7.19b):** khi thêm bóng giả (blob) phải biết CHÍNH XÁC mặt trên của bề mặt nhận bóng (road là cube 0.1 dày → top 0.05, KHÔNG phải 0) — đặt sai là chìm/vô hình. Nếu bóng THẬT (shadow map) đã hoạt động và user hài lòng thì KHÔNG nên thay thế bằng blob.
+
 ## 2026-08-12 (hướng quay con bọ + duplicate + bóng) - v3f.10
 
 > User: "con bọ đang quay mặt sai hướng, cho quay lại rồi build; kiểm tra logic có duplicate con bọ không (có lúc thấy 2 con đè nhau); con bọ có bóng, làm bóng với tàu luôn (khó quá thì thôi)".
