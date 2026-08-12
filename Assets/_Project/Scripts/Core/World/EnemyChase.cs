@@ -135,6 +135,13 @@ namespace VoidRunner.Core.World
             // (PlayerController), obstacle đã gọi (Obstacle.Awake) — ENEMY bị SÓT → thêm (R3.16 self-heal).
             MaterialFixer.EnsureURPMaterials(enemy);
 
+            // FIX 2026-08-12 v3f.9.2 (user: "cho con bọ màu nâu đậm"): texture gốc của Flying Beetle
+            // ĐÃ LÀ nâu đậm (phân tích pixel: 36.5% RGB 48,16,16 + ~17% nâu — tên file "orange" chỉ là
+            // tên cũ, cam = 0%) nhưng scene vũ trụ tối làm nó nhìn như đen. KHÔNG đổi màu material
+            // (rule user: "tuyệt đối không đổi màu bằng code") — thêm ĐÈN ẤM chiếu vào để texture nâu
+            // thật lo rõ thành "nâu đậm" thấy được.
+            EnsureEnemyLight(enemy);
+
             // FIX 2026-08-12 v3 (user: "đừng rung con bọ mà cho nó vỗ cánh"): default state của
             // Animator controller là "idle 1" (bọ đứng im) → ép chạy state "flying" (vỗ cánh loop).
             // KHÔNG ép rotation mỗi frame (R4.17) — Animator lo phần chuyển động, code chỉ điều vị trí.
@@ -165,6 +172,27 @@ namespace VoidRunner.Core.World
             // ⚠️ KHÔNG ép mỗi frame (R4.17): enemy có Animator — ghi đè localRotation mỗi frame
             // sẽ đánh nhau với root motion của animation.
             enemy.transform.localRotation = Quaternion.Euler(0f, enemyYaw, 0f);
+        }
+
+        /// <summary>
+        /// v3f.9.2 (user: "cho con bọ màu nâu đậm"): Point Light vàng ấm bám theo enemy để texture
+        /// nâu đậm gốc của model lo rõ trên nền vũ trụ tối. KHÔNG đổi màu material — chỉ chiếu sáng
+        /// màu thật (đúng rule user cấm đổi màu bằng code). Idempotent — đã có "EnemyLight" thì thôi.
+        /// </summary>
+        private static void EnsureEnemyLight(GameObject enemy)
+        {
+            if (enemy.transform.Find("EnemyLight") != null) return;
+
+            var go = new GameObject("EnemyLight");
+            go.transform.SetParent(enemy.transform, false);
+            go.transform.localPosition = new Vector3(0f, 1.6f, 0.5f);
+
+            var light = go.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(1f, 0.72f, 0.42f, 1f); // vàng ấm — nâu lo rõ
+            light.intensity = 2.2f;
+            light.range = 7f;
+            light.shadows = LightShadows.None; // nhẹ — không tốn shadow map
         }
 
         /// <summary>Bounds world gộp mọi renderer (dùng để chuẩn hóa scale enemy).</summary>
