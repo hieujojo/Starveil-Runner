@@ -10,6 +10,16 @@
 - **Cách xử lý:** tool mới `Editor/BuildOptimizerTool.cs` (Tools/Void Runner/Optimize Build), idempotent, xóa FILE trước FOLDER (tránh missing ref), fail-safe Robot_Guardian.prefab: (1) Xóa asset 0 refs đã verify: G-spot_Lab, SpaceSkies Demo/Skybox_1/Skybox_2 + texture 1K/4K + Purple_1K/4K mats (giữ Purple_2K), Drone khác Robot_Guardian (prefab/model/mat/texture) + Show_Assets.unity demo, Sparrow mask1/2, folder rác fantasySpider/_Recovery/OlegWER. (2) Giảm maxTextureSize 2048→1024 cho 4 EXR Nebula (KHÔNG xóa - NebulaChanger đang dùng đổi skybox theo difficulty) + texture Sparrow tif + Flying Beetle tga + Robot_Guardian png.
 - **Lưu ý:** EXR cubemap HDR dù giảm 1K vẫn nặng; nếu cần nhẹ hơn nữa có thể giảm tiếp xuống 512 hoặc đổi skybox động thành 2 material.
 - **Bài học (R7.17):** trước khi xóa asset phải check REFS ĐẦY ĐỦ (scene + prefab + material + asset + code path) - ở đây phát hiện Nebula KHÔNG xóa được vì NebulaChanger.cs (enabled trong Game.unity) xoay 4 material theo difficulty. Grep GUID phải kiểm tra biến có rỗng không (biến rỗng → grep match mọi file = dương tính giả).
+## 2026-08-12 (deploy itch.io) - Fix white screen + xóa FPS counter
+
+> User: "game WebGL bị màn hình trắng khi nhúng iframe trên itch.io — nghi do Compression Format không được serve đúng; đồng thời xóa FPS counter trên UI game".
+
+- **Nguyên nhân white screen (đã xác định):** build hiện tại vẫn là bản CŨ build lúc Compression = Brotli (file .br). itch.io KHÔNG serve file .br với header Content-Encoding đúng → loader không giải nén được → trắng màn hình. Cấu hình HIỆN TẠI đã là Disabled (webGLCompressionFormat: 0) — chỉ cần BUILD LẠI là ra file không nén (.data/.wasm/.js), itch.io tự gzip on-the-fly → hết lỗi.
+- **Bài học (R7.18):** khi build WebGL để upload itch.io → Compression Format phải DISABLED (hoặc Gzip), KHÔNG dùng Brotli. Sau khi đổi cấu hình phải BUILD LẠI (file cũ không tự đổi). Cách zip đúng: nén NỘI DUNG thư mục build (index.html ở root của zip), không nén cả folder cha. Khi upload mới phải XÓA file build cũ trên itch.io (CDN cache).
+- **Xóa FPS counter:** xóa component + GameObject FPSCounter khỏi MainMenu.unity (47 dòng), xóa hẳn file FPSCounter.cs + FPSInjectTool.cs (đã test xong, không cần). Kiểm tra: scene sạch 0 refs, không file nào còn tham chiếu.
+
+---
+
 
 ---
 
