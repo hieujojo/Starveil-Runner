@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-08-12 (Cleanup ~4.5GB) — Xóa asset pack không dùng, AUDIT GUID trước khi xóa
+
+**Triệu chứng:** repo nặng (~10GB) — user: "đọc lại toàn bộ file/assets, cái nào không dùng thì xóa, phải xem thật kỹ logic/file có được dùng ở đâu không trước khi xóa".
+
+**Cách audit (bài học quan trọng):** (1) **GUID audit toàn diện** bằng Python — quét mọi `.meta` → map guid→path, đếm số lần `guid:` xuất hiện trong toàn bộ `.unity/.prefab/.mat/.asset/.cs` (kể cả trong _Project) → file nào 0 lần = không được tham chiếu. (2) **Cross-check riêng**: scene/prefab _Project có ref guid của pack không + code (`grep` tên pack trong `_Project/*.cs`) có dùng path/name không + Editor tool có còn ref path không (SciFiObstacleSetupTool comment nhắc Fence nhưng đã bỏ; ShipCatalog chỉ ref SF_Fighter + Sparrow prefab, PSD không dùng). (3) **Hỏi user trước khi xóa** các pack vừa tải có chủ đích (G-spot magic) — không tự ý xóa.
+
+**Đã xóa (~4.5GB):** `Creepy_Cat` (3D Scifi Kit 1.2G — từ v3f.5 chỉ còn DroneObstacle từ Sci_fi_Drones), `Monster` (1.4G — enemy duy nhất Flying Beetle), `OlegWER` (High-Poly Asteroid 180M), `fantasySpider` (11M), `JMO Assets` Cartoon FX (40M), `Eric VFX Studio` (15M) + rác: `Builds/` (Roll-a-Ball.exe cũ 102M, gitignored), `_Recovery` (130K), `Sparrow_Fighter/PSD File` (357M file nguồn — ShipCatalog không dùng).
+
+**Đã GIỮ:** G-spot_Lab (user xác nhận giữ — pending integrate cho VFX sau), Nebula Skyboxes + SpaceSkies Free (skybox), SF_Fighter + Sparrow_Fighter (ShipCatalog), Flying Beetle (enemy), Sci_fi_Drones (drone), kenney packs, DOTween, TMP.
+
+**Bài học:** (1) Đừng xóa theo cảm tính — audit GUID + cross-check code/tool + hỏi user cho pack mới tải. (2) Folder .meta của directory không được ref là bình thường (đừng nhầm là unused). (3) Các asset chưa từng `git add` không nằm trong history → xóa trên đĩa không tạo commit xóa. (4) Xóa folder lớn (1GB+) bằng `rm -rf` từng cái, timeout dài.
+
+---
+
 ## 2026-08-12 (3 warning CS0618 — API FindObjectsByType cũ) — Console dọn sạch
 
 **Triệu chứng:** sau khi thêm FPS counter, Console có 3 warning `CS0618: ... has been deprecated` (API cũ bị deprecate trong Unity 6): `FindObjectsByType<T>(FindObjectsInactive, FindObjectsSortMode)` (FPSCounter.cs + SkyboxSetupTool.cs) và `FindFirstObjectByType<T>()` (FPSInjectTool.cs).

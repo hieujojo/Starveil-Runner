@@ -190,6 +190,8 @@ Assets/
 ### Giai đoạn 3 — Polish & Deploy
 > Mục tiêu: game đẹp, có link demo gắn CV
 
+> ✅ **2026-08-12: Cleanup asset ~4.5GB** — audit GUID toàn diện (scene/prefab/material/code/editor tool) trước khi xóa; xóa pack không dùng: Creepy_Cat, Monster, OlegWER, fantasySpider, JMO Cartoon FX, Eric VFX + rác Builds/_Recovery/Sparrow PSD. GIỮ G-spot_Lab (pending integrate). Chi tiết mục 6.
+
 - [x] **UI Kenney (Blue + font Kenney Future)**: 2 gói `kenney_ui-pack` + `kenney_ui-pack-space-expansion` (1608 PNG, CC0) → đã convert Sprite bằng Editor tool (`Tools/Void Runner/Convert Kenney UI PNG to Sprites`) — UI MainMenu tông Blue, font game-y `Kenney Future SDF` (sampling 128), tự dựng bằng `Editor/MainMenuUIBuilder.cs` — ✅ hoàn tất (scene đã lưu + commit)
 - [x] **Game HUD + Game Over panel đẹp**: `Editor/HUDUIBuilder.cs` (dựng ScorePanel + coin icon + combo + panel GAME OVER + nút CHƠI LẠI/MENU, tự gán field UIManager); `UI/UIManager.cs` thêm RetryButton/MenuButton (Restart qua GameManager, Menu load scene MainMenu) — ✅ hoàn tất (scene đã lưu + commit)
 - [x] VFX: Particle khi collect coin/power-up + **screen shake** khi va chạm (Cinemachine Impulse) — ✅ xong (`VFXManager` tạo particle bằng code, không prefab; screen shake qua Impulse; tool `Setup VFX in Game Scene`)
@@ -246,6 +248,9 @@ Assets/
 | kenney_space-station-kit | 104 sprite + FBX (trạm vũ trụ lơ lửng) | [kenney.nl/assets/space-station-kit](https://kenney.nl/assets/space-station-kit) — CC0 |
 | kenney_music-jingles | BGM 8-bit | [kenney.nl](https://kenney.nl/assets/music-jingles) — CC0 |
 | Editor tools (`_Project/Editor/`) | Setup scene/UI/font/skybox tự động — 11 tool idempotent (chạy lại an toàn) | Tự viết (menu `Tools/Void Runner/`): KenneyFontImporter, MaterialLightingSetupTool, PostProcessingSetupTool, RefactorGameplayTool, ShipSelectSetupTool, SkyboxSetupTool, SpriteBatchConverter, UIOverhaulTool, VFXSetupTool, VoidMonsterSetupTool, **FPSInjectTool** (gắn FPS counter — 2026-08-12) + UIBuilderHelpers |
+| **G-spot_Lab Magic Energy (350M)** | 🔶 **PENDING INTEGRATE** — user tải để "thay thế kenney particle" nhưng CHƯA được code tham chiếu (0 ref); đã xác nhận giữ lại (2026-08-12) — dùng cho VFX tàu/coin sau này | [G-spot_Lab](https://assetstore.unity.com) — Magic Energy Seamless Textures Free |
+
+> **Cleanup asset 2026-08-12:** đã XÓA ~4.5GB pack không được game tham chiếu (0 ref trong scene/prefab/material/code — audit GUID toàn diện): `Creepy_Cat` (3D Scifi Kit 1.2G — bỏ rào/cổng từ v3f.5), `Monster` (1.4G — enemy duy nhất = Flying Beetle), `OlegWER` (High-Poly Asteroid 180M — user: "thiên thạch kì quá"), `fantasySpider` (11M), `JMO Assets` Cartoon FX (40M), `Eric VFX Studio` (15M) + rác: `Builds/` (Roll-a-Ball.exe cũ 102M), `_Recovery` (Unity crash), `Sparrow_Fighter/PSD File` (357M file nguồn). `Sparrow_Fighter` GIỮ (ShipCatalog index 1) — chỉ bỏ PSD.
 
 > Nguyên tắc: **không dùng asset gameplay từ Asset Store** — mọi logic tự viết (thể hiện skill).
 
