@@ -18,7 +18,10 @@ namespace VoidRunner.UI
         /// <summary>Dựng slider âm lượng dưới parent. Trả về Slider để gọi tiếp nếu cần.</summary>
         public static Slider Build(Transform parent, string name, Vector2 anchoredPos, Vector2 size, Color accent)
         {
-            var container = new GameObject(name, typeof(RectTransform));
+            // 2026-08-12 v2 (user reject style viền mảnh): container = HỘP CHỨA ĐẶC giống hệt nút
+            // Play/HowToPlay (solid màu BtnDark tím đậm — kế thừa vị trí + kích thước nút Sound cũ,
+            // hàng nút menu đồng bộ). KHÔNG dùng viền mảnh nữa.
+            var container = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             container.transform.SetParent(parent, false);
             var crt = (RectTransform)container.transform;
             crt.anchorMin = new Vector2(0.5f, 0.5f);
@@ -26,6 +29,9 @@ namespace VoidRunner.UI
             crt.pivot = new Vector2(0.5f, 0.5f);
             crt.anchoredPosition = anchoredPos;
             crt.sizeDelta = size;
+
+            var containerBg = container.GetComponent<Image>();
+            containerBg.color = new Color(0.29f, 0.17f, 0.54f, 1f); // tím đậm — khớp BtnDark (Sound cũ)
 
             // Label VOLUME (trái)
             var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
@@ -54,7 +60,7 @@ namespace VoidRunner.UI
             rt.anchorMax = new Vector2(1f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = new Vector2(55f, 0f);   // dịch sang phải sau label 110px
-            rt.sizeDelta = new Vector2(-110f, 26f);       // rộng = size.x - 110
+            rt.sizeDelta = new Vector2(-110f, 30f);       // rộng = size.x - 110 — cao hơn cho hộp to
 
             var bg = go.GetComponent<Image>();
             bg.color = new Color(1f, 1f, 1f, 0.18f);      // track nền mờ
