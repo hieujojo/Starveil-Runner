@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-12 (v3f.9.4–9.5) — Tuning nhỏ theo yêu cầu user (không phải bug)
+
+**Yêu cầu:** popup +10 gần lại 1 tí nữa · lửa tên lửa to hơn 1 tí · lửa dài hơn 1 tí xíu.
+
+**Thay đổi:** `VFXManager.SpawnPopupText` y 260→240→**228** (gần vào giữa màn hình — user: "hơi xa màn hình", sau đó "gần thêm 1 tí nữa, chỉ 1 tí"). `PlayerController.CreateFlameTrail` width 0.34→**0.45** (to hơn), `trail.time` 0.18→**0.22** (dài hơn).
+
+**Bài học:** với yêu cầu kiểu "chỉ 1 tí thôi" → mỗi lần đổi 1 biến số nhỏ (20% bước trước), commit riêng từng lần để user test nhanh; đừng đổi nhiều thứ cùng lúc.
+
+---
+
+## 2026-08-12 (FPS testing setup) — Công cụ đo FPS + tài liệu test
+
+**Thêm:** `Utils/FPSCounter.cs` (hiển thị FPS · frame ms · GC heap MB bằng OnGUI — không phụ thuộc Canvas/TMP, tắt/bật bằng **F3**) + `Editor/FPSInjectTool.cs` (`Tools/Void Runner/Add FPS Counter (Open Scene)` — idempotent: đã có thì giữ, chưa có thì gắn vào `Managers`) + `agent/TESTING.md` (hướng dẫn đo FPS bằng FPS counter lẫn Unity Profiler + checklist playtest).
+
+**Bài học:** (1) Đo FPS trong **Editor** chỉ để test nhanh — con số thật phải đo trên **Chrome sau khi build WebGL** (Editor nhanh hơn build thật 30–50%). (2) FPS counter bằng `OnGUI` đơn giản nhất (không cần sửa Canvas/không cần TMP) — đủ để dev, không phải production. (3) Công cụ test nên là **tool idempotent** (chạy nhiều lần an toàn) theo đúng pattern `Tools/Void Runner/*` của dự án.
+
+---
+
 ## 2026-08-12 (v3f.9.3) — Con bọ vẫn TRẮNG: prefab tham chiếu material MISSING (3d5d520e ×41)
 
 **Triệu chứng:** user: "con bọ vẫn màu trắng" (sau khi đã thêm đèn ấm v3f.9.2).

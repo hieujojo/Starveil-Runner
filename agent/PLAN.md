@@ -1,7 +1,7 @@
 # Void Runner — Kế hoạch hành động (Action Plan)
 
 > Hyper-casual endless runner 3D + **AI Chase** · Unity 6 URP · Game Production
-> ⚠️ **Trạng thái:** Đã chốt concept — CHƯA bắt đầu code. Tick checkbox khi hoàn thành từng task.
+> ✅ **Trạng thái:** G1–G2–G2.5–G3 xong gần hết — đang ở bước **Tuning 60 FPS** (2026-08-12). Tick checkbox khi hoàn thành từng task.
 
 ---
 
@@ -194,7 +194,7 @@ Assets/
 - [x] **Game HUD + Game Over panel đẹp**: `Editor/HUDUIBuilder.cs` (dựng ScorePanel + coin icon + combo + panel GAME OVER + nút CHƠI LẠI/MENU, tự gán field UIManager); `UI/UIManager.cs` thêm RetryButton/MenuButton (Restart qua GameManager, Menu load scene MainMenu) — ✅ hoàn tất (scene đã lưu + commit)
 - [x] VFX: Particle khi collect coin/power-up + **screen shake** khi va chạm (Cinemachine Impulse) — ✅ xong (`VFXManager` tạo particle bằng code, không prefab; screen shake qua Impulse; tool `Setup VFX in Game Scene`)
 - [x] VFX: **trail theo Enemy** (TrailRenderer tạo bằng code, nở rộng theo scale, clear khi restart) + **popup điểm** khi nhặt coin (DOTween bounce, pool, nhân combo, font Kenney Future) — ✅ xong
-- [x] VFX ambient (v3f.6 → v3f.9, 2026-08-12): **hệ sao trôi SpaceDrift** quanh player (chấm tròn mềm — shader `Sprites/Default`, vì URP ParticlesUnlit mặc định OPAQUE → khối vuông; xem CHANGELOG) + **lửa tên lửa** đuôi tàu — **v3f.9: BỎ HẲN hạt exhaust → TrailRenderer mượt** (gradient cam, cùng material vệt khói con bọ — đã chứng minh mượt; root cause cuối: chùm hạt dày + Bloom → blocky "hạt vuông cam") + Light cam lập lòe + self-heal + **bỏ hẳn vệt trail tím** (root cause: `Particles/Additive` không tồn tại trong URP — R3.1) — ⏳ **chờ user test xác nhận v3f.9** (lửa = dải cam mượt, hết hạt vuông) — kèm DIAG `[DIAG-SHIP]` xác nhận model
+- [x] VFX ambient (v3f.6 → v3f.9, 2026-08-12): **hệ sao trôi SpaceDrift** quanh player (chấm tròn mềm — shader `Sprites/Default`, vì URP ParticlesUnlit mặc định OPAQUE → khối vuông; xem CHANGELOG) + **lửa tên lửa** đuôi tàu — **v3f.9: BỎ HẲN hạt exhaust → TrailRenderer mượt** (gradient cam, cùng material vệt khói con bọ — đã chứng minh mượt; root cause cuối: chùm hạt dày + Bloom → blocky "hạt vuông cam") + Light cam lập lòe + self-heal + **bỏ hẳn vệt trail tím** (root cause: `Particles/Additive` không tồn tại trong URP — R3.1) — ✅ **user xác nhận OK 2026-08-12** (sao tròn + lửa = dải cam mượt, hết hạt vuông) — kèm v3f.9.1..9.5: xóa DIAG logs; con bọ nâu đậm (texture gốc ĐÃ nâu RGB 48,16,16 nhưng scene tối → đèn vàng ấm bám enemy, KHÔNG tint màu bằng code; material MISSING 3d5d520e×41 → `EnsureEnemyBrownMaterial` ép 1 material nâu thật); popup +10 gần lại (260→228); lửa tên lửa to hơn (width 0.34→0.45) + dài hơn (time 0.18→0.22)
 - [x] URP Post-processing: **Bloom, Vignette, Color Grading** (Global Volume) — ✅ hoàn tất: tool `PostProcessingSetupTool` tự dựng Global Volume + profile (`Settings/PostProcessing/VoidRunnerProfile.asset`) với 3 override + bật `renderPostProcessing` trên camera; đã chạy cho Game + MainMenu
 - [x] Material PBR tối giản đồng bộ (tông "hư không": tím/đen phát sáng); lighting + skybox nhất quán — ✅ tool `MaterialLightingSetupTool` (5 material phát sáng + Light lạnh + ambient/fog tím), đã chạy 2 scene
 - [x] **Unity Test Framework** — 24 test (EditMode 16 + PlayMode 8), **kết quả 24/24 xanh**; asmdef `VoidRunner.Core` (code chính) + `DOTween.Modules` (bài học predefined assembly)
@@ -203,7 +203,7 @@ Assets/
 - [x] **Task B — Enemy = QUÁI VẬT** (đã random 1 trong 3 — ĐỔI 2026-08-12: còn 1 enemy DUY NHẤT Flying Beetle, tool `Setup Enemy` gán 1 prefab) — ✅ commit `cd42fa9`
 - [x] **Task D — CHỌN TÀU ở MainMenu có preview 3D**: SaveSystem.SelectedShip; PlayerController.shipPrefabs (model SF Fighter/Sparrow thay primitive); ShipSelectManager (panel preview RenderTexture 256 + camera layer ShipPreview(6), nút < > SELECT CLOSE, tên tàu); tool `Setup Ship Select`; ShipCatalog (1 nguồn path + self-heal khi chưa gán prefab) — ✅ commit `decaa0e` + `de329c7`
 - [x] **Task C — VẬT CẢN = SciFi kit** (KHÔNG dùng asteroid — user: "cục thiên thạch giữa đường kì quá"): `SciFiObstacleSetupTool` — Ramp → **BarrierObstacle** (Fence_Long_01, 3D Scifi Kit Starter Kit — cam neon cảnh báo, bề ngang ≤4.2 gọn trong lane) + DynamicBox → **DroneObstacle** (Robot_Guardian, Sci fi Drones — bù pivot center đúng tâm lane); menu `Tools/Void Runner/Rebuild SciFi Obstacles` (idempotent) — ✅ commit `cbbf933` `04e8526` `48292ba` (2026-08-12) → **v3f.5: XÓA HẲN cổng/rào** (user: "cổng chứ đâu phải bãi mìn") — obstacle DUY NHẤT = **DroneObstacle** (Robot_Guardian) + `ObstacleFX` (đèn đỏ + hạt năng lượng + lơ lửng/xoay, tạo runtime); Ramp.asset → drone (cả 2 ObstacleData = drone, spawnWeight phân mật độ); xóa BarrierObstacle/Ramp.prefab/DynamicBox.prefab mồ côi — ✅ commit (v3f.5)
-- [ ] Tuning: độ khó fair; Unity Profiler đảm bảo **60 FPS**; test nhiều độ phân giải
+- [ ] Tuning: độ khó fair; đảm bảo **60 FPS** — 🔶 ĐANG TEST (2026-08-12): FPS counter `Tools/Void Runner/Add FPS Counter (Open Scene)` (hiện FPS/ms/GC, tắt bằng F3) + hướng dẫn đầy đủ `agent/TESTING.md`; **FPS thật phải đo trên Chrome sau khi build WebGL** (Editor nhanh hơn build thật); test nhiều độ phân giải
 - [ ] **WebGL build**: Resolution responsive · **Compression: Brotli** · WebGL 2.0 · Linear color space · chỉnh Initial Memory hợp lý (256–512 MB), hạn chế GC spike
 - [ ] **Upload itch.io** (chính): tài khoản → New project → Kind: HTML → nén thư mục WebGL `.zip` → mô tả + screenshot + GIF → Publish
 - [ ] **Upload Unity Play** (dự phòng): play.unity.com → Upload → Publish → copy link
@@ -245,7 +245,7 @@ Assets/
 | kenney_space-kit | 772 sprite + FBX (cột trụ, kiến trúc — ambient 2 bên đường) | [kenney.nl/assets/space-kit](https://kenney.nl/assets/space-kit) — CC0 |
 | kenney_space-station-kit | 104 sprite + FBX (trạm vũ trụ lơ lửng) | [kenney.nl/assets/space-station-kit](https://kenney.nl/assets/space-station-kit) — CC0 |
 | kenney_music-jingles | BGM 8-bit | [kenney.nl](https://kenney.nl/assets/music-jingles) — CC0 |
-| Editor tools (`_Project/Editor/`) | Setup scene/UI/font/skybox tự động — 10 tool idempotent (chạy lại an toàn) | Tự viết (menu `Tools/Void Runner/`): KenneyFontImporter, MaterialLightingSetupTool, PostProcessingSetupTool, RefactorGameplayTool, ShipSelectSetupTool, SkyboxSetupTool, SpriteBatchConverter, UIOverhaulTool, VFXSetupTool, VoidMonsterSetupTool + UIBuilderHelpers |
+| Editor tools (`_Project/Editor/`) | Setup scene/UI/font/skybox tự động — 11 tool idempotent (chạy lại an toàn) | Tự viết (menu `Tools/Void Runner/`): KenneyFontImporter, MaterialLightingSetupTool, PostProcessingSetupTool, RefactorGameplayTool, ShipSelectSetupTool, SkyboxSetupTool, SpriteBatchConverter, UIOverhaulTool, VFXSetupTool, VoidMonsterSetupTool, **FPSInjectTool** (gắn FPS counter — 2026-08-12) + UIBuilderHelpers |
 
 > Nguyên tắc: **không dùng asset gameplay từ Asset Store** — mọi logic tự viết (thể hiện skill).
 
