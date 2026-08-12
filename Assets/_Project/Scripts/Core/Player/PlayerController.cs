@@ -430,8 +430,9 @@ namespace VoidRunner.Core.Player
             // chiếu sáng thân tàu + halo quanh, tàu nổi bật hơn mọi thứ xung quanh.
             EnsureShipLight(ship.transform);
 
-            // v3f.10 (user: "con bọ có bóng, làm bóng với tàu luôn"): tắt shadow thật của model
-            // (tránh 2 bóng đè — light shadow mờ) + blob đen mờ trên track (nhẹ, chắc thấy).
+            // v3f.10.1 (user: "làm bóng với tàu"): tắt shadow thật của model tàu (quá nhỏ/mờ)
+            // → thay bằng blob đen mờ ĐẶT ĐÚNG TRÊN MẶT ROAD (road cube top y=0.05 — offset 0.93
+            // từ root y=1 → blob y=0.07, không còn chìm như v3f.10).
             foreach (var r in ship.GetComponentsInChildren<Renderer>())
             {
                 if (r != null) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;

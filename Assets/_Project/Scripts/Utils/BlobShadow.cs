@@ -24,9 +24,11 @@ namespace VoidRunner.Utils
         /// Scale bóng theo bounds thực (gộp mọi renderer con) × widthScale.
         /// </summary>
         /// <param name="target">Root transform của object (player/enemy).</param>
-        /// <param name="yOffset">Khoảng cách từ root xuống track (mặc định 0.98 — root y=1, track y=0).</param>
+        /// <param name="yOffset">Khoảng cách từ root xuống track. v3f.10.1: 0.98→0.93 — road là CUBE
+        /// scale y=0.1 (top y=0.05), blob trước đặt y=1-0.98=0.02 → CHÌM dưới mặt road (0.05) → vô
+        /// hình. 0.93 → blob y=0.07 = trên road 0.02 (hiển thị, không z-fighting).</param>
         /// <param name="widthScale">Hệ số phóng bóng so với bounds (mặc định 1.25 — bóng rộng hơn vật 1 chút).</param>
-        public static Transform Attach(Transform target, float yOffset = 0.98f, float widthScale = 1.25f)
+        public static Transform Attach(Transform target, float yOffset = 0.93f, float widthScale = 1.25f)
         {
             if (target == null) return null;
 
@@ -81,7 +83,7 @@ namespace VoidRunner.Utils
             if (_cachedMat != null) return;
 
             var mat = new Material(Shader.Find("Sprites/Default"));
-            mat.color = new Color(0f, 0f, 0f, 0.38f); // đen mờ — thấy trên track xanh nhưng không quá đặc
+            mat.color = new Color(0f, 0f, 0f, 0.5f); // v3f.10.1: 0.38→0.5 (road tối — cần đậm hơn để thấy)
             mat.mainTexture = BuildRadialTexture();
             _cachedMat = mat;
         }

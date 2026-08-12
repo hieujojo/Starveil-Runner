@@ -174,8 +174,9 @@ namespace VoidRunner.Core.World
             {
                 _animator.Play("flying", 0, 0f);
                 // FIX 2026-08-12 v3f.5.3 (user: "animation gì trong lúc chuyển động nhìn ko rõ"):
-                // clip flying (vỗ cánh) của model nhỏ/quá nhẹ → tăng tốc độ animation để thấy rõ cánh vỗ
-                _animator.speed = 1.25f;
+                // tăng tốc animation để thấy rõ cánh vỗ. v3f.10.1 (user: "cho animation con bọ chậm
+                // lại tí"): 1.25 → 1.0 (tốc độ gốc của clip — bay tự nhiên, không vỗ loạn)
+                _animator.speed = 1f;
             }
 
             // Vô hiệu hóa collider con — chỉ root collider trigger nuốt player (không đụng vật lý)
@@ -192,14 +193,10 @@ namespace VoidRunner.Core.World
                 enemy.transform.localScale = Vector3.one * s;
             }
 
-            // Bóng mềm dưới bọ (v3f.10 — user: "con bọ có bóng, làm bóng với tàu luôn"): tắt
-            // shadow thật của model (light soft shadow quá mờ + tránh 2 bóng đè nhau) → thay
-            // bằng quad đen mờ trên track (rẻ hơn, chắc chắn thấy trên dải track xanh).
-            foreach (var r in enemy.GetComponentsInChildren<Renderer>())
-            {
-                if (r != null) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            }
-            BlobShadow.Attach(transform); // gắn vào ROOT — không nghiêng theo rotation model
+            // v3f.10.1 (user: "sao sau khi sửa mất bóng con bọ luôn"): GIỮ shadow THẬT từ light
+            // (soft shadow đã hoạt động và user thấy trước fix) — KHÔNG tắt shadowCastingMode như
+            // v3f.10 (blob thay thế bị chìm dưới mặt road top y=0.05 → vô hình). Bọ dùng shadow
+            // thật, blob chỉ dùng cho tàu (bóng tàu quá nhỏ/mờ với shadow thật).
         }
 
         /// <summary>
@@ -298,7 +295,7 @@ namespace VoidRunner.Core.World
             _catching = false;
             if (_animator != null)
             {
-                _animator.speed = 1.25f; // đồng bộ với BuildEnemyVisual (v3f.5.3)
+                _animator.speed = 1f; // đồng bộ với BuildEnemyVisual (v3f.10.1: chậm lại)
                 _animator.Play("flying", 0, 0f);
             }
         }
