@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-08-12 (v3f.9.3) — Con bọ vẫn TRẮNG: prefab tham chiếu material MISSING (3d5d520e ×41)
+
+**Triệu chứng:** user: "con bọ vẫn màu trắng" (sau khi đã thêm đèn ấm v3f.9.2).
+
+**Root cause:** prefab `Flying Beetle.prefab` tham chiếu material `3d5d520e...` **41 lần** nhưng material này **KHÔNG tồn tại trong project** (không tìm thấy trong bất kỳ .meta nào) → các phần dùng nó render material MẶC ĐỊNH = **TRẮNG**. Body.mat (86 tham chiếu) có texture nâu đúng nhưng không phủ hết — phần lớn bề mặt bọ vẫn trắng. Log KHÔNG báo lỗi (Unity im lặng dùng default) → dễ lọt.
+
+**Fix:** `EnsureEnemyBrownMaterial` — quét renderer tìm material đã convert có `_BaseMap` (texture nâu thật của model), ép MỌI renderer/slot dùng chung material đó. KHÔNG đổi màu (vẫn texture gốc) — chỉ sửa material missing. Kèm popup +10 gần lại (260→240, user: "hơi xa màn hình").
+
+**Bài học:** (1) Model 3rd-party chất lượng thấp hay có material MISSING — phải kiểm tra GUID trong prefab có tồn tại trong project không (`grep guid Assets/*.meta`). (2) Renderer trắng/xám = thường là material missing hoặc URP/Lit thiếu _BaseMap — không phải lỗi ánh sáng. (3) MaterialFixer chỉ sửa material CÓ file — slot missing thì phải tự thay bằng material đúng.
+
+---
+
 ## 2026-08-12 (v3f.9.2) — Con bọ "màu nâu đậm": texture gốc ĐÃ nâu nhưng scene tối làm như đen
 
 **Triệu chứng:** user: "tôi nhớ con bọ còn có màu nâu — chuyển nó thành nâu đậm được ko; tuyệt đối không được đổi màu bằng code; nếu model không có thì thôi".
