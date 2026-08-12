@@ -56,12 +56,13 @@ namespace VoidRunner.Core.Player
         private InputReader _input;
         private float _lastInputX; // phát hiện CẠNH LÊN của phím (0→±1) để nhảy 1 lane ngay lập tức
 
-        // Đuôi tàu — lửa tên lửa (v3f.8): ánh sáng cam lập lòe + hạt exhaust TRÒN phun về sau.
-        // Bỏ hẳn cube "Thruster" cũ — user: "các ô vuông cam nối nhau" (cube vuông phát sáng + flicker
-        // + bloom nhìn như dãy ô vuông) → thay bằng Light cam + hạt tròn hình lưỡi lửa.
+        // Đuôi tàu — lửa tên lửa (v3f.9): ánh sáng cam lập lòe + vệt lửa MƯỢT (TrailRenderer).
+        // Bỏ hẳn hạt exhaust (v3f.8 vẫn bị user báo "hạt vuông cam" — chùm hạt dày + Bloom → dải
+        // blocky) → TrailRenderer cùng material mềm như vệt khói con bọ (đã chứng minh mượt, không
+        // bao giờ vuông trong project này).
         private Light _flameLight;
         private float _flameBaseIntensity = 1.5f;
-        private ParticleSystem _exhaust;
+        private TrailRenderer _flameTrail;
 
         // Material dùng chung cho tàu (tạo 1 lần, tông cyan neon — không phụ thuộc asset)
         private static Material _bodyMat;
@@ -213,11 +214,11 @@ namespace VoidRunner.Core.Player
         private void Update()
         {
             // Ánh sáng lửa đuôi lập lòe (PerlinNoise) — tắt hẳn khi chết
-            if (_flameLight == null && _exhaust == null) return;
+            if (_flameLight == null && _flameTrail == null) return;
             if (_isDead)
             {
                 if (_flameLight != null) _flameLight.intensity = 0f;
-                if (_exhaust != null && _exhaust.isPlaying) _exhaust.Stop();
+                if (_flameTrail != null) _flameTrail.emitting = false;
                 return;
             }
 
@@ -226,6 +227,7 @@ namespace VoidRunner.Core.Player
                 float f = 0.7f + 0.3f * Mathf.PerlinNoise(Time.time * 22f, 0f);
                 _flameLight.intensity = _flameBaseIntensity * f;
             }
+            if (_flameTrail != null && !_flameTrail.emitting) _flameTrail.emitting = true;
         }
 
         private void OnTriggerEnter(Collider other)
@@ -273,7 +275,11 @@ namespace VoidRunner.Core.Player
             SetShipRenderersVisible(true); // tàu phải hiện đầy đủ khi chơi lại (có thể đang ẩn do blink dở)
             if (_ship != null) _ship.localRotation = Quaternion.identity;
             if (_flameLight != null) _flameLight.intensity = _flameBaseIntensity; // bật lại lửa
-            _exhaust?.Play();
+            if (_flameTrail != null)
+            {
+                _flameTrail.emitting = true;
+                _flameTrail.Clear(); // teleport về start — xóa vệt cũ tránh kéo dài xuyên map
+            }
         }
 
         // ---------------------------------------------------------------------
@@ -299,7 +305,7 @@ namespace VoidRunner.Core.Player
                 Transform oldExhaust = existing.Find("Exhaust");
                 if (oldExhaust != null) DestroyImmediate(oldExhaust.gameObject);
                 _flameLight = CreateFlameLight(existing, new Vector3(0f, 0.12f, -0.85f));
-                _exhaust = CreateExhaustSystem(existing);
+                _flameTrail = CreateFlameTrail(existing, new Vector3(0f, 0.12f, -1.05f));
                 return;
             }
 
@@ -309,6 +315,8 @@ namespace VoidRunner.Core.Player
             if (shipPrefabs != null && idx >= 0 && idx < shipPrefabs.Length) prefab = shipPrefabs[idx];
             // Self-heal (R4.18): chưa gán prefab trong scene (tool chưa chạy) → tự tải qua ShipCatalog
             if (prefab == null) prefab = ShipCatalog.Load(idx);
+            // [DIAG-TẠM] xác nhận tàu đang dùng là model nào (hay primitive) — XÓA sau khi test OK
+            Debug.Log("[DIAG-SHIP] " + (prefab != null ? "model=" + prefab.name : "primitive"));
             if (prefab != null)
             {
                 BuildModelShip(prefab);
@@ -334,11 +342,9 @@ namespace VoidRunner.Core.Player
             // Động cơ sau đuôi (phát sáng cam)
             CreatePart(ship.transform, "Engine", new Vector3(0f, 0.12f, -0.62f), new Vector3(0.3f, 0.12f, 0.2f), _engineMat);
 
-            // Ngọn lửa đẩy sau đuôi (v3f.8): ánh sáng cam lập lòe — cảm giác đang bay
+            // Ngọn lửa đẩy sau đuôi (v3f.9): ánh sáng cam lập lòe + vệt lửa TRƠN (TrailRenderer)
             _flameLight = CreateFlameLight(ship.transform, new Vector3(0f, 0.12f, -0.85f));
-
-            // Hạt lửa tròn bay ngược (-Z) từ đuôi — hình lưỡi lửa (không còn cube vuông)
-            _exhaust = CreateExhaustSystem(ship.transform);
+            _flameTrail = CreateFlameTrail(ship.transform, new Vector3(0f, 0.12f, -1.05f));
 
             // FIX 2026-08-12 v3: Point Light bám tàu (nhánh primitive — giống model ship)
             EnsureShipLight(ship.transform);
@@ -409,9 +415,7 @@ namespace VoidRunner.Core.Player
             float liftY = scaled.size.y * 0.35f;
 
             _flameLight = CreateFlameLight(ship.transform, new Vector3(0f, liftY, rearZ));
-
-            _exhaust = CreateExhaustSystem(ship.transform);
-            _exhaust.transform.localPosition = new Vector3(0f, liftY, rearZ - 0.25f);
+            _flameTrail = CreateFlameTrail(ship.transform, new Vector3(0f, liftY, rearZ - 0.1f));
 
             // FIX 2026-08-12 v3 (user: "tàu bị mờ, muốn nó là thứ nổi bật nhất"): Point Light cyan
             // bám theo tàu — track tối đen, không có UI đè; tàu mờ vì THIẾU ÁNH SÁNG. Light này
@@ -436,72 +440,44 @@ namespace VoidRunner.Core.Player
         }
 
         /// <summary>
-        /// Hệ hạt lửa tên lửa (v3f.8 — effect MỚI thay "ô vuông cam nối nhau"): hạt TRÒN
-        /// (Sprites/Default + texture radial — đã chứng minh tròn với sao trôi) phun từ Cone hẹp
-        /// về sau, NỞ RỘNG + MỜ DẦN theo thời gian sống = hình lưỡi lửa. Không còn cube vuông.
+        /// Vệt lửa tên lửa (v3f.9 — effect MỚI): TrailRenderer ngắn sau đuôi, gradient cam
+        /// (sáng vàng → cam → trong suốt), cùng material mềm như vệt khói con bọ — render như
+        /// 1 dải ribbon MƯỢT, về mặt kỹ thuật không thể hiện ra "ô vuông".
         /// </summary>
-        private static ParticleSystem CreateExhaustSystem(Transform parent)
+        private static TrailRenderer CreateFlameTrail(Transform parent, Vector3 localPos)
         {
             var go = new GameObject("Exhaust");
             go.transform.SetParent(parent, false);
-            go.transform.localPosition = new Vector3(0f, 0.12f, -1.05f);
+            go.transform.localPosition = localPos;
 
-            var ps = go.AddComponent<ParticleSystem>();
-            var main = ps.main;
-            main.loop = true;
-            main.playOnAwake = true;
-            main.startLifetime = 0.35f;
-            main.startSpeed = -9f; // phun về sau (-Z)
-            main.startSize = 0.14f;
-            main.startColor = new Color(1f, 0.6f, 0.15f, 0.9f);
-            main.maxParticles = 120;
-            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            var trail = go.AddComponent<TrailRenderer>();
+            trail.time = 0.18f;             // vệt ngắn — chạy nhanh sẽ kéo dài tự nhiên như lưỡi lửa
+            trail.startWidth = 0.34f;
+            trail.endWidth = 0.02f;
+            trail.minVertexDistance = 0.08f;
+            trail.numCornerVertices = 4;
+            trail.numCapVertices = 2;
+            trail.autodestruct = false;
 
-            var emission = ps.emission;
-            emission.rateOverTime = 55f;
-
-            var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Cone; // chùm hẹp — không văng lung tung
-            shape.angle = 4f;
-            shape.radius = 0.1f;
-
-            // Lưỡi lửa: hạt nở rộng dần + mờ dần khi bay xa khỏi đuôi
-            var size = ps.sizeOverLifetime;
-            size.enabled = true;
-            size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(
-                new Keyframe(0f, 0.8f),
-                new Keyframe(0.5f, 1f),
-                new Keyframe(1f, 1.8f)));
-
-            var col = ps.colorOverLifetime;
-            col.enabled = true;
             var grad = new Gradient();
             grad.SetKeys(
                 new[]
                 {
-                    new GradientColorKey(new Color(1f, 0.85f, 0.5f), 0f),
-                    new GradientColorKey(new Color(1f, 0.5f, 0.12f), 0.5f),
+                    new GradientColorKey(new Color(1f, 0.8f, 0.35f), 0f),
+                    new GradientColorKey(new Color(1f, 0.5f, 0.1f), 0.45f),
                     new GradientColorKey(new Color(0.55f, 0.2f, 0.05f), 1f),
                 },
                 new[]
                 {
-                    new GradientAlphaKey(0.95f, 0f),
-                    new GradientAlphaKey(0.65f, 0.5f),
+                    new GradientAlphaKey(0.9f, 0f),
+                    new GradientAlphaKey(0.55f, 0.45f),
                     new GradientAlphaKey(0f, 1f),
                 });
-            col.color = grad;
+            trail.colorGradient = grad;
 
-            var renderer = go.GetComponent<ParticleSystemRenderer>();
-            // Tái sử dụng material mềm của VFXManager (cùng loại sao trôi — đã chứng minh tròn)
-            renderer.material = VFXManager.CreateSoftParticleMaterial();
-            renderer.renderMode = ParticleSystemRenderMode.Billboard;
-
-            // [DIAG-TẠM] xác nhận material thực tế — XÓA sau khi user test OK
-            Material m = renderer.sharedMaterial;
-            Debug.Log("[DIAG-FLAME] shader=" + (m != null && m.shader != null ? m.shader.name : "NULL")
-                + " tex=" + (m != null && m.mainTexture != null ? m.mainTexture.width + "x" + m.mainTexture.height : "NULL")
-                + " rate=55 size=0.14->x1.8");
-            return ps;
+            // Tái sử dụng material mềm của VFXManager (cùng loại vệt khói con bọ — đã mượt)
+            trail.material = VFXManager.CreateSoftParticleMaterial();
+            return trail;
         }
 
         /// <summary>Ánh sáng lửa cam lập lòe sau đuôi (thay cube Thruster cũ — v3f.8).</summary>

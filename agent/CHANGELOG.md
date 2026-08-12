@@ -5,6 +5,23 @@
 
 ---
 
+## 2026-08-12 (v3f.9) — VẪN "HẠT VUÔNG CAM" SAU KHI BỎ CUBE: đổi hẳn sang TrailRenderer
+
+**Triệu chứng:** user: "vẫn là các hạt vuông vuông màu cam, tại sao vậy". Kèm DIAG log `[DIAG-FLAME] shader=Sprites/Default tex=32x32` — material exhaust ĐÚNG (giống sao/coin, đều tròn).
+
+**Điều tra (không đoán):**
+- Exhaust dùng ĐÚNG material tròn (DIAG xác nhận), sao trôi + coin burst cùng material đó user xác nhận OK → hạt code không thể là ô vuông.
+- Model tàu (SF_Fighter/Sparrow) KHÔNG có sẵn ParticleSystem (đã kiểm tra prefab) → không phải model.
+- Tàu đang dùng = MODEL (ShipCatalog.Load hoạt động ở editor; scene không gán shipPrefabs).
+- SpeedLines màu xanh-trắng (không cam). ObstacleFX cũng dùng material tròn.
+→ **Kết luận: chùm hạt cam DÀY (19 hạt/3m) + Bloom → mỗi hạt sáng nhỏ bị bloom thành khối blocky → nhìn như "hạt vuông vuông"**. Hạt rời thì OK (sao thưa, coin rải rác), chùm dày thì vỡ blocky.
+
+**Fix (v3f.9 — đổi hẳn sang effect mới):** BỎ particle exhaust → **TrailRenderer** (cùng material mềm + gradient cam sáng→trong suốt, time 0.18s, width 0.34→0.02) — render như 1 dải ribbon mượt, về mặt kỹ thuật KHÔNG thể hiện "ô vuông". Giữ Light cam lập lòe. ResetToStart thêm `_flameTrail.Clear()` (teleport về start tránh vệt kéo dài xuyên map). Kèm DIAG mới `[DIAG-SHIP]` (xác nhận model/primitive).
+
+**Bài học:** debug VFX phải phân biệt được: (1) material có đúng không (DIAG in shader), (2) là MESH cube hay HẠT, (3) hiệu ứng hậu kỳ (Bloom) có biến chùm hạt dày thành blocky không. Khi material đã chứng minh đúng mà user vẫn báo vuông → nghi ngờ Bloom/độ dày chùm hạt, đổi loại hiệu ứng (particle → trail) thay vì chỉnh lại cùng loại.
+
+---
+
 ## 2026-08-12 (v3f.8) — "LỬA" vẫn là Ô VUÔNG CAM NỐI NHAU: thủ phạm là CUBE "Thruster", không phải hạt
 
 **Triệu chứng:** user: "các hạt sao đã oke nhưng tên lửa vẫn kì — các ô vuông cam nhỏ hơn nối liền nhau; cái tên lửa sau tàu đang render bằng effect gì vậy, đổi sang effect mới đi".
