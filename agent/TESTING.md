@@ -19,10 +19,11 @@
 
 ### Cách 1 — FPS counter trên màn hình (nhanh nhất)
 
-1. Mở scene cần test (MainMenu hoặc Game)
-2. Menu **Tools → Void Runner → Add FPS Counter (Open Scene)** (chạy lại an toàn — idempotent)
-3. **PLAY** → góc trái trên hiện: `FPS: 60 (16.6 ms)  GC: 180 MB [F3]`
-4. Bấm **F3** để ẩn/hiện counter
+1. Mở scene **MainMenu** → Menu **Tools → Void Runner → Add FPS Counter (Open Scene)** (chạy lại an toàn — idempotent)
+2. **PLAY** → góc trái trên hiện: `FPS: 60 (16.6 ms)  GC: 180 MB [F3]`
+3. Bấm **F3** để ẩn/hiện counter
+4. Counter **sống XUYÊN SCENE** (DontDestroyOnLoad + chống trùng) → vào Game/GameOver vẫn thấy
+5. Console cũng in **`[FPS-LOG]` mỗi 10 giây** (FPS/ms/GC/tên scene) — đọc số liệu từ Console cũng được, không cần nhìn màn hình
 
 **Chỉ số cần đạt (máy thường):**
 

@@ -7,8 +7,10 @@ namespace VoidRunner.Utils
 {
     /// <summary>
     /// FPS counter đơn giản để test hiệu năng khi PLAY.
-    /// - Hiển thị: FPS · frame time (ms) · GC heap (MB)
-    /// - Bật/tắt nhanh bằng phím F3 (mặc định bật) — dùng Input System (project activeInputHandler=1)
+    /// - Hiển thị trên màn hình: FPS · frame time (ms) · GC heap (MB) — bật/tắt bằng F3
+    /// - Sống XUYÊN SCENE (DontDestroyOnLoad): gắn 1 lần ở MainMenu là thấy cả ở Game/GameOver
+    ///   (kèm anti-duplicate: nếu đã có instance khác thì tự hủy)
+    /// - Log ra Console mỗi [logInterval] giây (mặc định 10s): [FPS-LOG] FPS=.. ms=.. GC=..MB
     /// - Không phụ thuộc Canvas/TMP — dùng OnGUI nên sống được mọi nơi.
     /// - Tool: Tools/Void Runner/Add FPS Counter (Open Scene) để gắn vào scene.
     /// </summary>
@@ -17,14 +19,28 @@ namespace VoidRunner.Utils
         [Tooltip("Hiện ngay khi vào Play hay phải bấm phím?")]
         public bool visibleOnStart = true;
 
+        [Tooltip("Log FPS ra Console mỗi X giây (0 = tắt log)")]
+        public float logInterval = 10f;
+
         private bool _visible;
         private readonly float[] _frameTimes = new float[60];
         private int _index;
         private float _fps;
+        private float _logTimer;
         private readonly StringBuilder _sb = new StringBuilder(128);
 
         private void Awake()
         {
+            // Anti-duplicate: object này (ví dụ bản scene Game) thấy bản cũ từ MainMenu đang
+            // DontDestroyOnLoad → tự hủy, giữ đúng 1 counter duy nhất.
+            FPSCounter[] all = FindObjectsByType<FPSCounter>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            if (all.Length > 1)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            DontDestroyOnLoad(gameObject);
             _visible = visibleOnStart;
         }
 
@@ -48,6 +64,19 @@ namespace VoidRunner.Utils
             }
 
             _fps = sum > 0f ? _frameTimes.Length / sum : 0f;
+
+            // Log định kỳ ra Console để đọc số liệu dễ hơn (không cần nhìn Game view).
+            if (logInterval > 0f)
+            {
+                _logTimer += Time.unscaledDeltaTime;
+                if (_logTimer >= logInterval)
+                {
+                    _logTimer = 0f;
+                    float ms = Time.unscaledDeltaTime * 1000f;
+                    float gcMb = Profiler.GetTotalAllocatedMemoryLong() / (1024f * 1024f);
+                    Debug.Log($"[FPS-LOG] FPS={_fps:F0} ms={ms:F1} GC={gcMb:F0}MB scene={UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+                }
+            }
         }
 
         private void OnGUI()

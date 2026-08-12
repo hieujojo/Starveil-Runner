@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-08-12 (FPS counter xuyên scene) — Counter biến mất khi vào Game scene
+
+**Triệu chứng:** user: "FPS chỉ hiện ở MainMenu, vào chơi không thấy".
+
+**Root cause:** tool `Add FPS Counter` gắn counter vào scene đang mở (MainMenu); khi bấm Play → `SceneManager.LoadScene("Game")` → GameObject cũ bị hủy → counter mất ở Game/GameOver.
+
+**Fix:** `FPSCounter.Awake` — `DontDestroyOnLoad` (sống xuyên scene) + **anti-duplicate** (`FindObjectsByType` → nếu đã có instance khác thì tự hủy — tránh 2 counter chồng khi quay lại MainMenu) + **log `[FPS-LOG]` mỗi 10s** ra Console (FPS/ms/GC/tên scene) để user đọc số liệu không cần nhìn Game view.
+
+**Bài học:** (1) Tool gắn component vào scene không đủ cho game có nhiều scene — nếu muốn tồn tại lâu dài phải `DontDestroyOnLoad` + anti-duplicate (đúng pattern `AudioManager` singleton của dự án). (2) Công cụ test nên vừa hiển thị trên màn hình vừa log ra Console — user đọc Console dễ hơn khi chụp/ghi kết quả.
+
+---
+
 ## 2026-08-12 (v3f.9.4–9.5) — Tuning nhỏ theo yêu cầu user (không phải bug)
 
 **Yêu cầu:** popup +10 gần lại 1 tí nữa · lửa tên lửa to hơn 1 tí · lửa dài hơn 1 tí xíu.
