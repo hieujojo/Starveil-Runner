@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-08-12 (v3f.9.2) — Con bọ "màu nâu đậm": texture gốc ĐÃ nâu nhưng scene tối làm như đen
+
+**Triệu chứng:** user: "tôi nhớ con bọ còn có màu nâu — chuyển nó thành nâu đậm được ko; tuyệt đối không được đổi màu bằng code; nếu model không có thì thôi".
+
+**Điều tra:** phân tích pixel texture thật `tbeetle texture orange_Albedo.tga` (4096×4096) bằng Python/PIL:
+- `RGB(48,16,16)` (nâu đỏ đậm) = **36.5%**, nâu khác ~17%, đen 12.6% — **cam = 0%** (dù tên file là "orange" — tên gây hiểu lầm!)
+- `_Color` của Body/Wings/Animation mat đều = trắng → màu hiển thị 100% từ texture = nâu đậm.
+→ Model ĐÃ CÓ màu nâu đậm, nhưng scene vũ trụ tối → nhìn như đen.
+
+**Fix:** KHÔNG đổi màu material (đúng rule user) — thêm **Point Light vàng ấm** (`EnsureEnemyLight`, intensity 2.2, range 7, idempotent) bám enemy → chiếu sáng texture nâu thật → lo rõ thành "nâu đậm" thấy được.
+
+**Bài học:** (1) ĐỪNG TIN TÊN file/asset — "tbeetle texture orange" hóa ra 0% cam; phải phân tích pixel/ảnh thật. (2) Muốn vật tối hiện màu rõ trong scene tối → thêm ÁNH SÁNG (không phải tint màu) — giữ nguyên màu texture thật. (3) User cấm đổi màu bằng code = cấm tint/tô lại màu; chiếu sáng để màu thật lo rõ là cách tôn trọng rule.
+
+---
+
 ## 2026-08-12 (v3f.9) — VẪN "HẠT VUÔNG CAM" SAU KHI BỎ CUBE: đổi hẳn sang TrailRenderer
 
 **Triệu chứng:** user: "vẫn là các hạt vuông vuông màu cam, tại sao vậy". Kèm DIAG log `[DIAG-FLAME] shader=Sprites/Default tex=32x32` — material exhaust ĐÚNG (giống sao/coin, đều tròn).
