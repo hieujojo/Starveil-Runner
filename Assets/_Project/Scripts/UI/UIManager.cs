@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using VoidRunner.Core;
 using VoidRunner.Systems.Save;
 using VoidRunner.Systems.Score;
+using VoidRunner.Systems.Leaderboard;
 
 namespace VoidRunner.UI
 {
@@ -31,6 +32,7 @@ namespace VoidRunner.UI
 
         private ScoreSystem _scoreSystem;
         private CanvasGroup _panelGroup;
+        private GameObject _leaderboardPanel;
 
         private void OnEnable()
         {
@@ -62,6 +64,15 @@ namespace VoidRunner.UI
             if (gameOverPanel != null && _panelGroup == null)
             {
                 _panelGroup = gameOverPanel.AddComponent<CanvasGroup>();
+            }
+
+            // Leaderboard online (Mục 2 UPGRADE_PLAN) — dựng panel + nút SUBMIT bằng code, idempotent
+            _leaderboardPanel = LeaderboardView.Ensure(gameOverPanel != null ? gameOverPanel.transform : null);
+            Transform submit = _leaderboardPanel != null ? _leaderboardPanel.transform.Find("SubmitButton") : null;
+            if (submit != null)
+            {
+                var btn = submit.GetComponent<Button>();
+                if (btn != null) btn.onClick.AddListener(SubmitLeaderboardScore);
             }
 
             _scoreSystem = FindAnyObjectByType<ScoreSystem>();
@@ -106,11 +117,24 @@ namespace VoidRunner.UI
                 _panelGroup.alpha = 0f;
                 _panelGroup.DOFade(1f, fadeDuration).SetUpdate(true);
             }
+
+            // Tải top 10 + hiện panel leaderboard (ẩn cùng panel Game Over)
+            LeaderboardView.Show(_leaderboardPanel);
         }
 
         private void HideGameOver()
         {
             gameOverPanel?.SetActive(false);
+            LeaderboardView.Hide(_leaderboardPanel);
+        }
+
+        /// <summary>Gửi điểm hiện tại lên leaderboard (nút SUBMIT trên panel Game Over).</summary>
+        private void SubmitLeaderboardScore()
+        {
+            if (_leaderboardPanel == null || _scoreSystem == null) return;
+            TMP_InputField input = _leaderboardPanel.transform.Find("NameInput")?.GetComponent<TMP_InputField>();
+            string name = input != null ? input.text : "AAA";
+            LeaderboardView.Submit(_leaderboardPanel, name, _scoreSystem.Score);
         }
 
         private void OnDestroy()
