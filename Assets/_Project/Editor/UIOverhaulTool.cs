@@ -313,7 +313,8 @@ namespace VoidRunner.EditorTools
             }
         }
 
-        [MenuItem(MenuRoot + "Fix MainMenu Spacing (dãn nút cho thoáng)")]
+        // Nằm riêng nhóm Fix/ (không lẫn vào Setup) — đây là fix layout, không phải setup (2026-08-15)
+        [MenuItem("Tools/Starveil Runner/Fix/MainMenu Spacing (dãn nút cho thoáng)")]
         public static void FixMainMenuSpacing()
         {
             var scene = SceneManager.GetActiveScene();
