@@ -420,7 +420,16 @@ namespace VoidRunner.Systems.VFX
         {
             if (_cachedSoftMaterial == null)
             {
-                var mat = new Material(Shader.Find("Sprites/Default"));
+                var shader = Shader.Find("Sprites/Default");
+                if (shader == null)
+                {
+                    // 2026-08-15: shader bị strip khỏi WebGL build (không .mat asset nào tham chiếu) →
+                    // Shader.Find null → new Material(null) = ArgumentNullException → mất toàn bộ VFX hạt.
+                    // Fix gốc: tool "Setup Always Included Shaders" + build lại. Chống crash tại đây.
+                    Debug.LogWarning("[VFXManager] Không tìm thấy shader 'Sprites/Default' (bị strip khỏi build?) — VFX hạt sẽ không hiển thị. Chạy tool 'Tools/Void Runner/Setup Always Included Shaders' rồi build lại.");
+                    return null;
+                }
+                var mat = new Material(shader);
                 mat.mainTexture = BuildSoftTexture();
                 _cachedSoftMaterial = mat;
             }
