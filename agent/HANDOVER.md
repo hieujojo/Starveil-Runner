@@ -72,10 +72,10 @@ Assets/_Project/
 │   ├── Data/            # ScriptableObject defs (ObstacleData, PowerUpData) — asset thật ở _Project/ScriptableObjects/
 │   ├── Utils/           # ObjectPool<T>, BlobShadow, MaterialFixer
 │   └── (VoidRunner.Core.asmdef — custom assembly, test reference được)
-├── Editor/              # ★ Tool tự động hóa — menu "Tools → Void Runner / Starveil Runner"
-│   ├── UIOverhaulTool, SkyboxSetupTool, VFXSetupTool, MaterialLightingSetupTool,
-│   ├── PostProcessingSetupTool, ShipSelectSetupTool, EnemyMonsterSetupTool,
-│   ├── SciFiObstacleSetupTool, RefactorGameplayTool, BuildOptimizerTool, RenameGameTitleTool...
+├── Editor/              # ★ Tool tự động hóa — menu "Tools → Starveil Runner" (Setup / Optimize / Fix)
+│   ├── Setup/: UIOverhaulTool (UI Theme), SkyboxSetupTool, VFXSetupTool, MaterialLightingSetupTool,
+│   ├── Setup/: PostProcessingSetupTool, ShipSelectSetupTool, EnemyMonsterSetupTool, SciFiObstacleSetupTool
+│   ├── Optimize/: BuildOptimizerTool · Fix/: AlwaysIncludedShadersTool + helper UIBuilderHelpers
 ├── Tests/               # Unity Test Framework: 16 EditMode + 8 PlayMode (24 test)
 ├── Scenes/              # MainMenu.unity (index 0) → Game.unity (index 1)
 ├── Prefabs/ · ScriptableObjects/ · Art/ · Audio/

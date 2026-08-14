@@ -97,6 +97,8 @@
 
 ## ⚙️ NHÓM 6 — Workflow Unity / Git (thủ tục bất biến)
 
+- **R5.22 — Shader chỉ dùng RUNTIME (Shader.Find) PHẢI được thêm vào Always Included Shaders nếu không có .mat asset nào tham chiếu** — nếu không, WebGL build STRIP shader đó → `Shader.Find` trả null → `new Material(null)` = `ArgumentNullException: shader` → model/VFX biến mất im lặng (build vẫn pass, không lỗi ở Editor). Kiểm tra: `grep -rl '<tên shader>' Assets --include='*.mat'` = 0 file → phải thêm. Tool có sẵn: `Tools/Starveil Runner/Fix/Always Included Shaders`. Khi deploy WebGL lỗi render mà Editor OK → đọc browser console bằng headless Chrome (`--enable-unsafe-swiftshader` + CDP) để bắt exception thật. *(Bug 2026-08-15: Sprites/Default + URP/Unlit bị strip → mất bóng/VFX/vạch lane trên Unity Play.)*
+
 - **R6.1** — File .cs mới khi Unity đang mở **chưa có .meta** → commit code trước, chờ Unity sinh .meta, commit .meta sau (KHÔNG tự tay gõ GUID).
 - **R6.2** — File scene/prefab đang mở trong Unity thì đĩa chưa cập nhật — phải **Ctrl+S** rồi mới grep/commit.
 - **R6.3** — Trailing whitespace file Unity tự sinh (`.meta`, scene) → **loại trừ khỏi `git diff --check`**, không sửa file hệ thống.
