@@ -18,7 +18,7 @@ namespace VoidRunner.EditorTools
     {
         private const string ProfilePath = "Assets/_Project/Settings/PostProcessing/VoidRunnerProfile.asset";
 
-        [MenuItem("Tools/Void Runner/Setup Post-Processing in Open Scene")]
+        [MenuItem("Tools/Starveil Runner/Setup/Post-Processing (Open Scene)")]
         public static void SetupPostProcessing()
         {
             var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();

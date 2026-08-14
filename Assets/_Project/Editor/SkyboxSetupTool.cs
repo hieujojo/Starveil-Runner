@@ -22,7 +22,7 @@ namespace VoidRunner.EditorTools
     /// </summary>
     public static class SkyboxSetupTool
     {
-        private const string MenuRoot = "Tools/Void Runner/";
+        private const string MenuRoot = "Tools/Starveil Runner/Setup/";
 
         private const string NebulaTexPath = "Assets/Nebula Skyboxes/Nebula_02_Cubemap.exr"; // tím đỏ hư không
         private const string NebulaMatPath = "Assets/_Project/Materials/Skybox/NebulaSkybox.mat";
@@ -38,10 +38,10 @@ namespace VoidRunner.EditorTools
             ("Assets/Nebula Skyboxes/Nebula_04_Cubemap.exr", "Assets/_Project/Materials/Skybox/Nebula04.mat", "Nebula04"),
         };
 
-        [MenuItem(MenuRoot + "Setup Skybox (Nebula — tinh vân hư không)")]
+        [MenuItem(MenuRoot + "Skybox (Nebula — tinh vân hư không)")]
         public static void SetupNebula() => Setup(useNebula: true);
 
-        [MenuItem(MenuRoot + "Setup Skybox (SpaceSkies Purple — nhẹ hơn)")]
+        [MenuItem(MenuRoot + "Skybox (SpaceSkies Purple — nhẹ hơn)")]
         public static void SetupSpaceSkies() => Setup(useNebula: false);
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace VoidRunner.EditorTools
         /// vào GO "Managers" trong scene đang mở (Game) — skybox đổi dần theo độ khó.
         /// Idempotent — chạy lại không nhân đôi.
         /// </summary>
-        [MenuItem(MenuRoot + "Setup Nebula Difficulty (Task B — 4 skybox theo độ khó)")]
+        [MenuItem(MenuRoot + "Nebula Difficulty (4 skybox theo độ khó)")]
         public static void SetupNebulaDifficulty()
         {
             var scene = SceneManager.GetActiveScene();
@@ -197,8 +197,8 @@ namespace VoidRunner.EditorTools
             return mat;
         }
 
-        [MenuItem(MenuRoot + "Setup Skybox (Nebula — tinh vân hư không)", true)]
-        [MenuItem(MenuRoot + "Setup Skybox (SpaceSkies Purple — nhẹ hơn)", true)]
+        [MenuItem(MenuRoot + "Skybox (Nebula — tinh vân hư không)", true)]
+        [MenuItem(MenuRoot + "Skybox (SpaceSkies Purple — nhẹ hơn)", true)]
         private static bool Validate()
         {
             var scene = SceneManager.GetActiveScene();

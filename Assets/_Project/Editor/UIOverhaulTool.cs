@@ -23,7 +23,7 @@ namespace VoidRunner.EditorTools
     /// </summary>
     public static class UIOverhaulTool
     {
-        private const string MenuRoot = "Tools/Void Runner/";
+        private const string MenuRoot = "Tools/Starveil Runner/Setup/";
 
         // ===== Tông màu chuẩn =====
         private static readonly Color PanelBg = new Color(0.055f, 0.024f, 0.125f, 0.92f);      // #0E0620
@@ -38,7 +38,7 @@ namespace VoidRunner.EditorTools
         private static readonly Color DangerRed = new Color(1f, 0.38f, 0.38f, 1f);             // GAME OVER
         private static readonly Color OutlineVoid = new Color(0.1f, 0f, 0.3f, 1f);             // viền tím hư không
 
-        [MenuItem(MenuRoot + "Overhaul UI (ép chuẩn tông hư không — 2 scene)")]
+        [MenuItem(MenuRoot + "UI Theme (ép chuẩn tông hư không — 2 scene)")]
         public static void Overhaul()
         {
             var scene = SceneManager.GetActiveScene();
@@ -407,7 +407,7 @@ namespace VoidRunner.EditorTools
             return true;
         }
 
-        [MenuItem(MenuRoot + "Overhaul UI (ép chuẩn tông hư không — 2 scene)", true)]
+        [MenuItem(MenuRoot + "UI Theme (ép chuẩn tông hư không — 2 scene)", true)]
         private static bool ValidateOverhaul()
         {
             return Object.FindAnyObjectByType<Canvas>() != null;

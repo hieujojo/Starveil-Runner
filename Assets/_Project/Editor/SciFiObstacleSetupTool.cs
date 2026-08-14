@@ -25,7 +25,7 @@ namespace VoidRunner.EditorTools
     /// </summary>
     public static class SciFiObstacleSetupTool
     {
-        private const string MenuRoot = "Tools/Void Runner/";
+        private const string MenuRoot = "Tools/Starveil Runner/Setup/";
 
         // Nguồn model — gói GIỮ LOCAL qua .gitignore (xem .gitignore mục assets 3rd-party)
         private const string DroneSourcePath = "Assets/Sci_fi_Drones/Prefabs/Robot_Guardian.prefab";
@@ -39,7 +39,7 @@ namespace VoidRunner.EditorTools
         private const string OldBarrierPrefabPath = "Assets/_Project/Prefabs/Obstacles/BarrierObstacle.prefab";
         private const string OldBarrierMatPath = "Assets/_Project/Materials/Obstacles/BarrierWarning.mat";
 
-        [MenuItem(MenuRoot + "Setup Obstacle = Drone (Robot_Guardian)")]
+        [MenuItem(MenuRoot + "Obstacle = Drone (Robot_Guardian)")]
         public static void Setup()
         {
             SetupCore();

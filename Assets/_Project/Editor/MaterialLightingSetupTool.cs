@@ -14,7 +14,7 @@ namespace VoidRunner.EditorTools
     {
         private const string MaterialsFolder = "Assets/_Project/Art/Materials";
 
-        [MenuItem("Tools/Void Runner/Setup Material & Lighting (Open Scene)")]
+        [MenuItem("Tools/Starveil Runner/Setup/Material & Lighting (Open Scene)")]
         public static void SetupMaterialAndLighting()
         {
             var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
