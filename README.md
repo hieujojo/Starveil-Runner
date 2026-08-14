@@ -5,7 +5,7 @@
 [![Unity](https://img.shields.io/badge/Unity-6.x-222222?logo=unity&logoColor=white)](https://unity.com)
 [![C#](https://img.shields.io/badge/C%23-.NET-239120?logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
 [![URP](https://img.shields.io/badge/Render%20Pipeline-URP%2017-2196F3)](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@17/manual/index.html)
-[![CI](https://img.shields.io/github/actions/workflow/status/lothric11/starveil-runner/build-test.yml?label=CI%20Build%20%26%20Test)](https://github.com/lothric11/starveil-runner/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/hieujojo/Void-Runner/build-test.yml?label=CI%20Build%20%26%20Test)](https://github.com/hieujojo/Void-Runner/actions)
 
 > **🚀 Chơi thử ngay:** [itch.io](https://lothric11.itch.io/starveil-runner) · [Unity Play](https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl)
 
