@@ -15,11 +15,11 @@ namespace VoidRunner.EditorTools
     /// </summary>
     public static class EnemyMonsterSetupTool
     {
-        private const string MenuRoot = "Tools/Void Runner/";
+        private const string MenuRoot = "Tools/Starveil Runner/Setup/";
 
         private const string EnemyPrefabPath = "Assets/Flying Beetle/prefab/Flying beetle.prefab";
 
-        [MenuItem(MenuRoot + "Setup Enemy (Flying Beetle — 1 kẻ thù duy nhất)")]
+        [MenuItem(MenuRoot + "Enemy (Flying Beetle — 1 kẻ thù duy nhất)")]
         public static void Setup()
         {
             var scene = SceneManager.GetActiveScene();

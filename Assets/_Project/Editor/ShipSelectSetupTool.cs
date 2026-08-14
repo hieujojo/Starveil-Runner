@@ -17,12 +17,12 @@ namespace VoidRunner.EditorTools
     /// </summary>
     public static class ShipSelectSetupTool
     {
-        private const string MenuRoot = "Tools/Void Runner/";
+        private const string MenuRoot = "Tools/Starveil Runner/Setup/";
 
         // Một nguồn sự thật duy nhất — dùng ShipCatalog (tránh lệch path giữa tool và self-heal)
         private static readonly string[] ShipPaths = ShipCatalog.ShipPaths;
 
-        [MenuItem(MenuRoot + "Setup Ship Select (Task D — 2 fighter)")]
+        [MenuItem(MenuRoot + "Ship Select (2 fighter)")]
         public static void Setup()
         {
             var scene = SceneManager.GetActiveScene();

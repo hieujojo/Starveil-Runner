@@ -18,9 +18,9 @@ namespace VoidRunner.EditorTools
     /// </summary>
     public static class VFXSetupTool
     {
-        private const string MenuRoot = "Tools/Void Runner/";
+        private const string MenuRoot = "Tools/Starveil Runner/Setup/";
 
-        [MenuItem(MenuRoot + "Setup VFX in Game Scene")]
+        [MenuItem(MenuRoot + "VFX in Game Scene")]
         public static void Setup()
         {
             var scene = SceneManager.GetActiveScene();
