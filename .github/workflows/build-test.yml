@@ -27,7 +27,7 @@ jobs:
             Library-Test-
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v3
+        uses: game-ci/unity-activate@v2 # CHỈ có v2 — v3 không tồn tại (CI fail "Set up job" 2026-08-15)
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -74,7 +74,7 @@ jobs:
             Library-WebGL-
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v3
+        uses: game-ci/unity-activate@v2 # CHỈ có v2 — v3 không tồn tại (CI fail "Set up job" 2026-08-15)
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
