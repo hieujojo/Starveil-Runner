@@ -25,6 +25,8 @@ namespace VoidRunner.Core.World
         [SerializeField] private Transform player;
         [SerializeField] private ObstacleManager obstacleManager;
         [SerializeField] private PickupSpawner pickupSpawner;
+        [SerializeField, Tooltip("UPGRADE_PLAN Mục 6: spawn PatrollerDrone (enemy mới) — để trống = tắt")]
+        private PatrollerSpawner patrollerSpawner;
 
         private ObjectPool<Tile> _pool;
         private readonly List<Tile> _activeTiles = new List<Tile>();
@@ -61,6 +63,9 @@ namespace VoidRunner.Core.World
             if (pickupSpawner == null) pickupSpawner = FindAnyObjectByType<PickupSpawner>();
             // Coin phải chọn lane KHÁC obstacle (fix 2026-08-11: obstacle đè lên xu)
             if (pickupSpawner != null) pickupSpawner.BindObstacleManager(obstacles);
+            if (patrollerSpawner == null) patrollerSpawner = FindAnyObjectByType<PatrollerSpawner>();
+            // Patroller (enemy mới Mục 6) cần biết player + obstacle manager
+            if (patrollerSpawner != null) patrollerSpawner.Bind(obstacles, playerRef);
             _initialized = true;
         }
 
@@ -94,6 +99,8 @@ namespace VoidRunner.Core.World
                 Tile tile = _activeTiles[i];
                 if (tile.IsBehind(player, recycleDistance))
                 {
+                    // Patroller đi cùng tile bị recycle → trừ đếm (Mục 6)
+                    patrollerSpawner?.NotifyRecycled();
                     _pool.Release(tile);
                     _activeTiles.RemoveAt(i);
                 }
@@ -126,6 +133,7 @@ namespace VoidRunner.Core.World
                 obstacleManager?.TrySpawn(tile);
             }
             pickupSpawner?.TrySpawn(tile);
+            patrollerSpawner?.TrySpawn(tile);
         }
     }
 }
