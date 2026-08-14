@@ -410,6 +410,7 @@ docs(readme): cập nhật README với link demo
 3. Subject **KHÔNG** có dấu chấm cuối
 4. Viết commit body khi cần giải thích thêm logic hoặc lý do thay đổi
 5. Asset của Unity (`prefab`, `scene`, `.meta`) luôn commit **kèm trong cùng commit** với code liên quan — không commit file `.meta` riêng lẻ, không xóa `.meta` của asset đang được tham chiếu
+6. **KHÔNG thêm footer `🤖 Generated with Codebuff` / `Co-Authored-By: Codebuff` vào commit** (quyết định 2026-08-15 — user yêu cầu bỏ contributor AI khỏi GitHub; lịch sử đã rewrite sạch bằng `git filter-branch`, xem CHANGELOG). Commit chỉ gồm subject + body thuần. Khi AI (Codebuff/Freebuff) commit thay user: KHÔNG ghi tên tác giả khác — commit hiển thị đúng tên GitHub của user.
 
 ## Validation
 

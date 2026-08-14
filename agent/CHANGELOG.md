@@ -3,6 +3,16 @@
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
 
+## 2026-08-15 (xóa contributor "Codebuff" khỏi GitHub) — Rewrite lịch sử 19 commit + rule mới
+
+> User: "bỏ cái contributor được ko" (thấy GitHub hiện thêm contributor "Codebuff" — email `noreply@codebuff.com` xuất hiện trong footer commit `Co-Authored-By`).
+
+- **Bản chất:** tab Contributors trên GitHub = tự đếm từ **email author** của từng commit. Commit nào có footer `Co-Authored-By: Codebuff` → GitHub đếm Codebuff là đồng tác giả. **KHÔNG có nút xóa thủ công** — phải sửa lịch sử commit.
+- **Quy trình an toàn (3 lớp backup TRƯỚC khi force-push):** (1) tag `backup-before-history-rewrite` + branch `backup/main-current` đều trỏ `4375aac` (trạng thái trước rewrite) → push lên remote; (2) verify backup tồn tại qua `git ls-remote`; (3) reflog local giữ commit cũ ~90 ngày.
+- **Rewrite:** `git filter-branch --msg-filter` lọc bỏ 2 dòng footer (`Co-Authored-By: Codebuff` + `🤖 Generated with Codebuff` — pass 2 dùng chuỗi ASCII "Generated with Codebuff" vì grep emoji không khớp do encoding) cho 19 commit (range `a34a347..main`). **Verify:** `git log --format=%B | grep -c Codebuff` = 0 · tree khớp backup 100% (`cc63609...`) · force-push bằng `--force-with-lease` (an toàn hơn force thường). Kết quả GitHub API: contributors = chỉ còn `hieujojo (282 commits)`.
+- **Rule mới:** REFERENCE.md PART 4 quy tắc 6 + RULES.md R7.25 — cấm footer Codebuff trong commit; AI commit thay user không ghi tên tác giả khác.
+- **Bài học (R7.25):** (1) footer `Co-Authored-By` tạo contributor giả trên GitHub — nếu user không muốn AI hiện diện trong repo, KHÔNG thêm footer từ đầu (dễ hơn rewrite); (2) rewrite lịch sử an toàn = backup tag+branch push lên remote TRƯỚC + `--force-with-lease` + verify tree hash khớp sau rewrite; (3) filter-branch grep emoji có thể fail do encoding — filter theo phần ASCII của chuỗi.
+
 ## 2026-08-15 (UPGRADE_PLAN — đợt code: Mục 1, 2, 3, 5, 6) — Toàn bộ phần AI xong, chờ user setup
 
 > User: "cái nào cần code thì bạn ưu tiên làm trước đi, xong kêu tôi setup là được". Đợt này AI làm hết phần code/tài liệu của 5/6 mục; user chỉ cần setup + đo đạc + quay video.
