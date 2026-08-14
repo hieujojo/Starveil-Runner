@@ -3,6 +3,32 @@
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
 
+## 2026-08-15 (UPGRADE_PLAN — đợt code: Mục 1, 2, 3, 5, 6) — Toàn bộ phần AI xong, chờ user setup
+
+> User: "cái nào cần code thì bạn ưu tiên làm trước đi, xong kêu tôi setup là được". Đợt này AI làm hết phần code/tài liệu của 5/6 mục; user chỉ cần setup + đo đạc + quay video.
+
+- **Mục 1 — README nâng cấp:** GIF placeholder đầu trang + badge CI + link chơi thử ngay header + **ASCII gameplay diagram** (lane/drone/coin/ship/beetle) + section **"Why this project"** (kể chuyện đúng số liệu) + sửa "24 test" → "31 test". Chờ user: quay GIF + trailer.
+- **Mục 2 — Leaderboard (Supabase):** `Systems/Leaderboard/` (Entry + Config SO + Service: UnityWebRequest POST/GET, offline silent-fail, SanitizeName 3 ký tự arcade, ParseTopScores bọc mảng JSON) + `UI/LeaderboardView.cs` (panel top 10 trong Game Over — pattern CreditsPanelBuilder, NameInput + SUBMIT + status) + tích hợp UIManager + `docs/supabase-leaderboard.sql` (bảng + index + **Row Level Security** 2 policy public read/insert) + EditMode 8 test + PlayMode 3 test. Chờ user: tạo Supabase + dán URL/key.
+- **Mục 3 — CI/CD:** `.github/workflows/build-test.yml` (GameCI: unity-test-runner testMode=all → unity-builder WebGL → upload artifact; cache Library; `unityVersion: 6000.4.5f1`) + badge CI trên README. `unity-activate@v3` tự activate + return license cuối job (đã verify docs — KHÔNG cần job deactivate riêng). Chờ user: secrets + push.
+- **Mục 5 — Performance doc:** `docs/PERFORMANCE.md` — template (mục tiêu FPS, cách đo Editor/WebGL/Android, bảng kết quả trống, điểm nóng texture đã xử lý, checklist tối ưu). Chờ user: chụp Profiler.
+- **Mục 6 — Enemy mới PatrollerDrone:** `Core/World/PatrollerDrone.cs` (drone lắc NGANG giữa 3 lane phía TRƯỚC player — cos, phase random hóa, đụng = `RaiseObstacleHit` CÙNG luật obstacle R0.4) + `Core/World/PatrollerSpawner.cs` (spawn theo tile pattern PickupSpawner: xác suất thấp, max 1 concurrent, ≥3 tile cách nhau, chỉ spawn tile có obstacle) + TileSpawner tích hợp (Bind/TrySpawn/NotifyRecycled) + `Editor/PatrollerDroneSetupTool.cs` (dựng prefab từ DroneObstacle, idempotent) + PlayMode 3 test. Chờ user: chạy tool dựng prefab + gắn spawner.
+- **Bài học (R7.24):** (1) toàn bộ phần "AI làm" của UPGRADE_PLAN đã chuyển sang code xong — user chỉ setup; tổng test dự kiến **45** (EditMode 24 + PlayMode 21) — chạy Test Runner xác nhận trước khi ghi lên CV; (2) GameCI `unity-test-runner`/`unity-builder` tự activate+return license — thêm job deactivate riêng là thừa (fail vì license đã trả); (3) workflow cần `unityVersion` khớp `ProjectVersion.txt` (6000.4.5f1) để dùng đúng docker image.
+
+## 2026-08-15 (UPGRADE_PLAN Mục 2) — Online Leaderboard (Supabase) — code xong, chờ setup
+
+> User: "cái nào cần code thì bạn ưu tiên làm trước đi, xong kêu tôi setup là được".
+
+- **THÊM MỚI:** hệ thống leaderboard online — gửi/nhận điểm qua **Supabase REST API** (UnityWebRequest — không cần package nào):
+  - `Systems/Leaderboard/LeaderboardEntry.cs` — 1 dòng điểm {name, score} (serializable, khớp JSON Supabase).
+  - `Systems/Leaderboard/LeaderboardConfig.cs` — ScriptableObject cấu hình (url + anonKey + tableName + maxEntries); chưa có asset/URL rỗng → chạy **OFFLINE** (game vẫn chơi bình thường — nguyên tắc: leaderboard KHÔNG bao giờ chặn gameplay).
+  - `Systems/Leaderboard/LeaderboardService.cs` — static, thuần (không phụ thuộc UI): `SubmitScore` (POST) + `FetchTopScores` (GET order=score.desc limit=n) + `ParseTopScores` (bọc mảng JSON — JsonUtility không parse top-level array) + `SanitizeName` (tên arcade: in hoa, tối đa 3 ký tự, chỉ chữ+số). Offline/lỗi server → callback false + 1 lần warning, không crash.
+  - `UI/LeaderboardView.cs` — builder UI runtime (pattern CreditsPanelBuilder): panel top 10 trong Game Over (nền tím đen + viền cyan + tiêu đề vàng) + NameInput 3 ký tự + nút SUBMIT + status (Saved!/Offline). Idempotent.
+  - `UI/UIManager` — dựng panel trong Start, Show khi Game Over (tự tải top 10), Hide khi Restart, SUBMIT gửi điểm hiện tại.
+  - `docs/supabase-leaderboard.sql` — SQL bảng `leaderboard` + index + **Row Level Security** (mở đúng 2 policy: public SELECT + public INSERT — anon key chỉ ghi/đọc, không sửa/xóa).
+  - Tests: `EditMode/LeaderboardServiceEditTests.cs` (8 test: SanitizeName ×6 + ParseTopScores ×3) + `PlayMode/LeaderboardViewPlayTests.cs` (3 test: panel dựng + hiện khi Game Over + idempotent + ẩn khi Restart).
+- **Bài học (R7.23):** (1) Supabase bắt buộc Row Level Security — game dùng anon key nên phải `create policy ... for select using (true)` + `for insert with check (true)`, nếu không mọi request trả 401/empty dù URL/key đúng; (2) JsonUtility KHÔNG parse top-level JSON array — phải bọc `{"data":[...]}`; (3) tên arcade 3 ký tự = chuẩn của arcade máy thật — SanitizeName + characterLimit 3 + onValidateInput (chỉ chữ+số, in hoa) khớp nhau.
+- **Setup user cần làm (sau khi tôi tổng hợp checklist):** tạo Supabase project → chạy SQL → Settings→API copy URL + anon key → Unity tạo `LeaderboardConfig` asset (Resources) → build lại. Xem UPGRADE_PLAN Mục 2.
+
 ## 2026-08-15 (build zip 130MB — KHÔNG phải 40–60MB) - Chẩn đoán + fix build size
 
 > User: "thật ra hiện tại file tôi zip lại sau khi build là 130mb á, chứ ko phải 40-60mb đâu, tìm cách khắc phục vấn đề này đi".

@@ -37,15 +37,17 @@
 
 | # | Mục | Thời lượng | Ưu tiên | Trạng thái |
 |---|---|---|---|---|
-| 1 | **GIF gameplay + README nâng cấp + trailer video** | 1 buổi | 🔥 Ngay | ☐ |
-| 2 | **Online Leaderboard (Supabase)** | 2–3 ngày | 🔥 1 | ☐ |
-| 3 | **CI/CD GitHub Actions + badge** | 1–2 ngày | 🔥 2 | ☐ |
+| 1 | **GIF gameplay + README nâng cấp + trailer video** | 1 buổi | 🔥 Ngay | 🔶 README nâng cấp xong — chờ user quay GIF/trailer |
+| 2 | **Online Leaderboard (Supabase)** | 2–3 ngày | 🔥 1 | 🔶 Code + SQL + test xong — chờ user tạo Supabase + asset config |
+| 3 | **CI/CD GitHub Actions + badge** | 1–2 ngày | 🔥 2 | 🔶 Workflow + badge xong — chờ user tạo secrets + push |
 | 4 | **Android build qua LDPlayer** (không cần máy thật) | 1–2 ngày | 🥈 6 | ☐ |
-| 5 | **Performance profiling doc** | 1 ngày | 🥉 5 | ☐ |
-| 6 | **Enemy type mới** | 2–3 ngày | 🥉 4 | ☐ |
+| 5 | **Performance profiling doc** | 1 ngày | 🥉 5 | 🔶 Khung docs/PERFORMANCE.md xong — chờ user chụp Profiler |
+| 6 | **Enemy type mới** | 2–3 ngày | 🥉 4 | 🔶 Code + tool + test xong — chờ user chạy tool dựng prefab |
 
 **Timeline đề xuất:** Mục 1 (ngay) → Mục 2 (tuần 1) → Mục 3 (tuần 2) → Mục 6 (tuần 3) → Mục 5 (tuần 3) → Mục 4 (tuần 4).
 *Digital Unicorn hạn 4/10/2026 — dư ~7 tuần, làm xong cả 6 mục thoải mái.*
+
+**Trạng thái 2026-08-15 (đã làm đợt code — chờ user setup):** Mục 1–3, 5, 6 đã xong PHẦN CODE/ASSET/AI (chi tiết checkbox từng mục bên dưới). Việc còn lại của user: Supabase (Mục 2) · GitHub secrets + push (Mục 3) · quay GIF/trailer (Mục 1) · chạy tool Patroller Drone + chơi thử (Mục 6) · chụp Profiler (Mục 5). Xem **Phần 6 — Checklist setup cho user** ở cuối file.
 
 ---
 
@@ -224,18 +226,81 @@
 
 ---
 
+## 4.1 Checklist setup cho user (2026-08-15 — làm phần này)
+
+**Trong Unity (~15 phút):**
+
+1. **Chạy Test Runner** (Window → General → Test Runner) → xác nhận toàn bộ test xanh (dự kiến 31 + 14 mới = **45 test**: EditMode 24 + PlayMode 21)
+2. Chạy `Tools → Starveil Runner → Setup → Patroller Drone` (dựng prefab enemy mới)
+3. Gắn `PatrollerSpawner` vào GameObject `Managers`/ObstacleManager trong scene Game → kéo prefab `PatrollerDrone` vào field `patrollerPrefab` → kéo component vào field `patrollerSpawner` của TileSpawner (hoặc để tự find)
+4. Tạo asset `LeaderboardConfig` (Assets → Create → VoidRunner → Leaderboard Config) → đặt trong thư mục **Resources** bất kỳ → dán URL + anon key (sau bước Supabase bên dưới)
+5. Build WebGL lại (**Compression = Gzip**) → deploy lại cả 2 nền tảng (build live vẫn 132MB cũ!)
+
+**Ngoài Unity:**
+
+6. **Supabase** (Mục 2): supabase.com → New project → SQL Editor → chạy `docs/supabase-leaderboard.sql` → Settings → API → copy Project URL + anon public key → dán vào asset LeaderboardConfig
+7. **GitHub** (Mục 3): push repo lên GitHub → Settings → Secrets and variables → Actions → tạo `UNITY_EMAIL`, `UNITY_PASSWORD`, `UNITY_LICENSE` (lấy từ Unity Hub Preferences → Licenses, file .ulf) → push → Actions chạy tự động → badge xanh
+8. **Quay video** (Mục 1): OBS → cắt GIF 5–8s → `docs/gameplay.gif` → thay link placeholder trong README
+9. **Profiler** (Mục 5): Window → Analysis → Profiler → chơi 30s → chụp CPU/Memory/Rendering
+10. **Android** (Mục 4, làm sau): cài Android Build Support + LDPlayer → build APK
+
 ## 4. Checklist tổng (đánh dấu khi xong)
 
 - [ ] Mục 1: GIF trên README + trailer YouTube + itch.io có video
-- [ ] Mục 2: Leaderboard chạy trên WebGL + điểm vào Supabase thật
-- [ ] Mục 3: Badge xanh trên README + Actions pass
+- [ ] Mục 2: Leaderboard chạy trên WebGL + điểm vào Supabase thật (code xong — chờ user setup)
+- [ ] Mục 3: Badge xanh trên README + Actions pass (workflow xong — chờ user secrets + push)
 - [ ] Mục 4: APK chạy trên LDPlayer + video + CV cập nhật
-- [ ] Mục 5: `docs/PERFORMANCE.md` có ảnh Profiler
-- [ ] Mục 6: 2 enemy types + test pass
+- [ ] Mục 5: `docs/PERFORMANCE.md` có ảnh Profiler (khung xong — chờ user chụp)
+- [ ] Mục 6: 2 enemy types + test pass (code xong — chờ user chạy tool dựng prefab)
 - [ ] Cập nhật README/PLAN/CHANGELOG + commit sạch
 - [ ] Cập nhật CV Unity (`edit-cv-to-match-jd/cv/unity.html`) + email mẫu
 
 ---
+
+## 5.1 Trạng thái chi tiết (2026-08-15 — AI code xong, chờ user)
+
+> Cập nhật 2026-08-15: toàn bộ phần AI làm đã XONG. User chỉ cần làm việc thủ công (setup + đo đạc + quay).
+
+### Mục 1 — README nâng cấp ✅ (AI)
+
+- [x] GIF placeholder ngay đầu README (thay link placeholder bằng GIF thật sau khi user quay)
+- [x] Badge CI + link chơi thử ngay header
+- [x] ASCII gameplay diagram (lane + drone + coin + ship + beetle)
+- [x] Section "Why this project" (kể chuyện đúng số liệu: 31 tests, ~60MB build mục tiêu)
+- [x] Sửa số test cũ "24 test" → "31 test"
+- [ ] **User:** quay video OBS → GIF 5–8s (`docs/gameplay.gif`) + trailer 30–60s YouTube (unlisted)
+
+### Mục 2 — Leaderboard ✅ (AI) — chờ setup Supabase
+
+- [x] SQL schema `docs/supabase-leaderboard.sql` (bảng + index + RLS 2 policy)
+- [x] `Systems/Leaderboard/`: LeaderboardEntry.cs + LeaderboardConfig.cs + LeaderboardService.cs (POST/GET, offline silent-fail)
+- [x] `UI/LeaderboardView.cs` — panel top 10 trong Game Over + NameInput 3 ký tự + nút SUBMIT
+- [x] UIManager tích hợp (dựng panel, Show khi Game Over, Hide khi Restart)
+- [x] EditMode 8 test (SanitizeName + ParseTopScores) + PlayMode 3 test (panel dựng/hiện/ẩn)
+- [ ] **User:** tạo Supabase project → chạy SQL → copy URL + anon key → Unity tạo `LeaderboardConfig` asset (Assets → Create → VoidRunner → Leaderboard Config, đặt trong thư mục **Resources**) → build lại → test
+
+### Mục 3 — CI/CD ✅ (AI) — chờ secrets + push
+
+- [x] `.github/workflows/build-test.yml` (GameCI: test EditMode+PlayMode → build WebGL Gzip → upload artifact)
+- [x] Badge CI trên README
+- [ ] **User:** tạo secrets `UNITY_EMAIL` / `UNITY_PASSWORD` / `UNITY_LICENSE` (hoặc `UNITY_SERIAL` nếu Pro) trên GitHub → push → xem Actions pass
+
+### Mục 5 — Performance doc ✅ (AI) — chờ chụp Profiler
+
+- [x] `docs/PERFORMANCE.md` — template + mục tiêu + cách đo + checklist tối ưu
+- [ ] **User:** chụp ảnh Unity Profiler (CPU/Memory/Rendering) → gửi cho AI điền số liệu
+
+### Mục 6 — PatrollerDrone ✅ (AI) — chờ chạy tool + gắn scene
+
+- [x] `Core/World/PatrollerDrone.cs` — drone lắc ngang 3 lane phía trước player, đụng = RaiseObstacleHit (CÙNG luật obstacle, R0.4 — không chết trực tiếp)
+- [x] `Core/World/PatrollerSpawner.cs` — spawn theo tile (pattern PickupSpawner): xác suất thấp, tối đa 1 concurrent, tối thiểu 3 tile cách nhau, chỉ spawn tile CÓ obstacle
+- [x] TileSpawner tích hợp (Initialize bind + TrySpawn + NotifyRecycled)
+- [x] `Editor/PatrollerDroneSetupTool.cs` — dựng prefab từ DroneObstacle (idempotent)
+- [x] PlayMode 3 test (bám trước player + lắc ngang + đứng yên khi không Playing)
+- [ ] **User:** chạy tool `Tools → Starveil Runner → Setup → Patroller Drone` → gắn `PatrollerSpawner` vào GameObject có ObstacleManager (scene Game) + kéo prefab PatrollerDrone vào field → PLAY test
+- [ ] Gắn tham chiếu PatrollerSpawner vào TileSpawner (kéo thả hoặc để self-find tự tìm)
+
+### Mục 4 — Android — ☐ CHƯA LÀM (cần user cài module + LDPlayer)
 
 ## 5. Hướng dẫn phiên làm việc mới
 
