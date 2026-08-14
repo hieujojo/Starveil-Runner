@@ -35,7 +35,7 @@ namespace VoidRunner.Utils
             Transform existing = target.Find("BlobShadow");
             if (existing != null) return existing; // idempotent — chạy lại không nhân đôi
 
-            EnsureMaterial();
+            if (!EnsureMaterial()) return null; // 2026-08-15: shader Sprites/Default bị strip khỏi WebGL build → Shader.Find null → đừng crash, bỏ qua bóng
 
             var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
             go.name = "BlobShadow";
@@ -44,7 +44,9 @@ namespace VoidRunner.Utils
             go.transform.localPosition = new Vector3(0f, -yOffset, 0f);
 
             Collider col = go.GetComponent<Collider>();
-            if (col != null) Object.Destroy(col); // chỉ visual — không va chạm
+            // Chỉ visual — không va chạm. Disable TRƯỚC khi Destroy để khỏi log lỗi
+            // "Concave Mesh Colliders are not supported when used with dynamic Rigidbody" (2026-08-15).
+            if (col != null) { col.enabled = false; Object.Destroy(col); }
 
             MeshRenderer mr = go.GetComponent<MeshRenderer>();
             if (mr != null)
@@ -78,14 +80,24 @@ namespace VoidRunner.Utils
             return Mathf.Max(b.size.x, b.size.z);
         }
 
-        private static void EnsureMaterial()
+        private static bool EnsureMaterial()
         {
-            if (_cachedMat != null) return;
+            if (_cachedMat != null) return true;
 
-            var mat = new Material(Shader.Find("Sprites/Default"));
+            var shader = Shader.Find("Sprites/Default");
+            if (shader == null)
+            {
+                // 2026-08-15: shader bị strip khỏi WebGL build (không .mat nào tham chiếu) → Shader.Find null.
+                // Fix gốc: chạy tool "Setup Always Included Shaders" rồi build lại. Đây chỉ là chống crash.
+                Debug.LogWarning("[BlobShadow] Không tìm thấy shader 'Sprites/Default' (bị strip khỏi build?) — bỏ qua bóng mềm. Chạy tool 'Tools/Void Runner/Setup Always Included Shaders' rồi build lại.");
+                return false;
+            }
+
+            var mat = new Material(shader);
             mat.color = new Color(0f, 0f, 0f, 0.5f); // v3f.10.1: 0.38→0.5 (road tối — cần đậm hơn để thấy)
             mat.mainTexture = BuildRadialTexture();
             _cachedMat = mat;
+            return true;
         }
 
         /// <summary>Texture tròn mềm (radial alpha) — mép mờ dần, không lộ góc vuông.</summary>

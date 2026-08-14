@@ -112,6 +112,7 @@ namespace VoidRunner.Core.World
         private void BuildLaneMarkers()
         {
             EnsureMaterial();
+            if (_laneMat == null) return; // shader bị strip → không vẽ vạch (tránh hàng loạt null material)
 
             // 2 vạch liền 2 mép (cách mép 0.4) — khung đường sáng
             CreateMarker(new Vector3(-roadHalfWidth + 0.4f, 0.06f, 0f), new Vector3(0.25f, 0.05f, length));
@@ -151,8 +152,18 @@ namespace VoidRunner.Core.World
         {
             if (_laneMat != null) return;
 
+            // 2026-08-15: cả 2 shader có thể bị strip khỏi WebGL build (không .mat nào tham chiếu) →
+            // Shader.Find null → new Material(null) = ArgumentNullException → mất vạch lane.
+            // Fix gốc: tool "Setup Always Included Shaders" + build lại. Chống crash tại đây.
             var shader = Shader.Find("Universal Render Pipeline/Unlit");
-            _laneMat = shader != null ? new Material(shader) : new Material(Shader.Find("Unlit/Color"));
+            if (shader == null) shader = Shader.Find("Unlit/Color");
+            if (shader == null)
+            {
+                Debug.LogWarning("[Tile] Không tìm thấy shader 'Universal Render Pipeline/Unlit' / 'Unlit/Color' (bị strip khỏi build?) — bỏ qua vạch lane. Chạy tool 'Tools/Void Runner/Setup Always Included Shaders' rồi build lại.");
+                return;
+            }
+
+            _laneMat = new Material(shader);
             _laneMat.color = new Color(0.2f, 0.8f, 1f, 1f); // cyan neon nổi trên nền tối
         }
 
