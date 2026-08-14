@@ -30,7 +30,7 @@
 > User: "tool nào chỉ xài 1 lần duy nhất thì xóa đi nhé ... sắp xếp các tool cho hợp lý 1 tí, tôi thấy setup refactor fix lẫn lộn hết ... commit theo từng convention".
 
 - **Đã xóa 4 tool one-shot (R3.14/R3.15 — grep 0 file tham chiếu trước khi xóa):** `RefactorGameplayTool` (refactor G2.5 xong), `RenameGameTitleTool` (đổi tên game xong), `SpriteBatchConverter` (convert 1608 PNG Kenney xong), `KenneyFontImporter` (TMP font đã tạo, asset đã commit).
-- **Sắp xếp menu:** `Tools/Void Runner/` (setup/refactor/fix lẫn lộn) → `Tools/Starveil Runner/` gom **3 nhóm theo CÔNG VIỆC**: `Setup/` (Enemy · Obstacle = Drone · Ship Select · Skybox ×3 · VFX · UI Theme · Fix MainMenu Spacing · Material & Lighting · Post-Processing) · `Optimize/` (Build ×2) · `Fix/` (Always Included Shaders). Cập nhật docs đồng bộ (HANDOVER/PLAN/REFERENCE/DECISIONS/RULES/UPGRADE_PLAN).
+- **Sắp xếp menu:** `Tools/Void Runner/` (setup/refactor/fix lẫn lộn) → `Tools/Starveil Runner/` gom **3 nhóm theo CÔNG VIỆC**: `Setup/` (Enemy · Obstacle = Drone · Ship Select · Skybox ×3 · VFX · UI Theme · Material & Lighting · Post-Processing) · `Optimize/` (Build ×2) · `Fix/` (Always Included Shaders · **MainMenu Spacing** — chuyển từ Setup sang Fix vì là fix layout 2026-08-15). Cập nhật docs đồng bộ (HANDOVER/PLAN/REFERENCE/DECISIONS/RULES/UPGRADE_PLAN).
 - **Bài học (R7.22):** menu Tools mọc loạn khi tích lũy tool qua nhiều giai đoạn — sau mỗi tool xong việc tự hỏi "còn cần chạy lại không", không cần → XÓA ngay (R3.15); menu nên gom theo NHÓM CÔNG VIỆC (Setup/Optimize/Fix) chứ không theo thời gian tạo.
 
 ## 2026-08-12 (🎉 DEPLOY HOÀN TẤT) - Game LIVE trên itch.io + Unity Play
