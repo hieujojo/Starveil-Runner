@@ -2,6 +2,37 @@
 
 > **Mục đích:** ghi lại mọi lỗi/warning đã gặp trong quá trình phát triển, cách fix và cách tránh lặp lại.
 > Cập nhật mỗi lần fix lỗi, trước khi commit.
+
+## 2026-08-15 (build zip 130MB — KHÔNG phải 40–60MB) - Chẩn đoán + fix build size
+
+> User: "thật ra hiện tại file tôi zip lại sau khi build là 130mb á, chứ ko phải 40-60mb đâu, tìm cách khắc phục vấn đề này đi".
+
+- **Chẩn đoán — đọc build report trong Editor.log (build 2026-08-12 22:23):** `Complete build size 139MB` — **Textures chiếm 97.2%** (282MB raw). Thủ phạm #1: **4 skybox Nebula EXR import @2048** (sRGB → nén DXT) → ~100MB trong build (~69%); thủ phạm #2: `Sparrow_normal.tif` + `tbeetle orange_Normal/Metallic.tga` @2048 (~21MB raw mỗi cái). Meshes chỉ 2.8MB, Sounds 0.09MB — KHÔNG phải mesh/audio.
+- **Gốc rễ:** `BuildOptimizerTool` (commit `5fe5008`) viết xong nhưng **chưa bao giờ được chạy** — bằng chứng: meta Nebula vẫn `maxTextureSize: 2048`, SpaceSkies 4K + Sparrow mask1/2 vẫn còn trên đĩa → build deploy cuối vẫn 139MB.
+- **Fix — nâng cấp `BuildOptimizerTool.cs`:** (1) THÊM menu **"Optimize Build — CHỈ giảm texture size (an toàn, không xóa gì)"**: không xóa asset, chỉ giảm `maxTextureSize` 2048→1024 cho 4 Nebula EXR + SpaceSkies Purple_2K (6 mặt) + Sparrow (8) + Flying Beetle (4) + Robot_Guardian (4) → dự kiến build **139MB → ~60MB** (Nebula 100MB→25MB); (2) `NebulaTargetSize = 1024` (đổi 512 nếu cần <50MB); (3) **GIỮ G-spot_Lab** — bỏ khỏi danh sách xóa (PLAN.md "PENDING INTEGRATE", user xác nhận giữ 2026-08-12; 0 refs = không vào build nên xóa cũng không giảm build).
+- **Bài học (R7.20):** (1) build WebGL nặng → mở Editor.log tìm `Complete build size` + bảng % theo loại asset để biết thủ phạm CHÍNH XÁC (ở đây texture 97%, không phải mesh/audio) — đừng đoán mò; (2) tool tối ưu đã viết nhưng chưa chạy = build vẫn nặng — trước khi deploy phải VERIFY tool đã chạy (meta texture thực sự đổi size) chứ không chỉ tin là có tool; (3) đừng xóa asset mà user đã xác nhận giữ (G-spot_Lab) dù 0 refs.
+
+## 2026-08-15 (Unity Play: vài model/VFX không render) - Shader bị strip khỏi WebGL build
+
+> User: "check link này ... đọc log đi do tôi thấy có vài mô hình ko được render ra vì vấn đề gì đấy thì phải".
+
+- **Chẩn đoán — đọc browser console của game deploy bằng headless Chrome (CDP + puppeteer-core, chạy game ~4 phút):** sau khi bấm PLAY, Game scene bắn hàng loạt `ArgumentNullException: Value cannot be null. Parameter name: shader` (≈10 lần — mỗi Tile 1 lần) + `Concave Mesh Colliders are not supported when used with dynamic Rigidbody ... Player/BlobShadow, Quad`. Game vẫn chạy (canvas 1280x720, engine init OK) — chỉ model/VFX tạo material runtime không render.
+- **Nguyên nhân gốc:** material tạo runtime bằng `Shader.Find()` trả về **null** vì shader bị **STRIP khỏi WebGL build** (không .mat asset nào trong scene tham chiếu → Unity không include):
+  - `Sprites/Default` — BlobShadow (bóng tàu/bọ) + VFXManager (toàn bộ hạt: sao trôi, lửa, burst, popup, trail) — `grep 'Sprites/Default' *.mat` = **0 file**, `m_AlwaysIncludedShaders` thiếu fileID 10754;
+  - `Universal Render Pipeline/Unlit` + `Unlit/Color` — Tile lane markers (vạch lane) — grep .mat = 0 file.
+- **Fix gốc:** tool Editor MỚI `AlwaysIncludedShadersTool.cs` (`Tools/Void Runner/Setup Always Included Shaders`) — thêm 5 shader runtime vào `GraphicsSettings.m_AlwaysIncludedShaders` (Sprites/Default, URP/Lit, URP/Unlit, Unlit/Color, Standard) qua SerializedObject, idempotent (bỏ qua shader đã có).
+- **Fix phòng thủ (chống crash dù shader có bị strip):** null-check trong `BlobShadow.EnsureMaterial` (trả bool, skip nếu thiếu), `VFXManager.CreateSoftParticleMaterial` (trả null + warning), `Tile.EnsureMaterial` (fallback URP/Unlit → Unlit/Color → skip vẽ vạch) — hết ArgumentNullException.
+- **Kèm:** `BlobShadow` disable collider TRƯỚC khi Destroy → hết log lỗi "Concave Mesh Colliders... dynamic Rigidbody".
+- **Bài học (R7.21):** shader CHỈ dùng runtime (`Shader.Find`) mà không có .mat asset nào tham chiếu → KHÔNG vào WebGL build (bị strip) → `Shader.Find` null → `new Material(null)` = ArgumentNullException → model/VFX biến mất **im lặng** (build vẫn pass). Kiểm tra nhanh: `grep -rl '<tên shader>' Assets --include='*.mat'` = 0 file → phải thêm vào **Always Included Shaders**. Và: lỗi render trên WebGL deploy → dùng headless Chrome (`--enable-unsafe-swiftshader` + CDP) đọc browser console để bắt exception thật — Unity Editor không lộ lỗi này (shader có đủ trong Editor).
+
+## 2026-08-15 (tool cleanup + sắp xếp menu) - Xóa 4 tool one-shot + gom menu 3 nhóm
+
+> User: "tool nào chỉ xài 1 lần duy nhất thì xóa đi nhé ... sắp xếp các tool cho hợp lý 1 tí, tôi thấy setup refactor fix lẫn lộn hết ... commit theo từng convention".
+
+- **Đã xóa 4 tool one-shot (R3.14/R3.15 — grep 0 file tham chiếu trước khi xóa):** `RefactorGameplayTool` (refactor G2.5 xong), `RenameGameTitleTool` (đổi tên game xong), `SpriteBatchConverter` (convert 1608 PNG Kenney xong), `KenneyFontImporter` (TMP font đã tạo, asset đã commit).
+- **Sắp xếp menu:** `Tools/Void Runner/` (setup/refactor/fix lẫn lộn) → `Tools/Starveil Runner/` gom **3 nhóm theo CÔNG VIỆC**: `Setup/` (Enemy · Obstacle = Drone · Ship Select · Skybox ×3 · VFX · UI Theme · Fix MainMenu Spacing · Material & Lighting · Post-Processing) · `Optimize/` (Build ×2) · `Fix/` (Always Included Shaders). Cập nhật docs đồng bộ (HANDOVER/PLAN/REFERENCE/DECISIONS/RULES/UPGRADE_PLAN).
+- **Bài học (R7.22):** menu Tools mọc loạn khi tích lũy tool qua nhiều giai đoạn — sau mỗi tool xong việc tự hỏi "còn cần chạy lại không", không cần → XÓA ngay (R3.15); menu nên gom theo NHÓM CÔNG VIỆC (Setup/Optimize/Fix) chứ không theo thời gian tạo.
+
 ## 2026-08-12 (🎉 DEPLOY HOÀN TẤT) - Game LIVE trên itch.io + Unity Play
 
 > User: "deploy thành công rồi, check thử ... cập nhật toàn bộ docs .md và readme đi, mọi thứ hoàn thành".

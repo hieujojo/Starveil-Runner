@@ -223,8 +223,8 @@ MainMenu → Game (chạy + né + thu thập) → Game Over → Retry / Menu
 ## ✨ Task A/B/D (2026-08-11/12 — Credits · Enemy quái vật · Chọn tàu)
 
 > ⚠️ **Chạy tool TRƯỚC khi test** (mỗi tool 1 lần, idempotent):
-> 1. Mở scene **Game** → `Tools/Void Runner/Setup Enemys` (gán 3 quái vật) + `Setup Ship Select` (gán 2 tàu)
-> 2. Mở scene **MainMenu** → `Tools/Void Runner/Setup Ship Select` (tạo ShipSelectManager + gán prefab)
+> 1. Mở scene **Game** → `Tools/Starveil Runner/Setup/Enemy (Flying Beetle...)` + `Setup/Ship Select (2 fighter)` (gán 2 tàu)
+> 2. Mở scene **MainMenu** → `Tools/Starveil Runner/Setup/Ship Select (2 fighter)` (tạo ShipSelectManager + gán prefab)
 > 3. **Ctrl+S** cả 2 scene. *(Nếu quên: ShipCatalog tự tải khi chưa gán — nhưng build cần tool.)*
 
 | # | Kiểm tra | Kết quả |
