@@ -1797,7 +1797,6 @@ MonoBehaviour:
   creditsButton: {fileID: 0}
   howToPlayPanel: {fileID: 406369630}
   bestScoreText: {fileID: 744814681}
-  soundButtonText: {fileID: 1162007484}
   gameSceneName: Game
 --- !u!114 &1964162067
 MonoBehaviour:
