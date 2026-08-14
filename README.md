@@ -5,10 +5,35 @@
 [![Unity](https://img.shields.io/badge/Unity-6.x-222222?logo=unity&logoColor=white)](https://unity.com)
 [![C#](https://img.shields.io/badge/C%23-.NET-239120?logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
 [![URP](https://img.shields.io/badge/Render%20Pipeline-URP%2017-2196F3)](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@17/manual/index.html)
+[![CI](https://img.shields.io/github/actions/workflow/status/lothric11/starveil-runner/build-test.yml?label=CI%20Build%20%26%20Test)](https://github.com/lothric11/starveil-runner/actions)
+
+> **🚀 Chơi thử ngay:** [itch.io](https://lothric11.itch.io/starveil-runner) · [Unity Play](https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl)
+
+![Gameplay GIF — thay bằng video quay thật](https://via.placeholder.com/960x540/0d0a1a/ffd84d?text=GAMEPLAY+GIF+COMING+SOON)
 
 ---
 
 ## 🎮 Gameplay
+
+```
+        Track vô tận — 3 lane (mỗi lane 6m, road rộng 18m)
+
+   ◀ lane 0        lane 1        lane 2 ▶
+   ┌──────────────┬──────────────┬──────────────┐
+   │              │    [COIN]    │              │  ← coin: +điểm, không bao giờ đè obstacle
+   │     [DRONE]  │              │              │  ← drone: đèn đỏ + lơ lửng (spawn đồng đều theo độ khó)
+   │              │     ▲        │              │  ← tàu của bạn (A/D hoặc vuốt để đổi lane)
+   │              │   (ship)     │              │
+   └──────────────┴──────────────┴──────────────┘
+                          │
+                          ▼ hướng chạy (tốc độ tăng dần)
+
+        🪲 Flying Beetle đuổi theo phía sau (cơ chế tiến sát):
+        đụng obstacle 1 lần → bọ TIẾN SÁT · né sạch 10–15s → bọ NỚI RA
+        đụng 2 lần trong cửa sổ → bọ LAO TỚI BẮT = Game Over
+```
+
+## 🎮 Chi tiết gameplay
 
 - **3 lane vô tận, road rộng 18m**: bấm `A`/`D` (hoặc mũi tên) = nhảy ngay 1 lane; **đè giữ** = trượt liên tục qua nhiều lane; nhả = tự về giữa lane — phản hồi tức thì, né chướng ngại vật mượt mà. **📱 Mobile: vuốt trái/phải để đổi lane** (và kéo chuột trên desktop cũng được)
 - **Enemy = Flying Beetle đuổi theo kiểu Subway Surfers**: đụng chướng ngại vật lần 1 → Enemy **tiến sát** (phình to, đe dọa); né sạch 10–15s → Enemy **nới lại khoảng cách**; đụng **2 lần trong cửa sổ 10–15s** → Enemy nuốt chửng = **Game Over**. Đụng obstacle → tàu **nhấp nháy** (feedback rõ ràng)
@@ -38,10 +63,20 @@
 | Power-up | Shield / Magnet / Slow-mo | ✅ |
 | Audio + Save | `AudioManager` singleton + `SaveSystem` (PlayerPrefs) | ✅ |
 | Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Enemy, đụng obstacle → tàu nhấp nháy, coin không đè obstacle, **Point Light cyan bám tàu (nổi bật)** | ✅ |
-| Test tự động | **Unity Test Framework — 24 test + 5 PlayMode test Enemy 2 nấc** | ✅ |
+| Test tự động | **Unity Test Framework — 31 test** (16 EditMode + 15 PlayMode) + **CI tự động** (GameCI: test + build WebGL mỗi push) | ✅ |
 | Deploy | **WebGL build (Gzip) → [itch.io](https://lothric11.itch.io/starveil-runner) + [Unity Play](https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl)** | ✅ Live 2026-08-12 |
 
 ---
+
+## 💡 Why this project?
+
+**Starveil Runner** được xây dựng để chứng minh toàn bộ kỹ năng của một **Game Developer Unity** thực chiến — từ 0 đến game **LIVE trên 2 nền tảng** (itch.io + Unity Play):
+
+- 🧠 **Thiết kế gameplay thật**: cơ chế "Enemy tiến sát" kiểu Subway Surfers — biến một lỗi nhỏ (đụng drone) thành **áp lực sinh tử liên tục** (bọ đuổi sát, đụng lần 2 = Game Over). Không chỉ "nhặt item + né vật cản"
+- 🏗️ **Kiến trúc sạch sẽ**: `UI → Systems → Core`, event-driven (`GameEvents`), ScriptableObject config, Object Pool — code dễ mở rộng, dễ test
+- 🧪 **Test-driven + CI**: 31 test tự động (EditMode + PlayMode) + pipeline GameCI chạy test & build WebGL mỗi lần push — chất lượng không phụ thuộc "tôi nhớ test tay"
+- 🚀 **Đã deploy thật**: WebGL build tối ưu (texture 2048→1024, ~60MB), compression Gzip, xử lý white screen, publish lên itch.io + Unity Play
+- 📱 **Mobile-ready**: điều khiển bằng vuốt, pause overlay, safe-area
 
 ## 🕹️ Điều khiển
 
