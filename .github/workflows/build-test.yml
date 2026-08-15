@@ -22,7 +22,13 @@ jobs:
         env:
           LICENSE_VAL: ${{ secrets.UNITY_LICENSE }}
         run: |
-          if [ -n "$LICENSE_VAL" ]; then echo "UNITY_LICENSE: ✅ CÓ GIÁ TRỊ — $(echo -n "$LICENSE_VAL" | wc -c) ký tự"; else echo "UNITY_LICENSE: ❌ TRỐNG — chưa lưu được, làm lại bước dán secret"; fi
+          LEN=$(echo -n "$LICENSE_VAL" | wc -c)
+          if [ -n "$LICENSE_VAL" ]; then
+            echo "UNITY_LICENSE: ✅ CÓ GIÁ TRỊ — $LEN ký tự"
+          else
+            echo "::error::UNITY_LICENSE SECRET RỖNG — mở Settings → Secrets and variables → Actions (tab Secrets) → UNITY_LICENSE → Update → dán nội dung Desktop/UnityEntitlementLicense.xml → bấm Update secret"
+            exit 1
+          fi
 
       - name: Cache Library
         uses: actions/cache@v4
