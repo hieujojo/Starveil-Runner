@@ -18,6 +18,12 @@ jobs:
         with:
           lfs: true
 
+      - name: 🔍 Kiểm tra UNITY_LICENSE (không hiện giá trị)
+        env:
+          LICENSE_VAL: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [ -n "$LICENSE_VAL" ]; then echo "UNITY_LICENSE: ✅ CÓ GIÁ TRỊ — $(echo -n "$LICENSE_VAL" | wc -c) ký tự"; else echo "UNITY_LICENSE: ❌ TRỐNG — chưa lưu được, làm lại bước dán secret"; fi
+
       - name: Cache Library
         uses: actions/cache@v4
         with:
