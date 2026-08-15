@@ -28,6 +28,12 @@ jobs:
         with:
           lfs: true
 
+      - name: 🔍 Chẩn đoán secrets (không hiện giá trị)
+        run: |
+          if [ -n "${{ secrets.UNITY_EMAIL }}" ]; then echo "UNITY_EMAIL   : ✅ SET"; else echo "UNITY_EMAIL   : ❌ EMPTY"; fi
+          if [ -n "${{ secrets.UNITY_PASSWORD }}" ]; then echo "UNITY_PASSWORD: ✅ SET"; else echo "UNITY_PASSWORD: ❌ EMPTY"; fi
+          if [ -n "${{ secrets.UNITY_SERIAL }}" ]; then echo "UNITY_SERIAL  : ✅ SET"; else echo "UNITY_SERIAL  : ⚪ BỎ QUA (Personal không cần)"; fi
+
       - name: Unity - Request activation file
         uses: game-ci/unity-activate@v2 # CHỈ có v2 — v3 không tồn tại (CI fail "Set up job" 2026-08-15)
         env:
