@@ -9,18 +9,20 @@ on:
 
 jobs:
   # ============================================================
-  # JOB 0 — LẤY LICENSE (chỉ chạy khi bấm Run workflow bằng tay)
-  # Bạn CHƯA có secret UNITY_LICENSE hợp lệ thì làm theo 4 bước:
-  #   1. Tab Actions → chọn workflow này → Run workflow (bấm tay)
-  #   2. Job "Request activation file 🔑" → tải artifact "Unity Activation File" → file .alf
-  #   3. Mở https://license.unity3d.com/manual → upload .alf → Unity Personal → tải .ulf
-  #   4. Mở .ulf bằng notepad → copy TOÀN BỘ → GitHub Settings → Secrets → Actions
-  #      → sửa secret UNITY_LICENSE (hoặc tạo mới) → paste → Update
-  # Xong secret là test/build chạy được, không cần email/password nữa.
+  # JOB 0 — LẤY LICENSE (chỉ chạy khi CHƯA có UNITY_LICENSE)
+  #
+  # Cách NHANH + CHẮC nhất: sinh .alf NGAY TRÊN MÁY (không cần CI):
+  #   1. Mở cmd/PowerShell trong 1 thư mục trống, chạy:
+  #        "D:/Unity Editor/6000.4.5f1/Editor/Unity.exe" -batchmode -nographics -createManualActivationFile -logfile -
+  #      → ra file Unity_v6000.4.5f1.alf (vài chục giây)
+  #   2. Mở https://license.unity3d.com/manual → upload .alf → Unity Personal → tải .ulf
+  #   3. Mở .ulf bằng notepad → copy TOÀN BỘ → GitHub Settings → Secrets → Actions
+  #      → sửa secret UNITY_LICENSE → paste → Update secret
+  #  Xong: chạy lại workflow → job này tự SKIP, test/build xanh.
   # ============================================================
   request-activation-file:
     name: Request activation file 🔑
-    if: github.event_name == 'workflow_dispatch' # chỉ chạy khi bấm tay — không chạy mỗi push
+    if: github.event_name == 'workflow_dispatch' && secrets.UNITY_LICENSE == '' # chỉ khi CHƯA có license — có rồi thì skip
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
