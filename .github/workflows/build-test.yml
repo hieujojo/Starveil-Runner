@@ -5,57 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch: # chạy tay từ GitHub Actions tab
+  workflow_dispatch:
 
 jobs:
-  # ============================================================
-  # JOB 0 — LẤY LICENSE (chỉ chạy khi CHƯA có UNITY_LICENSE)
-  #
-  # Cách NHANH + CHẮC nhất: sinh .alf NGAY TRÊN MÁY (không cần CI):
-  #   1. Mở cmd/PowerShell trong 1 thư mục trống, chạy:
-  #        "D:/Unity Editor/6000.4.5f1/Editor/Unity.exe" -batchmode -nographics -createManualActivationFile -logfile -
-  #      → ra file Unity_v6000.4.5f1.alf (vài chục giây)
-  #   2. Mở https://license.unity3d.com/manual → upload .alf → Unity Personal → tải .ulf
-  #   3. Mở .ulf bằng notepad → copy TOÀN BỘ → GitHub Settings → Secrets → Actions
-  #      → sửa secret UNITY_LICENSE → paste → Update secret
-  #  Xong: chạy lại workflow → job này tự SKIP, test/build xanh.
-  # ============================================================
-  request-activation-file:
-    name: Request activation file 🔑
-    if: github.event_name == 'workflow_dispatch' && secrets.UNITY_LICENSE == '' # chỉ khi CHƯA có license — có rồi thì skip
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: 🔍 Chẩn đoán secrets (không hiện giá trị)
-        env:
-          EMAIL_VAL: ${{ secrets.UNITY_EMAIL }}
-          PASS_VAL: ${{ secrets.UNITY_PASSWORD }}
-          SERIAL_VAL: ${{ secrets.UNITY_SERIAL }}
-          LICENSE_VAL: ${{ secrets.UNITY_LICENSE }}
-        run: |
-          if [ -n "$EMAIL_VAL" ]; then echo "UNITY_EMAIL    : ✅ SET"; else echo "UNITY_EMAIL    : ❌ EMPTY"; fi
-          if [ -n "$PASS_VAL" ]; then echo "UNITY_PASSWORD : ✅ SET"; else echo "UNITY_PASSWORD : ❌ EMPTY"; fi
-          if [ -n "$SERIAL_VAL" ]; then echo "UNITY_SERIAL   : ✅ SET"; else echo "UNITY_SERIAL   : ⚪ BỎ QUA (Personal không cần)"; fi
-          if [ -n "$LICENSE_VAL" ]; then echo "UNITY_LICENSE  : ✅ CÓ GIÁ TRỊ"; else echo "UNITY_LICENSE  : ❌ TRỐNG"; fi
-
-      - name: Unity - Request activation file
-        uses: game-ci/unity-activate@v2 # CHỈ có v2 — v3 không tồn tại (CI fail "Set up job" 2026-08-15)
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-
-      - name: Upload activation file
-        uses: actions/upload-artifact@v4
-        with:
-          name: Unity Activation File
-          path: activation
-          if-no-files-found: ignore # license đã có sẵn thì không sinh .alf — không fail
-
   test:
     name: Unity Test Runner (EditMode + PlayMode)
     runs-on: ubuntu-latest
