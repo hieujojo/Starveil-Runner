@@ -39,15 +39,15 @@
 |---|---|---|---|---|
 | 1 | **GIF gameplay + README nâng cấp + trailer video** | 1 buổi | 🔥 Ngay | 🔶 README nâng cấp xong — chờ user quay GIF/trailer |
 | 2 | **Online Leaderboard (Supabase)** | 2–3 ngày | 🔥 1 | 🔶 Code + SQL + test xong — chờ user tạo Supabase + asset config |
-| 3 | **CI/CD GitHub Actions + badge** | 1–2 ngày | 🔥 2 | 🔶 Workflow + badge xong — chờ user tạo secrets + push |
+| 3 | ~~**CI/CD GitHub Actions + badge**~~ | ~~1–2 ngày~~ | ~~🔥 2~~ | ❌ **ĐÃ HỦY 2026-08-16** — GameCI v4 không tương thích license XML Unity 6; đã xóa workflow + badge (chi tiết ở Mục 3) |
 | 4 | **Android build qua LDPlayer** (không cần máy thật) | 1–2 ngày | 🥈 6 | ☐ |
 | 5 | **Performance profiling doc** | 1 ngày | 🥉 5 | 🔶 Khung docs/PERFORMANCE.md xong — chờ user chụp Profiler |
 | 6 | **Enemy type mới** | 2–3 ngày | 🥉 4 | 🔶 Code + tool + test xong — chờ user chạy tool dựng prefab |
 
-**Timeline đề xuất:** Mục 1 (ngay) → Mục 2 (tuần 1) → Mục 3 (tuần 2) → Mục 6 (tuần 3) → Mục 5 (tuần 3) → Mục 4 (tuần 4).
-*Digital Unicorn hạn 4/10/2026 — dư ~7 tuần, làm xong cả 6 mục thoải mái.*
+**Timeline đề xuất:** Mục 1 (ngay) → Mục 2 (tuần 1) → Mục 6 (tuần 3) → Mục 5 (tuần 3) → Mục 4 (tuần 4).
+*Digital Unicorn hạn 4/10/2026 — dư ~7 tuần, làm xong cả 5 mục còn lại thoải mái.*
 
-**Trạng thái 2026-08-15 (đã làm đợt code — chờ user setup):** Mục 1–3, 5, 6 đã xong PHẦN CODE/ASSET/AI (chi tiết checkbox từng mục bên dưới). Việc còn lại của user: Supabase (Mục 2) · GitHub secrets + push (Mục 3) · quay GIF/trailer (Mục 1) · chạy tool Patroller Drone + chơi thử (Mục 6) · chụp Profiler (Mục 5). Xem **Phần 6 — Checklist setup cho user** ở cuối file.
+**Trạng thái 2026-08-15 (đã làm đợt code — chờ user setup):** Mục 1–2, 5, 6 đã xong PHẦN CODE/ASSET/AI (chi tiết checkbox từng mục bên dưới). Mục 3 (CI/CD) **đã HỦY 2026-08-16**. Việc còn lại của user: Supabase (Mục 2) · quay GIF/trailer (Mục 1) · chạy tool Patroller Drone + chơi thử (Mục 6) · chụp Profiler (Mục 5). Xem **Phần 6 — Checklist setup cho user** ở cuối file.
 
 ---
 
@@ -123,30 +123,18 @@
 
 ---
 
-### 🤖 Mục 3 — CI/CD GitHub Actions + badge (1–2 ngày)
+### ~~🤖 Mục 3 — CI/CD GitHub Actions + badge~~ ❌ ĐÃ HỦY (2026-08-16)
 
-**Nó là gì:** robot tự động. Mỗi lần push code lên GitHub → máy chủ GitHub **tự mở Unity, tự build WebGL, tự chạy toàn bộ test (hiện tại 31)** → báo kết quả qua **badge xanh** trên README: `✓ build passing · 31/31 tests`.
+**Lý do hủy — xung đột GameCI vs license mới của Unity 6:**
+- GameCI v4 (`unity-test-runner` / `unity-builder`) chỉ nhận license **.ulf CŨ**: nó trích `serial` từ tag `<DeveloperData Value="...">` trong file .ulf (`getSerialFromLicenseFile` trong `src/model/input.ts`).
+- Unity từ 2024 sinh license mới **`UnityEntitlementLicense.xml`** (game-ci #469) — **không có serial, không có `<DeveloperData>`** → GameCI báo *"No valid license activation strategy could be determined"* dù secret đã có giá trị.
+- Đường `.alf → license.unity3d.com/manual → .ulf` cũng **ĐÃ CHẾT cho bản Personal** (game-ci #408/#97) — trang web chỉ nhận serial cho Plus/Pro.
 
-**Vì sao:** fresher gần như không ai có. Tín hiệu "người hiểu quy trình team thật" — studio trọng hơn cả feature. Bonus: bằng chứng cho hướng apply DevOps/full-stack.
+**Đã xóa:** `.github/workflows/build-test.yml` + badge CI + tham chiếu CI trong README (commit `d619997`). Không lãng phí thời gian làm lại theo hướng này.
 
-**Các bước:**
-
-- [ ] **User — tạo GitHub Actions secret:** vào repo Starveil-Runner trên GitHub → Settings → Secrets and variables → Actions → thêm:
-  - `UNITY_EMAIL` (email đăng nhập Unity)
-  - `UNITY_PASSWORD` (mật khẩu Unity — cần bật "Sign in with Unity ID" + tài khoản Personal license miễn phí)
-  - `UNITY_SERIAL` (nếu có license serial; Personal thì để trống)
-- [ ] **AI — viết `.github/workflows/build-test.yml`** dùng **GameCI** (game-ci/unity-builder + unity-test-runner — chuẩn ngành):
-  - Job 1: `run tests` — chạy EditMode + PlayMode (**31 test** — con số tự động đếm từ Test Runner, không hardcode), báo pass/fail
-  - Job 2: `build WebGL` — build + upload artifact (tải về được)
-  - Trigger: push lên `main` + pull request
-  - Badge: `https://img.shields.io/badge/tests-31/31-brightgreen` — **sau khi chạy lại Test Runner xác nhận 31/31 xanh** (con số 24/24 cũ đã lỗi thời; nếu có test fail phải fix trước rồi mới ghi badge)
-- [ ] **AI — thêm badge lên README** (cạnh badge Unity/C#/URP sẵn có).
-- [ ] **User — bấm nút:** push lên → vào tab **Actions** xem robot chạy → xác nhận build pass.
-- [ ] **AI — kiểm tra log build**: nếu fail vì license/package thì fix.
-
-**⚠️ Lưu ý:** GameCI cần license activation — nếu vướng, phương án dự phòng: chỉ chạy `unity-test-runner` (test) trước, build WebGL để sau.
-
-**Bằng chứng sau khi xong:** badge xanh trên README + tab Actions hiện "All checks passed".
+**Nếu muốn CI sau này (khi rảnh — KHÔNG gấp):**
+- **Phương án B — Self-hosted runner trên PC:** dùng license Unity đã activate sẵn trên máy (`D:/Unity Editor/6000.4.5f1`) → **không cần secret/serial/Docker**. Setup: GitHub → Settings → Actions → Runners → New self-hosted runner (Windows) → cài runner → workflow `runs-on: self-hosted` + gọi `Unity.exe -batchmode -runTests` / `-buildTarget WebGL` trực tiếp.
+- Hoặc **Unity Build Automation (UBA)** — CI cloud chính chủ của Unity, tự lo license phía server (Personal free ~300 phút/tháng).
 
 ---
 
@@ -219,7 +207,7 @@
 | README + ASCII diagram + tài liệu | ✅ | — |
 | Quay video / GIF / trailer | Kịch bản | ✅ Quay + cắt |
 | Leaderboard code + SQL + test | ✅ | Tạo tài khoản Supabase + dán 2 giá trị |
-| CI/CD workflow file + badge | ✅ | Tạo 3 secrets + bấm nút push |
+| ~~CI/CD workflow file + badge~~ | ~~✅~~ | ❌ **ĐÃ HỦY** — GameCI không tương thích license XML Unity 6 |
 | Android | Hướng dẫn + tối ưu HUD | Cài module + LDPlayer + build + quay |
 | Performance doc | Khung + phân tích | Chụp ảnh Profiler |
 | Enemy mới | Toàn bộ code + test | Test chơi thử |
@@ -239,7 +227,7 @@
 **Ngoài Unity:**
 
 6. **Supabase** (Mục 2): supabase.com → New project → SQL Editor → chạy `docs/supabase-leaderboard.sql` → Settings → API → copy Project URL + anon public key → dán vào asset LeaderboardConfig
-7. **GitHub** (Mục 3): push repo lên GitHub → Settings → Secrets and variables → Actions → tạo `UNITY_EMAIL`, `UNITY_PASSWORD`, `UNITY_LICENSE` (lấy từ Unity Hub Preferences → Licenses, file .ulf) → push → Actions chạy tự động → badge xanh
+7. **~~GitHub (Mục 3)~~ — ĐÃ HỦY**: GameCI không đọc license XML Unity 6 → bỏ qua (workflow đã xóa commit `d619997`)
 8. **Quay video** (Mục 1): OBS → cắt GIF 5–8s → `docs/gameplay.gif` → thay link placeholder trong README
 9. **Profiler** (Mục 5): Window → Analysis → Profiler → chơi 30s → chụp CPU/Memory/Rendering
 10. **Android** (Mục 4, làm sau): cài Android Build Support + LDPlayer → build APK
@@ -248,7 +236,7 @@
 
 - [ ] Mục 1: GIF trên README + trailer YouTube + itch.io có video
 - [ ] Mục 2: Leaderboard chạy trên WebGL + điểm vào Supabase thật (code xong — chờ user setup)
-- [ ] Mục 3: Badge xanh trên README + Actions pass (workflow xong — chờ user secrets + push)
+- [x] ~~Mục 3~~: **ĐÃ HỦY 2026-08-16** (GameCI vs license XML Unity 6 — xóa workflow + badge)
 - [ ] Mục 4: APK chạy trên LDPlayer + video + CV cập nhật
 - [ ] Mục 5: `docs/PERFORMANCE.md` có ảnh Profiler (khung xong — chờ user chụp)
 - [ ] Mục 6: 2 enemy types + test pass (code xong — chờ user chạy tool dựng prefab)
@@ -260,11 +248,12 @@
 ## 5.1 Trạng thái chi tiết (2026-08-15 — AI code xong, chờ user)
 
 > Cập nhật 2026-08-15: toàn bộ phần AI làm đã XONG. User chỉ cần làm việc thủ công (setup + đo đạc + quay).
+> Cập nhật 2026-08-16: Mục 3 (CI/CD) **ĐÃ HỦY** — xem lý do ở phần Mục 3.
 
 ### Mục 1 — README nâng cấp ✅ (AI)
 
 - [x] GIF placeholder ngay đầu README (thay link placeholder bằng GIF thật sau khi user quay)
-- [x] Badge CI + link chơi thử ngay header
+- [x] Badge Unity/C#/URP + link chơi thử ngay header
 - [x] ASCII gameplay diagram (lane + drone + coin + ship + beetle)
 - [x] Section "Why this project" (kể chuyện đúng số liệu: 31 tests, ~60MB build mục tiêu)
 - [x] Sửa số test cũ "24 test" → "31 test"
@@ -279,11 +268,10 @@
 - [x] EditMode 8 test (SanitizeName + ParseTopScores) + PlayMode 3 test (panel dựng/hiện/ẩn)
 - [ ] **User:** tạo Supabase project → chạy SQL → copy URL + anon key → Unity tạo `LeaderboardConfig` asset (Assets → Create → VoidRunner → Leaderboard Config, đặt trong thư mục **Resources**) → build lại → test
 
-### Mục 3 — CI/CD ✅ (AI) — chờ secrets + push
+### ~~Mục 3 — CI/CD~~ ❌ ĐÃ HỦY (2026-08-16)
 
-- [x] `.github/workflows/build-test.yml` (GameCI: test EditMode+PlayMode → build WebGL Gzip → upload artifact)
-- [x] Badge CI trên README
-- [ ] **User:** tạo secrets `UNITY_EMAIL` / `UNITY_PASSWORD` / `UNITY_LICENSE` (hoặc `UNITY_SERIAL` nếu Pro) trên GitHub → push → xem Actions pass
+- [x] Workflow + badge từng được tạo — **đã XÓA** (commit `d619997`)
+- [ ] ~~User: tạo secrets + push~~ — KHÔNG cần nữa (GameCI v4 chỉ đọc license .ulf cũ, không đọc `UnityEntitlementLicense.xml` mới của Unity 6)
 
 ### Mục 5 — Performance doc ✅ (AI) — chờ chụp Profiler
 
@@ -305,6 +293,6 @@
 ## 5. Hướng dẫn phiên làm việc mới
 
 1. Đọc file này trước → rồi `agent/PLAN.md` → `agent/REFERENCE.md` (PART 4 commit) → `agent/CHANGELOG.md`
-2. Làm theo thứ tự mục 1 → 2 → 3 → 6 → 5 → 4 (dễ → khó, thấy kết quả sớm)
+2. Làm theo thứ tự mục 1 → 2 → 6 → 5 → 4 (dễ → khó, thấy kết quả sớm)
 3. Mỗi mục xong → commit + cập nhật trạng thái ☐ → ✅ ở file này
 4. Nhắc user: KHÔNG bịa số liệu, ghi trung thực (LDPlayer ≠ real device)
