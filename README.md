@@ -1,11 +1,10 @@
-# 🔮 Starveil Runner — Endless Runner 3-Lane với Cơ Chế "Enemy Tiến Sát"
+﻿# 🔮 Starveil Runner — Endless Runner 3-Lane với Cơ Chế "Enemy Tiến Sát"
 
 > **Starveil Runner** là một endless runner 3-lane được phát triển bằng **Unity 6 + URP**: điều khiển nhân vật lao về phía trước trên đường vô tận trong khi **"Enemy" (Flying Beetle)** đuổi theo phía sau. Cơ chế đặc trưng kiểu **Subway Surfers / Temple Run**: đụng chướng ngại vật → Enemy **tiến sát** hơn; né sạch 10–15 giây → Enemy **nới ra**; đụng 2 lần trong cửa sổ đó → bị nuốt chửng = Game Over. Thu coin, nhặt power-up và sống sót càng lâu càng tốt.
 
 [![Unity](https://img.shields.io/badge/Unity-6.x-222222?logo=unity&logoColor=white)](https://unity.com)
 [![C#](https://img.shields.io/badge/C%23-.NET-239120?logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
 [![URP](https://img.shields.io/badge/Render%20Pipeline-URP%2017-2196F3)](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@17/manual/index.html)
-[![CI](https://img.shields.io/github/actions/workflow/status/hieujojo/Starveil-Runner/build-test.yml?label=CI%20Build%20%26%20Test)](https://github.com/hieujojo/Starveil-Runner/actions)
 
 > **🚀 Chơi thử ngay:** [itch.io](https://lothric11.itch.io/starveil-runner) · [Unity Play](https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl)
 
@@ -63,7 +62,7 @@
 | Power-up | Shield / Magnet / Slow-mo | ✅ |
 | Audio + Save | `AudioManager` singleton + `SaveSystem` (PlayerPrefs) | ✅ |
 | Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Enemy, đụng obstacle → tàu nhấp nháy, coin không đè obstacle, **Point Light cyan bám tàu (nổi bật)** | ✅ |
-| Test tự động | **Unity Test Framework — 31 test** (16 EditMode + 15 PlayMode) + **CI tự động** (GameCI: test + build WebGL mỗi push) | ✅ |
+| Test tự động | **Unity Test Framework — 31 test** (16 EditMode + 15 PlayMode) | ✅ |
 | Deploy | **WebGL build (Gzip) → [itch.io](https://lothric11.itch.io/starveil-runner) + [Unity Play](https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl)** | ✅ Live 2026-08-12 |
 
 ---
@@ -74,7 +73,7 @@
 
 - 🧠 **Thiết kế gameplay thật**: cơ chế "Enemy tiến sát" kiểu Subway Surfers — biến một lỗi nhỏ (đụng drone) thành **áp lực sinh tử liên tục** (bọ đuổi sát, đụng lần 2 = Game Over). Không chỉ "nhặt item + né vật cản"
 - 🏗️ **Kiến trúc sạch sẽ**: `UI → Systems → Core`, event-driven (`GameEvents`), ScriptableObject config, Object Pool — code dễ mở rộng, dễ test
-- 🧪 **Test-driven + CI**: 31 test tự động (EditMode + PlayMode) + pipeline GameCI chạy test & build WebGL mỗi lần push — chất lượng không phụ thuộc "tôi nhớ test tay"
+- 🧪 **Test-driven**: 31 test tự động (EditMode + PlayMode) — chất lượng không phụ thuộc "tôi nhớ test tay"
 - 🚀 **Đã deploy thật**: WebGL build tối ưu (texture 2048→1024, ~60MB), compression Gzip, xử lý white screen, publish lên itch.io + Unity Play
 - 📱 **Mobile-ready**: điều khiển bằng vuốt, pause overlay, safe-area
 
