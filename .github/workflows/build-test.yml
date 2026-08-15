@@ -10,12 +10,12 @@ on:
 jobs:
   # ============================================================
   # JOB 0 — LẤY LICENSE (chỉ chạy khi bấm Run workflow bằng tay)
-  # Bạn CHƯA có secret UNITY_LICENSE thì làm theo 4 bước:
+  # Bạn CHƯA có secret UNITY_LICENSE hợp lệ thì làm theo 4 bước:
   #   1. Tab Actions → chọn workflow này → Run workflow (bấm tay)
   #   2. Job "Request activation file 🔑" → tải artifact "Unity Activation File" → file .alf
   #   3. Mở https://license.unity3d.com/manual → upload .alf → Unity Personal → tải .ulf
   #   4. Mở .ulf bằng notepad → copy TOÀN BỘ → GitHub Settings → Secrets → Actions
-  #      → New repository secret → tên: UNITY_LICENSE → paste → Add secret
+  #      → sửa secret UNITY_LICENSE (hoặc tạo mới) → paste → Update
   # Xong secret là test/build chạy được, không cần email/password nữa.
   # ============================================================
   request-activation-file:
@@ -29,10 +29,16 @@ jobs:
           lfs: true
 
       - name: 🔍 Chẩn đoán secrets (không hiện giá trị)
+        env:
+          EMAIL_VAL: ${{ secrets.UNITY_EMAIL }}
+          PASS_VAL: ${{ secrets.UNITY_PASSWORD }}
+          SERIAL_VAL: ${{ secrets.UNITY_SERIAL }}
+          LICENSE_VAL: ${{ secrets.UNITY_LICENSE }}
         run: |
-          if [ -n "${{ secrets.UNITY_EMAIL }}" ]; then echo "UNITY_EMAIL   : ✅ SET"; else echo "UNITY_EMAIL   : ❌ EMPTY"; fi
-          if [ -n "${{ secrets.UNITY_PASSWORD }}" ]; then echo "UNITY_PASSWORD: ✅ SET"; else echo "UNITY_PASSWORD: ❌ EMPTY"; fi
-          if [ -n "${{ secrets.UNITY_SERIAL }}" ]; then echo "UNITY_SERIAL  : ✅ SET"; else echo "UNITY_SERIAL  : ⚪ BỎ QUA (Personal không cần)"; fi
+          if [ -n "$EMAIL_VAL" ]; then echo "UNITY_EMAIL    : ✅ SET"; else echo "UNITY_EMAIL    : ❌ EMPTY"; fi
+          if [ -n "$PASS_VAL" ]; then echo "UNITY_PASSWORD : ✅ SET"; else echo "UNITY_PASSWORD : ❌ EMPTY"; fi
+          if [ -n "$SERIAL_VAL" ]; then echo "UNITY_SERIAL   : ✅ SET"; else echo "UNITY_SERIAL   : ⚪ BỎ QUA (Personal không cần)"; fi
+          if [ -n "$LICENSE_VAL" ]; then echo "UNITY_LICENSE  : ✅ CÓ GIÁ TRỊ"; else echo "UNITY_LICENSE  : ❌ TRỐNG"; fi
 
       - name: Unity - Request activation file
         uses: game-ci/unity-activate@v2 # CHỈ có v2 — v3 không tồn tại (CI fail "Set up job" 2026-08-15)
