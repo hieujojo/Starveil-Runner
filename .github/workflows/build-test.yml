@@ -8,6 +8,40 @@ on:
   workflow_dispatch: # chạy tay từ GitHub Actions tab
 
 jobs:
+  # ============================================================
+  # JOB 0 — LẤY LICENSE (chỉ chạy khi bấm Run workflow bằng tay)
+  # Bạn CHƯA có secret UNITY_LICENSE thì làm theo 4 bước:
+  #   1. Tab Actions → chọn workflow này → Run workflow (bấm tay)
+  #   2. Job "Request activation file 🔑" → tải artifact "Unity Activation File" → file .alf
+  #   3. Mở https://license.unity3d.com/manual → upload .alf → Unity Personal → tải .ulf
+  #   4. Mở .ulf bằng notepad → copy TOÀN BỘ → GitHub Settings → Secrets → Actions
+  #      → New repository secret → tên: UNITY_LICENSE → paste → Add secret
+  # Xong secret là test/build chạy được, không cần email/password nữa.
+  # ============================================================
+  request-activation-file:
+    name: Request activation file 🔑
+    if: github.event_name == 'workflow_dispatch' # chỉ chạy khi bấm tay — không chạy mỗi push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Unity - Request activation file
+        uses: game-ci/unity-activate@v2 # CHỈ có v2 — v3 không tồn tại (CI fail "Set up job" 2026-08-15)
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+
+      - name: Upload activation file
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unity Activation File
+          path: activation
+          if-no-files-found: ignore # license đã có sẵn thì không sinh .alf — không fail
+
   test:
     name: Unity Test Runner (EditMode + PlayMode)
     runs-on: ubuntu-latest
@@ -26,20 +60,9 @@ jobs:
           restore-keys: |
             Library-Test-
 
-      - name: Activate Unity License
-        uses: game-ci/unity-activate@v2 # CHỈ có v2 — v3 không tồn tại (CI fail "Set up job" 2026-08-15)
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-
       - name: Run Tests
-        uses: game-ci/unity-test-runner@v4
+        uses: game-ci/unity-test-runner@v4 # tự activate từ UNITY_LICENSE — không cần bước riêng
         env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           projectPath: .
@@ -73,20 +96,9 @@ jobs:
           restore-keys: |
             Library-WebGL-
 
-      - name: Activate Unity License
-        uses: game-ci/unity-activate@v2 # CHỈ có v2 — v3 không tồn tại (CI fail "Set up job" 2026-08-15)
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-
       - name: Build WebGL
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v4 # tự activate từ UNITY_LICENSE — không cần bước riêng
         env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           projectPath: .
@@ -98,4 +110,3 @@ jobs:
         with:
           name: WebGL Build (Gzip)
           path: build/WebGL
-
