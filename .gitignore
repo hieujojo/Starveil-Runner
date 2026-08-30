@@ -163,3 +163,8 @@ InitTestScene*.unity*
 
 # ===== Config tool khác (kilo CLI) =====
 /.kilo/
+
+# ===== Leaderboard config (chứa API key — KHÔNG push lên GitHub) =====
+# Khi clone: tạo asset thủ công (xem Resources/LeaderboardConfig.example.asset)
+Assets/_Project/Resources/LeaderboardConfig.asset
+Assets/_Project/Resources/LeaderboardConfig.asset.meta
