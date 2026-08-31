@@ -110,7 +110,7 @@ namespace VoidRunner.Systems.Leaderboard
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"[Leaderboard] Parse JSON lỗi: {e.Message}");
+                Debug.Log($"[Leaderboard] Parse JSON lỗi — trả về rỗng: {e.Message}");
             }
             return result;
         }
