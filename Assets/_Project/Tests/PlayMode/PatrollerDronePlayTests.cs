@@ -45,8 +45,10 @@ namespace VoidRunner.Tests
             FieldInfo instanceField = typeof(GameManager).GetField("<Instance>k__BackingField",
                 BindingFlags.NonPublic | BindingFlags.Static);
             instanceField.SetValue(null, gm);
-            PropertyInfo stateProp = typeof(GameManager).GetProperty("State");
-            stateProp.GetSetMethod(true).Invoke(gm, new object[] { GameState.Playing });
+            // Dùng backing field trực tiếp — an toàn hơn property reflection trong Unity 6
+            FieldInfo stateField = typeof(GameManager).GetField("<State>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            stateField.SetValue(gm, GameState.Playing);
 
             // Fire event để set _active = true — giống game thật (drone spawn trong Playing state)
             GameEvents.RaiseGameStarted();
@@ -92,8 +94,9 @@ namespace VoidRunner.Tests
         {
             // State = Menu (không phải Playing) → drone đứng yên
             GameManager gm = _gmGo.GetComponent<GameManager>();
-            PropertyInfo stateProp = typeof(GameManager).GetProperty("State");
-            stateProp.GetSetMethod(true).Invoke(gm, new object[] { GameState.Menu });
+            FieldInfo stateField = typeof(GameManager).GetField("<State>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            stateField.SetValue(gm, GameState.Menu);
 
             Vector3 before = _droneGo.transform.position;
             yield return new WaitForSeconds(0.3f);

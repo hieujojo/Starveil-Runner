@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -17,6 +18,8 @@ namespace VoidRunner.Tests
         private GameObject _playerGo;
         private ScoreSystem _system;
 
+        private GameObject _gmGo;
+
         [UnitySetUp]
         public IEnumerator SetUp()
         {
@@ -26,12 +29,26 @@ namespace VoidRunner.Tests
             player.position = new Vector3(0f, 0f, 0f);
 
             _system = new GameObject("TestScoreSystem").AddComponent<ScoreSystem>();
+
+            // GameManager để PlayerController di chuyển (cần State=Playing)
+            _gmGo = new GameObject("TestGameManager");
+            GameManager gm = _gmGo.AddComponent<GameManager>();
+            gm.enabled = false;
+            FieldInfo instanceField = typeof(GameManager).GetField("<Instance>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            instanceField.SetValue(null, gm);
+            // Dùng backing field trực tiếp — an toàn hơn property reflection trong Unity 6
+            FieldInfo stateField = typeof(GameManager).GetField("<State>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            stateField.SetValue(gm, GameState.Playing);
+
             yield return null; // chờ 1 frame để Start() chạy → _active = true
         }
 
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            Object.DestroyImmediate(_gmGo);
             Object.Destroy(_playerGo);
             Object.Destroy(_system.gameObject);
             yield return null;

@@ -57,8 +57,10 @@ namespace VoidRunner.Tests
             FieldInfo instanceField = typeof(GameManager).GetField("<Instance>k__BackingField",
                 BindingFlags.NonPublic | BindingFlags.Static);
             instanceField.SetValue(null, gm);
-            PropertyInfo stateProp = typeof(GameManager).GetProperty("State");
-            stateProp.GetSetMethod(true).Invoke(gm, new object[] { GameState.Playing });
+            // Dùng backing field trực tiếp — an toàn hơn property reflection trong Unity 6
+            FieldInfo stateField = typeof(GameManager).GetField("<State>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            stateField.SetValue(gm, GameState.Playing);
 
             _gameOverRaised = false;
             _gameOverHandler = () => _gameOverRaised = true;
