@@ -47,6 +47,9 @@ namespace VoidRunner.Tests
             instanceField.SetValue(null, gm);
             PropertyInfo stateProp = typeof(GameManager).GetProperty("State");
             stateProp.GetSetMethod(true).Invoke(gm, new object[] { GameState.Playing });
+
+            // Fire event để set _active = true — giống game thật (drone spawn trong Playing state)
+            GameEvents.RaiseGameStarted();
         }
 
         [TearDown]

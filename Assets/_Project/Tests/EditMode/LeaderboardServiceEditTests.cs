@@ -69,6 +69,7 @@ namespace VoidRunner.Tests
         [Test]
         public void ParseTopScores_InvalidJson_ReturnsEmpty()
         {
+            // Warning khi parse JSON lỗi là đúng hành vi — không suppress (LogIssue attribute không khả dụng)
             Assert.AreEqual(0, LeaderboardService.ParseTopScores("not json at all").Count);
         }
     }
