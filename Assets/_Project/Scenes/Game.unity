@@ -432,6 +432,7 @@ GameObject:
   - component: {fileID: 288287885}
   - component: {fileID: 288287888}
   - component: {fileID: 288287889}
+  - component: {fileID: 288287890}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -475,6 +476,7 @@ MonoBehaviour:
   player: {fileID: 1348608049}
   obstacleManager: {fileID: 288287881}
   pickupSpawner: {fileID: 0}
+  patrollerSpawner: {fileID: 0}
 --- !u!114 &288287879
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -555,7 +557,6 @@ MonoBehaviour:
   bestScoreText: {fileID: 2013297669}
   retryButton: {fileID: 1068268561}
   menuButton: {fileID: 2144816551}
-  creditsButton: {fileID: 0}
   fadeDuration: 0.4
 --- !u!114 &288287884
 MonoBehaviour:
@@ -665,6 +666,12 @@ MonoBehaviour:
   trailTime: 0.35
   trailStartWidth: 0.9
   trailColor: {r: 0.05, g: 0.05, b: 0.1, a: 0.28}
+  driftRate: 50
+  driftSpeed: -10
+  driftLifetime: 1.8
+  driftSizeMin: 0.15
+  driftSizeMax: 0.35
+  driftColor: {r: 0.9, g: 0.95, b: 1, a: 1}
 --- !u!114 &288287889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -684,6 +691,23 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 014ecb3b1b5a7c441a16b3ec93e0e1d1, type: 2}
   startSpeed: 10
   maxSpeed: 20
+--- !u!114 &288287890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288287876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc2b0e10d5b2884b8f040522c9084c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VoidRunner.Core::VoidRunner.Core.World.PatrollerSpawner
+  patrollerPrefab: {fileID: 6945920205640586187, guid: 919b6ef6b78825d49b75cb072de355e7, type: 3}
+  spawnChance: 0.06
+  maxConcurrent: 1
+  laneCount: 3
+  laneWidth: 2
 --- !u!1 &440046622
 GameObject:
   m_ObjectHideFlags: 0
@@ -1860,8 +1884,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1087260099}
   - component: {fileID: 1087260098}
-  - component: {fileID: 1087260100}
   - component: {fileID: 1087260101}
+  - component: {fileID: 1087260100}
   m_Layer: 0
   m_Name: CinemachineCamera
   m_TagString: Untagged

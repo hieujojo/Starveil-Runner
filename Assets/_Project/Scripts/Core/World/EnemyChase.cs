@@ -35,6 +35,8 @@ namespace VoidRunner.Core.World
     [RequireComponent(typeof(Collider))]
     public class EnemyChase : MonoBehaviour
     {
+        // SerializeField cần giữ cho Inspector config — giá trị truyền sang Strategy qua Configure() ở Awake()
+#pragma warning disable CS0414
         [Header("Khoảng cách")]
         [SerializeField] private Transform player;
 
@@ -62,6 +64,7 @@ namespace VoidRunner.Core.World
 
         [SerializeField, Tooltip("Scale ở nấc 1 (áp sát) — phình nhẹ đe dọa nhưng KHÔNG che tàu (fix 2026-08-12: 1.6 quá to)")]
         private float closeScale = 1.2f;
+#pragma warning restore CS0414
 
         [Header("Enemy model (duy nhất)")]
         [Tooltip("Flying Beetle (Assets/Flying Beetle/prefab) — có Animator, instantiate là bay. Tool Setup Enemy tự gán.")]
@@ -86,7 +89,11 @@ namespace VoidRunner.Core.World
         private bool _catching;             // đang thực hiện cảnh bắt (hit lần 2) — không cho trigger/lunge lần nữa
         private Animator _animator;         // Animator của Flying Beetle (ép flying + speed khi hit)
 
-        public void Setup(Transform playerRef) => player = playerRef;
+        public void Setup(Transform playerRef)
+        {
+            player = playerRef;
+            _strategy?.Setup(playerRef); // FIX: initialize strategy _currentDistance = _baseDistance
+        }
 
         private void Awake()
         {

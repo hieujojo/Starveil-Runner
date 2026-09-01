@@ -26,6 +26,7 @@ namespace VoidRunner.Core.Commands
 
         public void Undo()
         {
+            // Undo move left = move right
             if (_player != null)
                 _player.MoveRight();
         }

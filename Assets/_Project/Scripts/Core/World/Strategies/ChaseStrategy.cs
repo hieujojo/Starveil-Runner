@@ -44,6 +44,7 @@ namespace VoidRunner.Core.World.Strategies
             _relaxWindow = relaxWin;
             _distanceLerpSpeed = lerpSpeed;
             _lateralFollow = lateral;
+            _currentDistance = baseDist; // FIX: initialize — nếu không, frame đầu Execute() teleports enemy đến player → safety net fired GameOver giả
         }
 
         public void Setup(Transform player)

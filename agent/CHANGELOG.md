@@ -1617,3 +1617,13 @@ var mat = new Material(shader);
   - PlayerController.cs: duplicate method `MoveToLane`
 
 - **Bài học:** (1) Strategy pattern trong Unity cần careful — test phải access strategy object thay vì MonoBehaviour fields; (2) Command pattern không nên wrap methods đã public (gây recursion) — giữ methods gốc, command là wrapper bên ngoài; (3) Factory pattern trong Unity cần using statement đúng namespace khi reference class từ namespace khác.
+
+## 2026-09-01 (fix test GameManager singleton stale)
+
+**3 test fail cũ** (đã tồn tại TRƯỚC khi thêm Design Patterns):
+
+**Nguyên nhân gốc:** `TearDown` destroy GameManager GameObject nhưng KHÔNG clear static `Instance` field → test sau dùng stale instance (đã destroy) → `State` không đúng → `EnemyChase.LateUpdate()` gate `State != Playing` → strategy không chạy → safety net trong ChaseStrategy raised Game Over.
+
+**Fix:** Clear `GameManager.Instance = null` (qua backing field reflection) TRƯỚC khi `DestroyImmediate` trong `TearDown` — cả `EnemyChasePlayTests` lẫn `ScoreSystemPlayTests`.
+
+**Bài học:** PlayMode test với singleton MonoBehaviour PHẢI cleanup static fields trong TearDown — `DestroyImmediate` chỉ destroy GameObject, KHÔNG clear static Instance. Đây là lỗi thường gặp trong Unity testing.

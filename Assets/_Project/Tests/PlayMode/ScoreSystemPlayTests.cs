@@ -30,6 +30,12 @@ namespace VoidRunner.Tests
 
             _system = new GameObject("TestScoreSystem").AddComponent<ScoreSystem>();
 
+            // FIX: Đặt player reference trực tiếp qua reflection
+            // → loại bỏ phụ thuộc FindAnyObjectByType (có thể fail trong test context)
+            FieldInfo playerField = typeof(ScoreSystem).GetField("player",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            playerField.SetValue(_system, _playerGo.transform);
+
             // GameManager để PlayerController di chuyển (cần State=Playing)
             _gmGo = new GameObject("TestGameManager");
             GameManager gm = _gmGo.AddComponent<GameManager>();

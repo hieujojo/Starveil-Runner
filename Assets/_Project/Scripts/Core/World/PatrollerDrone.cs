@@ -22,6 +22,8 @@ namespace VoidRunner.Core.World
     [RequireComponent(typeof(Obstacle))]
     public class PatrollerDrone : MonoBehaviour
     {
+        // SerializeField cần giữ cho Inspector config — giá trị truyền sang Strategy qua Configure() ở Awake()
+#pragma warning disable CS0414
         [Header("Tuần tra")]
         [SerializeField, Tooltip("Lane trái nhất khi lắc (0..2)")]
         private int patrolMinLane = 0;
@@ -37,6 +39,7 @@ namespace VoidRunner.Core.World
         private int laneCount = 3;
         [SerializeField, Tooltip("Bề rộng 1 lane (m) — mặc định 2 (road 18m / 3 lane)")]
         private float laneWidth = 2f;
+#pragma warning restore CS0414
 
         // STRATEGY PATTERN — PatrollerStrategy xử lý patrol logic
         private PatrollerStrategy _strategy;
