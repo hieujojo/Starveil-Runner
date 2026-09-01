@@ -327,15 +327,17 @@ namespace VoidRunner.Core.World
             // STRATEGY PATTERN — delegate obstacle hit logic to strategy
             _strategy.OnObstacleHit();
 
-            if (_strategy.Stage == 1)
-            {
-                // Nấc 1: vỗ cánh nhanh hơn
-                if (_animator != null) _animator.speed = hitSpeedUp;
-            }
-            else if (_strategy.IsCatching)
+            // FIX: check IsCatching TRƯỚC vì khi hit lần 2, _catching=true NHƯNG _stage vẫn=1
+            // → if(Stage==1) đúng → else if(IsCatching) KHÔNG BAO GIỜ chạy → CatchAndKill() never called
+            if (_strategy.IsCatching)
             {
                 // Nấc 2: bắt player
                 StartCoroutine(CatchAndKill());
+            }
+            else if (_strategy.Stage == 1)
+            {
+                // Nấc 1: vỗ cánh nhanh hơn
+                if (_animator != null) _animator.speed = hitSpeedUp;
             }
         }
 
