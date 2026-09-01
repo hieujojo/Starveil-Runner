@@ -82,8 +82,12 @@ namespace VoidRunner.Tests
         public void TearDown()
         {
             GameEvents.OnGameOver -= _gameOverHandler;
-            // DestroyImmediate: GameManager.Instance phải được clear NGAY giữa các test
-            // (Destroy deferred có thể giữ Instance trỏ tới object cũ → test sau gán nhầm State)
+            // BUG FIX: GameManager singleton persist giữa tests
+            // → clear Instance TRƯỚC khi destroy để test sau không dùng stale instance
+            FieldInfo instanceField = typeof(GameManager).GetField("<Instance>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            instanceField.SetValue(null, null);
+
             Object.DestroyImmediate(_gmGo);
             Object.DestroyImmediate(_enemyGo);
             Object.DestroyImmediate(_playerGo);

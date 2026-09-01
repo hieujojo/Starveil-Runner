@@ -48,6 +48,11 @@ namespace VoidRunner.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            // BUG FIX: GameManager singleton persist giữa tests
+            FieldInfo instanceField = typeof(GameManager).GetField("<Instance>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            instanceField.SetValue(null, null);
+
             Object.DestroyImmediate(_gmGo);
             Object.Destroy(_playerGo);
             Object.Destroy(_system.gameObject);
