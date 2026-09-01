@@ -92,8 +92,9 @@ namespace VoidRunner.Core.World
         {
             _startPos = transform.position;
 
-            // STRATEGY PATTERN — khởi tạo chase strategy
+            // STRATEGY PATTERN — khởi tạo chase strategy + configure từ SerializeField
             _strategy = new ChaseStrategy();
+            _strategy.Configure(baseDistance, closeDistance, relaxWindow, distanceLerpSpeed, lateralFollow);
 
             // Collider là trigger — player đi vào là bị nuốt (không đẩy vật lý)
             Collider col = GetComponent<Collider>();

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using VoidRunner.Core;
 using VoidRunner.Core.World;
+using VoidRunner.Core.World.Strategies;
 
 namespace VoidRunner.Tests
 {
@@ -43,9 +44,19 @@ namespace VoidRunner.Tests
             _enemy = _enemyGo.AddComponent<EnemyChase>();
             _enemy.Setup(_playerGo.transform);
 
-            // Tăng tốc co/nới + cửa sổ ngắn + catch nhanh để test nhanh
-            SetPrivateField(_enemy, "distanceLerpSpeed", 50f);
-            SetPrivateField(_enemy, "relaxWindow", 0.3f);
+            // Tăng tốc co/nới + cửa sổ ngắn để test nhanh
+            // STRATEGY PATTERN — configure strategy thay vì EnemyChase fields
+            FieldInfo strategyField = typeof(EnemyChase).GetField("_strategy",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            ChaseStrategy strategy = strategyField.GetValue(_enemy) as ChaseStrategy;
+            Assert.IsNotNull(strategy, "EnemyChase phải có _strategy field.");
+            strategy.Configure(
+                baseDist: 7f,
+                closeDist: 5.5f,
+                relaxWin: 0.3f,  // cửa sổ ngắn để test nhanh
+                lerpSpeed: 50f,  // co/nới nhanh
+                lateral: 20f
+            );
             SetPrivateField(_enemy, "catchDelay", 0.05f);
 
             // GameManager để có Instance + State=Playing — disable để Start không chạy (tránh StartRun noise).

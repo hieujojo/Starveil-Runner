@@ -36,6 +36,16 @@ namespace VoidRunner.Core.World.Strategies
         public bool IsCatching => _catching;
         public int Stage => _stage;
 
+        /// <summary>Configure từ EnemyChase fields (để test có thể set giá trị).</summary>
+        public void Configure(float baseDist, float closeDist, float relaxWin, float lerpSpeed, float lateral)
+        {
+            _baseDistance = baseDist;
+            _closeDistance = closeDist;
+            _relaxWindow = relaxWin;
+            _distanceLerpSpeed = lerpSpeed;
+            _lateralFollow = lateral;
+        }
+
         public void Setup(Transform player)
         {
             _currentDistance = _baseDistance;

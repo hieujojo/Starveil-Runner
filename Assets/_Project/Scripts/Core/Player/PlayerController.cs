@@ -159,19 +159,14 @@ namespace VoidRunner.Core.Player
         /// <summary>Nhận tốc độ mới từ DifficultyManager (khi game đang chơi).</summary>
         private void HandleDifficultyChanged(float speed, float _) => _currentSpeed = speed;
 
-        // COMMAND PATTERN — wrapper methods tạo command object
         public void MoveLeft()
         {
-            var cmd = new Commands.MoveLeftCommand(this);
-            cmd.Execute();
-            _commandHistory.Push(cmd);
+            MoveToLane(_currentLane - 1);
         }
 
         public void MoveRight()
         {
-            var cmd = new Commands.MoveRightCommand(this);
-            cmd.Execute();
-            _commandHistory.Push(cmd);
+            MoveToLane(_currentLane + 1);
         }
 
         /// <summary>COMMAND PATTERN — thực hiện command bên ngoài (từ InputReader).</summary>
