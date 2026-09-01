@@ -34,7 +34,7 @@ namespace VoidRunner.UI
         // trước đây panel hiện đè lên menu sáng → rất khó đọc)
         private GameObject _dimmer;
 
-        private void Start()
+private void Start()
         {
             howToPlayPanel?.SetActive(false);
             RefreshBestScore();
@@ -42,6 +42,7 @@ namespace VoidRunner.UI
             EnsureCredits();    // nút CREDITS + panel credits (tạo bằng code, idempotent)
             EnsureShipSelect(); // Task D: panel chọn ship (preview 3D, lưu SaveSystem.SelectedShip)
             EnsureVolumeSlider(); // 2026-08-12: thay nút bật/tắt âm thanh bằng slider kéo
+            SetupMainMenuPositions(); // FIX M1: cân bằng spacing giữa các nút
 
             if (playButton != null) playButton.onClick.AddListener(PlayGame);
             if (howToPlayButton != null) howToPlayButton.onClick.AddListener(ToggleHowToPlay);
@@ -281,6 +282,48 @@ namespace VoidRunner.UI
                 canvas.transform, "VolumeSlider",
                 new Vector2(0f, -60f), new Vector2(440f, 76f), // v3: nới rộng 360→440 (user: "hơi chật") — slider thoáng hơn
                 new Color(0.2f, 0.75f, 1f, 1f)); // cyan — khớp tông nút chính
+        }
+
+        /// <summary>FIX M1: Cân bằng spacing giữa các nút Main Menu.</summary>
+        /// Cũ: PLAY y=60, HOW TO PLAY y=24, SHIP y=-245, CREDITS y=-245 (không đều).
+        /// Mới: PLAY y=80, HOW TO PLAY y=0, SHIP y=-80, CREDITS y=-160 (khoảng cách 80px đều).
+        private void SetupMainMenuPositions()
+        {
+            // PLAY: y=80
+            if (playButton != null)
+            {
+                var rt = playButton.GetComponent<RectTransform>();
+                if (rt != null)
+                {
+                    rt.anchoredPosition = new Vector2(0f, 80f);
+                }
+            }
+
+            // HOW TO PLAY: y=0
+            if (howToPlayButton != null)
+            {
+                var rt = howToPlayButton.GetComponent<RectTransform>();
+                if (rt != null)
+                {
+                    rt.anchoredPosition = new Vector2(0f, 0f);
+                }
+            }
+
+            // CREDITS: y=-160 (cùng hàng với ShipSelect theo Task D, ship ở y=-80)
+            if (creditsButton != null)
+            {
+                var rt = creditsButton.GetComponent<RectTransform>();
+                if (rt != null)
+                {
+                    rt.anchoredPosition = new Vector2(0f, -160f);
+                }
+            }
+
+            // Ship select button không có field trực tiếp trong MainMenuManager —
+            // được tạo bởi EnsureShipSelect() -> ShipSelectManager, vị trí của ship
+            // phụ thuộc vào ShipSelectManager setup. Nhận định: ship nên ở y=-80
+            // để cân bằng với Credits y=-160 (cách 80px).
+            // Nếu cần điều chỉnh: sửa trong ShipSelectManager hoặc EnsureShipSelect.
         }
 
         private void RefreshBestScore()
