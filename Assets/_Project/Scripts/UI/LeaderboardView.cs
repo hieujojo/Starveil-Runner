@@ -47,7 +47,7 @@ namespace VoidRunner.UI
             prt.anchorMin = new Vector2(0.5f, 0.5f);
             prt.anchorMax = new Vector2(0.5f, 0.5f);
             prt.pivot = new Vector2(0.5f, 0.5f);
-            prt.anchoredPosition = new Vector2(0f, -40f);  // giữa Game Over panel, dịch xuống 40px
+            prt.anchoredPosition = new Vector2(0f, 20f);  // dịch lên 60px so với -40f để tránh chồng lên nút Retry/Menu
             prt.sizeDelta = new Vector2(W, H);
 
             var pimg = panel.GetComponent<Image>();
