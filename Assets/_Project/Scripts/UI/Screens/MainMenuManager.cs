@@ -160,7 +160,7 @@ namespace VoidRunner.UI
             // Nút CREDITS — CÙNG HÀNG với nút SHIP (y=-280): CREDITS bên PHẢI (160), SHIP bên TRÁI (-160)
             // (tránh chồng nhau — user thêm chọn ship Task D). KHÔNG subscribe onClick ở đây —
             // Start() đã subscribe (subscribe 2 lần = 1 click toggle 2 lần = nhìn như hỏng — góp ý reviewer).
-            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(160f, -245f), new Vector2(300f, 56f)); // Fix Spacing 2026-08-12 v3 (theo layout mới Best -160)
+            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(160f, -210f), new Vector2(260f, 50f)); // M1: cân bằng spacing — trên ship (-280), dưới volume (-60)
 
             // Panel credits + nút CLOSE
             GameObject panel = CreditsPanelBuilder.EnsurePanel(canvas);
