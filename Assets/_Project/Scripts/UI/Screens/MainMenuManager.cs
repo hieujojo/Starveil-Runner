@@ -25,6 +25,7 @@ namespace VoidRunner.UI
 
         [Header("Text")]
         [SerializeField] private TextMeshProUGUI bestScoreText;
+        [SerializeField] private TextMeshProUGUI pressStartText; // M2: hướng dẫn "PRESS SPACE TO START"
 
         [Header("Scene")]
         [SerializeField, Tooltip("Tên scene Game (khớp tên file .unity)")]
@@ -36,9 +37,17 @@ namespace VoidRunner.UI
 
 private void Start()
         {
-            howToPlayPanel?.SetActive(false);
-            RefreshBestScore();
-            EnsureCloseButton(); // nút CLOSE trên panel — đóng popup rõ ràng (không chỉ click dimmer)
+howToPlayPanel?.SetActive(false);
+        RefreshBestScore();
+        pressStartText.gameObject.SetActive(false); // Mặc định ẩn
+        EnsureCloseButton(); // nút CLOSE trên panel — đóng popup rõ ràng (không chỉ click dimmer)
+        EnsureCredits();    // nút CREDITS + panel credits (tạo bằng code, idempotent)
+        EnsureShipSelect(); // Task D: panel chọn ship (preview 3D, lưu SaveSystem.SelectedShip)
+        EnsureVolumeSlider(); // 2026-08-12: thay nút bật/tắt âm thanh bằng slider kéo
+        SetupMainMenuPositions(); // FIX M1: cân bằng spacing giữa các nút
+        ShowPressStartHint(); // M2: hiển thị hint bắt đầu
+
+        if (playButton != null) playButton.onClick.AddListener(PlayGame);
             EnsureCredits();    // nút CREDITS + panel credits (tạo bằng code, idempotent)
             EnsureShipSelect(); // Task D: panel chọn ship (preview 3D, lưu SaveSystem.SelectedShip)
             EnsureVolumeSlider(); // 2026-08-12: thay nút bật/tắt âm thanh bằng slider kéo
@@ -58,6 +67,8 @@ private void Start()
 
         private void PlayGame()
         {
+            // M2: Ẩn hint "PRESS SPACE TO START" khi bấm Play
+            pressStartText?.gameObject.SetActive(false);
             if (string.IsNullOrEmpty(gameSceneName)) return;
             SceneManager.LoadScene(gameSceneName);
         }
@@ -324,6 +335,26 @@ private void Start()
             // phụ thuộc vào ShipSelectManager setup. Nhận định: ship nên ở y=-80
             // để cân bằng với Credits y=-160 (cách 80px).
             // Nếu cần điều chỉnh: sửa trong ShipSelectManager hoặc EnsureShipSelect.
+        }
+
+        /// <summary>M2: Hiển thị/text nhấp nháy "PRESS SPACE TO START" dưới nút PLAY.</summary>
+        private void ShowPressStartHint()
+        {
+            if (pressStartText == null) return;
+            // Vị trí: dưới Play button, cách khoảng 20px
+            if (playButton != null)
+            {
+                var playRt = playButton.GetComponent<RectTransform>();
+                var startRt = pressStartText.rectTransform;
+                if (playRt != null && startRt != null)
+                {
+                    // Đặt text ngay dưới Play button, căn giữa horizont
+                    startRt.anchoredPosition = new Vector2(playRt.anchoredPosition.x, playRt.anchoredPosition.y - 30f);
+                    startRt.sizeDelta = new Vector2(300f, 40f); // vừa đủ text
+                }
+            }
+            pressStartText.color = new Color(0.0f, 0.8f, 1f, 1f); // cyan khớp tông nút
+            // Font sẽ được gán qua Inspector (giống bestScoreText)
         }
 
         private void RefreshBestScore()
