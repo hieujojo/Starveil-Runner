@@ -1597,3 +1597,23 @@ var mat = new Material(shader);
 | V5-4 | **Text "x2" (combo) che nửa góc trái** — ComboText anchor (0,1)@(34,-150) con Canvas | ✅ Fix tool: xuống dưới điểm (0.5,1)@(0,-110) |
 | V5-5 | **KHÔNG có vật cản + xu** — wiring scene đúng 100% nhưng không spawn | 🔍 Đang chẩn đoán: đã thêm log `[DiagSpawn]`/`[DiagObstacle]`/`[DiagCoin]`, user chơi 15s gửi log |
 | V5-6 | **2 hàng cảnh vật trái/phải** (ambient) — lỗi tái diễn nhiều lần | ⏳ **Chờ user REVIEW code** (`AmbientScroller.cs` + `AmbientSetupTool.cs` + config scene) trước khi cho phép sửa |
+
+## 2026-09-01 (Design Patterns — Strategy + Command + Factory)
+
+> User: "thêm toàn bộ pattern đi, nhớ note lại vào đâu đó để tôi tham"
+
+- **THÊM MỚI 3 Design Patterns:**
+  - **Strategy Pattern:** `IEnemyStrategy` interface + `ChaseStrategy` (Flying Beetle) + `PatrollerStrategy` (PatrollerDrone). EnemyChase/PatrollerDrone delegate movement to strategy. Thêm enemy mới = chỉ thêm class strategy (Open/Closed Principle).
+  - **Command Pattern:** `ICommand` interface + `MoveLeftCommand`, `MoveRightCommand`, `PauseCommand`, `RestartCommand`. PlayerController có command history (undo/redo support). Input handling qua command objects.
+  - **Factory Pattern:** `ITileFactory` + `IEnemyFactory` interfaces + `DefaultTileFactory` + `EnemyFactory` implementations. TileSpawner/PatrollerSpawner dùng factory thay vì Instantiate trực tiếp.
+  - **Documentation:** `docs/DESIGN_PATTERNS.md` — tài liệu đầy đủ với code examples + files tham chiếu.
+
+- **FIX 8 test fail sau refactor:**
+  - EnemyChasePlayTests (4 fail): Strategy dùng hardcoded values, test set field trên EnemyChase → Fix: thêm `ChaseStrategy.Configure()` + test configure strategy trực tiếp.
+  - PlayerControllerPlayTests (3 fail): Infinite recursion `MoveLeft()` → command → `MoveLeft()` → loop → Fix: `MoveLeft/MoveRight` gọi `MoveToLane` trực tiếp.
+
+- **FIX 2 lỗi compile:**
+  - DefaultTileFactory.cs: thiếu `using VoidRunner.Core.World`
+  - PlayerController.cs: duplicate method `MoveToLane`
+
+- **Bài học:** (1) Strategy pattern trong Unity cần careful — test phải access strategy object thay vì MonoBehaviour fields; (2) Command pattern không nên wrap methods đã public (gây recursion) — giữ methods gốc, command là wrapper bên ngoài; (3) Factory pattern trong Unity cần using statement đúng namespace khi reference class từ namespace khác.
