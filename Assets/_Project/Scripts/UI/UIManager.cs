@@ -89,14 +89,35 @@ namespace VoidRunner.UI
 
         private void HandleScoreChanged(int score)
         {
-            if (scoreText != null) scoreText.text = score.ToString("N0");
+            if (scoreText != null)
+            {
+                scoreText.text = score.ToString("N0");
+                // C1: punch scale — score "nhảy" khi thay đổi, tạo cảm giác scoring
+                scoreText.transform.DOKill();
+                scoreText.transform.localScale = Vector3.one;
+                scoreText.transform.DOPunchScale(Vector3.one * 0.15f, 0.2f, 8, 0.5f);
+            }
         }
 
         private void HandleComboChanged(int multiplier)
         {
             if (comboText == null) return;
-            comboText.gameObject.SetActive(multiplier > 1);
-            comboText.text = $"x{multiplier}";
+            comboText.DOKill();
+            if (multiplier > 1)
+            {
+                // C2: fade in + scale up — combo hiện mượt mà, không đột ngột
+                comboText.gameObject.SetActive(true);
+                comboText.text = $"x{multiplier}";
+                comboText.color = new Color(comboText.color.r, comboText.color.g, comboText.color.b, 0f);
+                comboText.transform.localScale = Vector3.one * 0.5f;
+                comboText.DOFade(1f, 0.15f);
+                comboText.transform.DOScale(1f, 0.2f).SetEase(Ease.OutBack);
+            }
+            else
+            {
+                // C2: fade out — combo biến mất mượt mà
+                comboText.DOFade(0f, 0.1f).OnComplete(() => comboText.gameObject.SetActive(false));
+            }
         }
 
         private void ShowGameOver()
