@@ -19,6 +19,14 @@ namespace VoidRunner.UI
         private const string RootName = "LeaderboardPanel";
         private const string NameKey = "StarveilRunner_ArcadeName";
 
+        // ── Bảng màu neon arcade ──
+        private static readonly Color PanelBg = new Color(0.05f, 0.03f, 0.10f, 0.95f);
+        private static readonly Color BorderCyan = new Color(0.3f, 0.85f, 1f, 0.5f);
+        private static readonly Color TitleGold = new Color(1f, 0.85f, 0.3f, 1f);
+        private static readonly Color TextWhite = new Color(0.92f, 0.92f, 0.96f, 1f);
+        private static readonly Color AccentCyan = new Color(0.2f, 0.75f, 1f, 1f);
+        private static readonly Color CloseRed = new Color(1f, 0.35f, 0.35f, 1f);
+
         /// <summary>
         /// Đảm bảo panel leaderboard tồn tại (con của Game Over panel — ẩn cùng panel).
         /// Trả về null nếu parent không hợp lệ.
@@ -29,41 +37,55 @@ namespace VoidRunner.UI
             Transform existing = parent.Find(RootName);
             if (existing != null) return existing.gameObject;
 
+            float W = 520f;  // chiều rộng panel
+            float H = 380f;  // chiều cao panel (tăng từ 300 → 380 cho thoáng)
+
+            // ── Panel chính ──
             var panel = new GameObject(RootName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             panel.transform.SetParent(parent, false);
             var prt = (RectTransform)panel.transform;
-            // Đỉnh panel Game Over (anchor giữa 680×560): từ y=-230 xuống -530 — dưới FinalScore,
-            // không đè Best/Retry/Menu (y=-140)/Credits (y=-245, ngoài panel)
-            prt.anchorMin = new Vector2(0.5f, 1f);
-            prt.anchorMax = new Vector2(0.5f, 1f);
-            prt.pivot = new Vector2(0.5f, 1f);
-            prt.anchoredPosition = new Vector2(0f, -230f);
-            prt.sizeDelta = new Vector2(560f, 300f);
+            prt.anchorMin = new Vector2(0.5f, 0.5f);
+            prt.anchorMax = new Vector2(0.5f, 0.5f);
+            prt.pivot = new Vector2(0.5f, 0.5f);
+            prt.anchoredPosition = new Vector2(0f, -40f);  // giữa Game Over panel, dịch xuống 40px
+            prt.sizeDelta = new Vector2(W, H);
 
             var pimg = panel.GetComponent<Image>();
-            pimg.color = new Color(0.06f, 0.04f, 0.12f, 1f); // tím đen — đục hoàn toàn (R0.9)
-            AddBorder(panel.transform, new Vector2(560f, 300f));
+            pimg.color = PanelBg;
 
-            // Tiêu đề
-            var title = CreateLabel(panel.transform, "Title", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -6f), new Vector2(500f, 32f), "LEADERBOARD", 28,
-                new Color(1f, 0.85f, 0.3f, 1f), TextAlignmentOptions.Center);
+            // Viền neon cyan (4 cạnh)
+            AddBorder(panel.transform, new Vector2(W, H), BorderCyan);
 
-            // Danh sách top — text nhiều dòng, đọc được
-            var list = CreateLabel(panel.transform, "List", new Vector2(0f, 1f), new Vector2(1f, 1f),
-                new Vector2(0f, 0f), new Vector2(0f, 0f), "", 22, new Color(0.9f, 0.9f, 1f, 1f), TextAlignmentOptions.TopLeft);
+            // ── Hàng ngang trên cùng: Title + Close button ──
+            // Tiêu đề "LEADERBOARD" — bên trái, có padding
+            CreateLabel(panel.transform, "Title", new Vector2(0f, 1f), new Vector2(1f, 1f),
+                new Vector2(30f, -8f), new Vector2(-50f, 30f), "🏆  LEADERBOARD", 24,
+                TitleGold, TextAlignmentOptions.Left);
+
+            // Nút ✕ Close — góc phải trên
+            EnsureCloseButton(panel.transform, W);
+
+            // ── Đường kẻ ngang phân tách ──
+            CreateStrip(panel.transform, "Divider", new Vector2(0.1f, 1f), new Vector2(0.9f, 1f),
+                new Vector2(0f, -42f), new Vector2(W * 0.8f, 2f));
+
+            // ── Danh sách top 10 ──
+            var list = CreateLabel(panel.transform, "List", new Vector2(0f, 1f), new Vector2(1f, 0.35f),
+                new Vector2(0f, 0f), new Vector2(0f, 0f), "", 18, TextWhite, TextAlignmentOptions.TopLeft);
             var lrt = (RectTransform)list.transform;
-            lrt.offsetMin = new Vector2(28f, 60f);
-            lrt.offsetMax = new Vector2(-28f, -44f);
+            lrt.offsetMin = new Vector2(30f, 0f);
+            lrt.offsetMax = new Vector2(-30f, -50f);
             list.text = "Loading...";
+            list.lineSpacing = 8f;  // giãn dòng cho thoáng
 
-            // Hàng dưới: input tên + nút SUBMIT
-            var input = EnsureNameInput(panel.transform);
-            var submit = EnsureSubmitButton(panel.transform);
+            // ── Hàng dưới cùng: Name Input + SUBMIT ──
+            EnsureNameInput(panel.transform);
+            EnsureSubmitButton(panel.transform);
 
-            // Thông báo trạng thái (offline/lỗi) — nhỏ, dưới list
+            // ── Thông báo trạng thái ──
             var status = CreateLabel(panel.transform, "Status", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
-                new Vector2(0f, 14f), new Vector2(500f, 24f), "", 16, new Color(1f, 0.5f, 0.5f, 1f), TextAlignmentOptions.Center);
+                new Vector2(0f, 8f), new Vector2(400f, 22f), "", 14,
+                new Color(1f, 0.5f, 0.5f, 1f), TextAlignmentOptions.Center);
             status.transform.SetAsLastSibling();
 
             panel.SetActive(false);
@@ -158,13 +180,14 @@ namespace VoidRunner.UI
             var go = new GameObject("NameInput", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(TMP_InputField));
             go.transform.SetParent(parent, false);
             var rt = (RectTransform)go.transform;
-            rt.anchorMin = new Vector2(0.5f, 0f);
-            rt.anchorMax = new Vector2(0.5f, 0f);
-            rt.anchoredPosition = new Vector2(-90f, 62f);
-            rt.sizeDelta = new Vector2(180f, 44f);
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(0f, 0f);
+            rt.pivot = new Vector2(0f, 0f);
+            rt.anchoredPosition = new Vector2(24f, 38f);  // góc trái dưới, có padding
+            rt.sizeDelta = new Vector2(160f, 42f);
 
             var img = go.GetComponent<Image>();
-            img.color = new Color(0.1f, 0.08f, 0.2f, 1f);
+            img.color = new Color(0.10f, 0.07f, 0.18f, 1f);
 
             var field = go.GetComponent<TMP_InputField>();
             field.characterLimit = 3; // tên arcade 3 ký tự
@@ -225,24 +248,54 @@ namespace VoidRunner.UI
             var go = new GameObject("SubmitButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
             var rt = (RectTransform)go.transform;
-            rt.anchorMin = new Vector2(0.5f, 0f);
-            rt.anchorMax = new Vector2(0.5f, 0f);
-            rt.anchoredPosition = new Vector2(110f, 62f);
-            rt.sizeDelta = new Vector2(160f, 44f);
+            rt.anchorMin = new Vector2(1f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot = new Vector2(1f, 0f);
+            rt.anchoredPosition = new Vector2(-24f, 38f);  // góc phải dưới, có padding
+            rt.sizeDelta = new Vector2(140f, 42f);
 
             var img = go.GetComponent<Image>();
-            img.color = new Color(0.2f, 0.75f, 1f, 1f); // cyan — tông nút chính
+            img.color = AccentCyan;
 
             var btn = go.GetComponent<Button>();
             btn.transition = Selectable.Transition.ColorTint;
 
             var label = CreateLabel(go.transform, "Label", new Vector2(0f, 0f), new Vector2(1f, 1f),
-                new Vector2(0f, 0f), new Vector2(0f, 0f), "SUBMIT", 24, Color.white, TextAlignmentOptions.Center);
+                new Vector2(0f, 0f), new Vector2(0f, 0f), "SUBMIT", 20, Color.white, TextAlignmentOptions.Center);
             var lrt = (RectTransform)label.transform;
-            lrt.offsetMin = new Vector2(10f, 0f);
-            lrt.offsetMax = new Vector2(-10f, 0f);
+            lrt.offsetMin = new Vector2(8f, 0f);
+            lrt.offsetMax = new Vector2(-8f, 0f);
 
             return btn;
+        }
+
+        /// <summary>Nút ✕ Close — góc phải trên,ấn để ẩn leaderboard.</summary>
+        private static void EnsureCloseButton(Transform parent, float panelWidth)
+        {
+            Transform existing = parent.Find("CloseButton");
+            if (existing != null) return;
+
+            var go = new GameObject("CloseButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            go.transform.SetParent(parent, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = new Vector2(1f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(1f, 1f);
+            rt.anchoredPosition = new Vector2(-8f, -6f);  // góc phải trên
+            rt.sizeDelta = new Vector2(32f, 32f);
+
+            var img = go.GetComponent<Image>();
+            img.color = new Color(0.15f, 0.1f, 0.25f, 0.8f);
+
+            var btn = go.GetComponent<Button>();
+            btn.transition = Selectable.Transition.ColorTint;
+            btn.onClick.AddListener(() => Hide(parent.gameObject));
+
+            var label = CreateLabel(go.transform, "X", new Vector2(0f, 0f), new Vector2(1f, 1f),
+                new Vector2(0f, 0f), new Vector2(0f, 0f), "✕", 20, CloseRed, TextAlignmentOptions.Center);
+            var lrt = (RectTransform)label.transform;
+            lrt.offsetMin = Vector2.zero;
+            lrt.offsetMax = Vector2.zero;
         }
 
         private static TextMeshProUGUI CreateLabel(Transform parent, string name, Vector2 aMin, Vector2 aMax,
@@ -268,16 +321,16 @@ namespace VoidRunner.UI
             return tmp;
         }
 
-        private static void AddBorder(Transform parent, Vector2 size)
+        private static void AddBorder(Transform parent, Vector2 size, Color color)
         {
-            float t = 3f;
-            CreateStrip(parent, "BorderTop", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -t * 0.5f), new Vector2(size.x, t));
-            CreateStrip(parent, "BorderBottom", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, t * 0.5f), new Vector2(size.x, t));
-            CreateStrip(parent, "BorderLeft", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(t * 0.5f, 0f), new Vector2(t, size.y));
-            CreateStrip(parent, "BorderRight", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-t * 0.5f, 0f), new Vector2(t, size.y));
+            float t = 2f;
+            CreateStrip(parent, "BorderTop", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -t * 0.5f), new Vector2(size.x, t), color);
+            CreateStrip(parent, "BorderBottom", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, t * 0.5f), new Vector2(size.x, t), color);
+            CreateStrip(parent, "BorderLeft", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(t * 0.5f, 0f), new Vector2(t, size.y), color);
+            CreateStrip(parent, "BorderRight", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-t * 0.5f, 0f), new Vector2(t, size.y), color);
         }
 
-        private static void CreateStrip(Transform parent, string name, Vector2 aMin, Vector2 aMax, Vector2 pos, Vector2 size)
+        private static void CreateStrip(Transform parent, string name, Vector2 aMin, Vector2 aMax, Vector2 pos, Vector2 size, Color? color = null)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             go.transform.SetParent(parent, false);
@@ -287,7 +340,7 @@ namespace VoidRunner.UI
             rt.anchoredPosition = pos;
             rt.sizeDelta = size;
             var img = go.GetComponent<Image>();
-            img.color = new Color(0.35f, 0.85f, 1f, 0.35f); // cyan mờ
+            img.color = color ?? BorderCyan;
             img.raycastTarget = false;
         }
 
