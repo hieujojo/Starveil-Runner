@@ -1,5 +1,6 @@
 using UnityEngine;
 using VoidRunner.Core.Interfaces;
+using VoidRunner.Core.World;
 
 namespace VoidRunner.Core.Factories
 {

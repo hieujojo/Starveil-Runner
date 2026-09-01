@@ -200,14 +200,6 @@ namespace VoidRunner.Core.Player
             GameEvents.RaiseLaneChanged(_currentLane);
         }
 
-        private void MoveToLane(int lane)
-        {
-            if (_isDead) return;
-            _currentLane = Mathf.Clamp(lane, 0, laneCount - 1);
-            _targetX = (_currentLane - (laneCount - 1) * 0.5f) * laneWidth;
-            GameEvents.RaiseLaneChanged(_currentLane);
-        }
-
         private void FixedUpdate()
         {
             if (_isDead) return;
