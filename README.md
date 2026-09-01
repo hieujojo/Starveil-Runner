@@ -62,7 +62,7 @@
 | Power-up | Shield / Magnet / Slow-mo | ✅ |
 | Audio + Save | `AudioManager` singleton + `SaveSystem` (PlayerPrefs) | ✅ |
 | Polish | Post-processing, VFX, screen shake (DOTween), VFX trail Enemy, đụng obstacle → tàu nhấp nháy, coin không đè obstacle, **Point Light cyan bám tàu (nổi bật)** | ✅ |
-| Test tự động | **Unity Test Framework — 31 test** (16 EditMode + 15 PlayMode) | ✅ |
+| Test tự động | **Unity Test Framework — 46 test** (25 EditMode + 21 PlayMode) | ✅ |
 | Deploy | **WebGL build (Gzip) → [itch.io](https://lothric11.itch.io/starveil-runner) + [Unity Play](https://play.unity.com/en/games/00ba213a-f671-4e8d-9a57-65da13cf1e5c/webgl)** | ✅ Live 2026-08-12 |
 
 ---
@@ -73,7 +73,7 @@
 
 - 🧠 **Thiết kế gameplay thật**: cơ chế "Enemy tiến sát" kiểu Subway Surfers — biến một lỗi nhỏ (đụng drone) thành **áp lực sinh tử liên tục** (bọ đuổi sát, đụng lần 2 = Game Over). Không chỉ "nhặt item + né vật cản"
 - 🏗️ **Kiến trúc sạch sẽ**: `UI → Systems → Core`, event-driven (`GameEvents`), ScriptableObject config, Object Pool — code dễ mở rộng, dễ test
-- 🧪 **Test-driven**: 31 test tự động (EditMode + PlayMode) — chất lượng không phụ thuộc "tôi nhớ test tay"
+- 🧪 **Test-driven**: 46 test tự động (EditMode + PlayMode) — chất lượng không phụ thuộc "tôi nhớ test tay"
 - 🚀 **Đã deploy thật**: WebGL build tối ưu (texture 2048→1024, ~60MB), compression Gzip, xử lý white screen, publish lên itch.io + Unity Play
 - 📱 **Mobile-ready**: điều khiển bằng vuốt, pause overlay, safe-area
 
@@ -116,12 +116,15 @@ Assets/_Project/
 │   ├── Core/          # Gameplay lõi (thuần logic, không phụ thuộc UI)
 │   │   ├── Game/      #   GameManager, GameEvents
 │   │   ├── Player/    #   PlayerController (lane switching)
-│   │   └── World/     #   TileSpawner, Tile, ObstacleManager, EnemyChase
-│   ├── Systems/       # Input, Score, PowerUp, Audio, Save, Difficulty
-│   ├── UI/            # HUD, Screens, Widgets
+│   │   ├── World/     #   TileSpawner, Tile, ObstacleManager, EnemyChase
+│   │   ├── Interfaces/ #  IEnemyStrategy, ICommand, ITileFactory, IEnemyFactory
+│   │   ├── Strategies/ #  ChaseStrategy, PatrollerStrategy (Strategy Pattern)
+│   │   ├── Commands/  #   MoveLeftCommand, MoveRightCommand, PauseCommand, RestartCommand
+│   │   └── Factories/ #   DefaultTileFactory, EnemyFactory
+│   ├── Systems/       # Input, Score, PowerUp, Audio, Save, Difficulty, Leaderboard
+│   ├── UI/            # HUD, Screens, Widgets, LeaderboardView, PauseManager
 │   ├── Data/          # ScriptableObject definitions
-│   ├── Interfaces/    # Contracts giữa các layer
-│   └── Utils/         # ObjectPool<T>, Singleton
+│   └── Utils/         # ObjectPool<T>, Singleton, BlobShadow
 ├── Scenes/            # Game.unity (MainMenu sẽ thêm)
 ├── Prefabs/           # Player, Tiles, Obstacles, Pickups, PowerUps, UI
 ├── ScriptableObjects/ # ObstacleData, PowerUpData
@@ -139,6 +142,7 @@ Assets/_Project/
 | **G1** | Core gameplay: lane switching, tile spawner (object pool), Enemy chase, obstacle | ✅ Code xong |
 | **G2** | Hệ thống: Score (combo), UI, Power-up, Audio, Save, Difficulty | ✅ Code xong |
 | **G2.5** | **Refactor gameplay theo review user** (Enemy 2 nấc, player tàu vũ trụ, track vô tận, UI English, best score ẩn) | ✅ Hoàn thành (2026-08-11) |
+| **G4** | **Design Patterns** (Strategy, Command, Factory) + **Online Leaderboard** (Supabase) + **PatrollerDrone** (enemy mới) | ✅ Hoàn thành (2026-09-01) |
 | **G3** | Polish & Deploy: VFX, post-processing, WebGL → itch.io / Unity Play, README | ✅ Hoàn thành — **LIVE cả 2 nền tảng** (2026-08-12) |
 | **G3.5** | Pause overlay (ESC + nút II) · slider âm lượng (MainMenu + Pause) · swipe mobile | ✅ Hoàn thành — test OK trên web |
 

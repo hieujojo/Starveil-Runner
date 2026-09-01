@@ -1627,3 +1627,34 @@ var mat = new Material(shader);
 **Fix:** Clear `GameManager.Instance = null` (qua backing field reflection) TRƯỚC khi `DestroyImmediate` trong `TearDown` — cả `EnemyChasePlayTests` lẫn `ScoreSystemPlayTests`.
 
 **Bài học:** PlayMode test với singleton MonoBehaviour PHẢI cleanup static fields trong TearDown — `DestroyImmediate` chỉ destroy GameObject, KHÔNG clear static Instance. Đây là lỗi thường gặp trong Unity testing.
+
+## 2026-09-01 — Design Patterns (Strategy + Command + Factory) + Fix 3 test fail
+
+> User yêu cầu thêm toàn bộ design pattern cho CV/phỏng vấn. Sau khi thêm, phát hiện 3 test fail → điều tra + fix.
+
+### Đã thêm (code)
+
+- **Strategy Pattern:** `IEnemyStrategy` interface + `ChaseStrategy` (Flying Beetle) + `PatrollerStrategy` (PatrollerDrone). Tách logic movement từ MonoBehaviour ra Strategy class — mỗi loại enemy 1 strategy riêng, dễ thêm enemy mới.
+- **Command Pattern:** `ICommand` interface + `MoveLeftCommand` + `MoveRightCommand` + `PauseCommand` + `RestartCommand`. PlayerController có `_commandHistory` (Stack) cho undo/redo.
+- **Factory Pattern:** `ITileFactory` + `IEnemyFactory` interfaces + `DefaultTileFactory` + `EnemyFactory`. TileSpawner gọi factory thay vì Instantiate trực tiếp.
+- **Documentation:** `docs/DESIGN_PATTERNS.md` — tài liệu đầy đủ với code examples + Q&A phỏng vấn gợi ý.
+
+### Đã fix (3 test fail)
+
+- **Bug 1 — ChaseStrategy._currentDistance = 0:** `_strategy.Configure()` không set `_currentDistance` → frame đầu tiên `Execute()` teleports enemy từ z=-7 đến z=0 (trên đầu player) → safety net `|0-0| < 1.6` → GameOver giả. Fix: thêm `_currentDistance = baseDist` trong `Configure()`.
+- **Bug 2 — EnemyChase.HandleObstacleHit order:** check `Stage == 1` TRƯỚC `IsCatching` → khi hit lần 2: `_catching = true` NHƯNG `_stage` vẫn = 1 → `if (Stage == 1)` đúng → `else if (IsCatching)` không chạy → `CatchAndKill()` never called. Fix: đảo thứ tự check `IsCatching` trước `Stage`.
+- **Bug 3 — ScoreSystem test player reference:** `FindAnyObjectByType<PlayerController>()` có thể fail trong test context → `player = null` → `Update()` return early → score = 0. Fix: set player ref qua reflection trong test SetUp.
+- **Bug 4 — CS0414 warnings:** SerializeField fields trong EnemyChase/PatrollerDrone chỉ dùng ở Awake() để Configure strategy → compiler warning. Fix: `#pragma warning disable CS0414`.
+- **Bonus:** `EnemyChase.Setup()` giờ gọi `_strategy.Setup(playerRef)` để init `_currentDistance` đúng.
+
+### Kết quả test
+
+- EditMode: **25/25 PASSED**
+- PlayMode: **21/21 PASSED**
+- Tổng: **46/46 PASSED** ✅
+
+### Bài học
+
+1. **Strategy pattern trong Unity:** khi tách logic từ MonoBehaviour sang Strategy class, phải init state (`_currentDistance`) TRONG strategy constructor hoặc Configure() — KHÔNG rely vào external Setup() call.
+2. **if/else if order:** check `IsCatching` TRƯỚC `Stage` vì khi `_catching = true`, `_stage` vẫn giữ giá trị cũ (không reset).
+3. **PlayMode test với FindAnyObjectByType:** có thể fail trong test context → dùng reflection để set reference trực tiếp.

@@ -42,7 +42,7 @@
 | 3 | ~~**CI/CD GitHub Actions + badge**~~ | ~~1–2 ngày~~ | ~~🔥 2~~ | ❌ **ĐÃ HỦY 2026-08-16** — GameCI v4 không tương thích license XML Unity 6; đã xóa workflow + badge (chi tiết ở Mục 3) |
 | 4 | **Android build qua LDPlayer** (không cần máy thật) | 1–2 ngày | 🥈 6 | ☐ |
 | 5 | **Performance profiling doc** | 1 ngày | 🥉 5 | 🔶 Khung docs/PERFORMANCE.md xong — chờ user chụp Profiler |
-| 6 | **Enemy type mới** | 2–3 ngày | 🥉 4 | 🔶 Code + tool + test xong — chờ user chạy tool dựng prefab |
+| 6 | **Enemy type mới** | 2–3 ngày | 🥉 4 | ✅ **Hoàn thành** — code + tool + test + gán scene xong (2026-09-01) |
 
 **Timeline đề xuất:** Mục 1 (ngay) → Mục 2 (tuần 1) → Mục 6 (tuần 3) → Mục 5 (tuần 3) → Mục 4 (tuần 4).
 *Digital Unicorn hạn 4/10/2026 — dư ~7 tuần, làm xong cả 5 mục còn lại thoải mái.*
