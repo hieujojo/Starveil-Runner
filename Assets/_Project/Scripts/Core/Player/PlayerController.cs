@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 using VoidRunner.Core;
+using VoidRunner.Core.Interfaces;
 using VoidRunner.Core.World;
 using VoidRunner.Systems.Difficulty;
 using VoidRunner.Systems.Input;
@@ -55,6 +57,9 @@ namespace VoidRunner.Core.Player
         private Transform _ship;
         private InputReader _input;
         private float _lastInputX; // phát hiện CẠNH LÊN của phím (0→±1) để nhảy 1 lane ngay lập tức
+
+        // COMMAND PATTERN — lịch sử lệnh (cho undo/redo nếu cần)
+        private readonly Stack<ICommand> _commandHistory = new Stack<ICommand>();
 
         // Đuôi tàu — lửa tên lửa (v3f.9): ánh sáng cam lập lòe + vệt lửa MƯỢT (TrailRenderer).
         // Bỏ hẳn hạt exhaust (v3f.8 vẫn bị user báo "hạt vuông cam" — chùm hạt dày + Bloom → dải
@@ -154,8 +159,46 @@ namespace VoidRunner.Core.Player
         /// <summary>Nhận tốc độ mới từ DifficultyManager (khi game đang chơi).</summary>
         private void HandleDifficultyChanged(float speed, float _) => _currentSpeed = speed;
 
-        public void MoveLeft() => MoveToLane(_currentLane - 1);
-        public void MoveRight() => MoveToLane(_currentLane + 1);
+        // COMMAND PATTERN — wrapper methods tạo command object
+        public void MoveLeft()
+        {
+            var cmd = new Commands.MoveLeftCommand(this);
+            cmd.Execute();
+            _commandHistory.Push(cmd);
+        }
+
+        public void MoveRight()
+        {
+            var cmd = new Commands.MoveRightCommand(this);
+            cmd.Execute();
+            _commandHistory.Push(cmd);
+        }
+
+        /// <summary>COMMAND PATTERN — thực hiện command bên ngoài (từ InputReader).</summary>
+        public void ExecuteCommand(ICommand command)
+        {
+            if (command == null) return;
+            command.Execute();
+            _commandHistory.Push(command);
+        }
+
+        /// <summary>COMMAND PATTERN — undo lệnh cuối cùng.</summary>
+        public void UndoLastCommand()
+        {
+            if (_commandHistory.Count > 0)
+            {
+                var cmd = _commandHistory.Pop();
+                cmd.Undo();
+            }
+        }
+
+        private void MoveToLane(int lane)
+        {
+            if (_isDead) return;
+            _currentLane = Mathf.Clamp(lane, 0, laneCount - 1);
+            _targetX = (_currentLane - (laneCount - 1) * 0.5f) * laneWidth;
+            GameEvents.RaiseLaneChanged(_currentLane);
+        }
 
         private void MoveToLane(int lane)
         {

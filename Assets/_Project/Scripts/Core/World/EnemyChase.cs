@@ -1,6 +1,8 @@
 using UnityEngine;
 using VoidRunner.Core;
+using VoidRunner.Core.Interfaces;
 using VoidRunner.Core.Player;
+using VoidRunner.Core.World.Strategies;
 using VoidRunner.Systems.VFX;
 using VoidRunner.Utils;
 
@@ -77,10 +79,10 @@ namespace VoidRunner.Core.World
         [SerializeField, Tooltip("Thời gian (giây) chạy animation atack trước khi Game Over — bắt mượt không cắt cảnh")]
         private float catchDelay = 1.1f;
 
+        // STRATEGY PATTERN — ChaseStrategy xử lý movement + stage logic
+        private ChaseStrategy _strategy;
+
         private Vector3 _startPos;
-        private int _stage;                 // 0 = nền, 1 = áp sát (đã đụng 1 lần)
-        private float _currentDistance;
-        private float _relaxTimer;
         private bool _catching;             // đang thực hiện cảnh bắt (hit lần 2) — không cho trigger/lunge lần nữa
         private Animator _animator;         // Animator của Flying Beetle (ép flying + speed khi hit)
 
@@ -89,7 +91,9 @@ namespace VoidRunner.Core.World
         private void Awake()
         {
             _startPos = transform.position;
-            _currentDistance = baseDistance;
+
+            // STRATEGY PATTERN — khởi tạo chase strategy
+            _strategy = new ChaseStrategy();
 
             // Collider là trigger — player đi vào là bị nuốt (không đẩy vật lý)
             Collider col = GetComponent<Collider>();
@@ -284,9 +288,9 @@ namespace VoidRunner.Core.World
 
         private void ResetEnemy()
         {
-            _stage = 0;
-            _relaxTimer = 0f;
-            _currentDistance = baseDistance;
+            // STRATEGY PATTERN — reset strategy state
+            _strategy.ResetState();
+
             transform.position = _startPos;
             transform.localScale = Vector3.one * baseScale;
 
@@ -312,14 +316,17 @@ namespace VoidRunner.Core.World
             if (GameManager.Instance == null || GameManager.Instance.State != GameState.Playing) return;
             if (_catching) return; // đang bắt — không nhận hit mới
 
-            if (_stage == 0)
+            // STRATEGY PATTERN — delegate obstacle hit logic to strategy
+            _strategy.OnObstacleHit();
+
+            if (_strategy.Stage == 1)
             {
-                _stage = 1;
-                _relaxTimer = relaxWindow;
-                if (_animator != null) _animator.speed = hitSpeedUp; // vỗ cánh nhanh hơn
+                // Nấc 1: vỗ cánh nhanh hơn
+                if (_animator != null) _animator.speed = hitSpeedUp;
             }
-            else
+            else if (_strategy.IsCatching)
             {
+                // Nấc 2: bắt player
                 StartCoroutine(CatchAndKill());
             }
         }
@@ -372,37 +379,8 @@ namespace VoidRunner.Core.World
             if (GameManager.Instance == null || GameManager.Instance.State != GameState.Playing) return;
             if (_catching) return; // đang bắt — coroutine điều khiển vị trí, không bám nữa
 
-            // NẤC 1: đếm ngược cửa sổ né sạch — hết hạn (player không đụng gì nữa) → nới về NẤC 0
-            if (_stage == 1)
-            {
-                _relaxTimer -= Time.deltaTime;
-                if (_relaxTimer <= 0f)
-                {
-                    _stage = 0;
-                }
-            }
-
-            float targetDistance = _stage == 1 ? closeDistance : baseDistance;
-            _currentDistance = Mathf.MoveTowards(_currentDistance, targetDistance, distanceLerpSpeed * Time.deltaTime);
-
-            // Mục tiêu: sau lưng player đúng `_currentDistance` (trục Z = hướng chạy), y giữ nguyên
-            Vector3 target = player.position - Vector3.forward * _currentDistance;
-
-            // Bám ngang theo lane player từ từ (không teleport ngang)
-            target.x = Mathf.MoveTowards(transform.position.x, player.position.x, lateralFollow * Time.deltaTime);
-
-            transform.position = target;
-
-            // Phình to hơn khi áp sát — mức độ đe dọa nhìn thấy được (nhẹ — không che tàu)
-            float closeness = Mathf.InverseLerp(baseDistance, closeDistance, _currentDistance);
-            transform.localScale = Vector3.one * Mathf.Lerp(baseScale, closeScale, closeness);
-
-            // Safety net: khoảng cách z thực tế dưới ngưỡng → enemy nuốt player (cơ chế chết chắc chắn
-            // chạy kể cả khi collider chưa kịp overlap do player đổi lane)
-            if (Mathf.Abs(transform.position.z - player.position.z) < swallowDistance)
-            {
-                GameEvents.RaiseGameOver();
-            }
+            // STRATEGY PATTERN — delegate movement to chase strategy
+            _strategy.Execute(transform, player, Time.deltaTime);
         }
 
         private void OnTriggerEnter(Collider other)

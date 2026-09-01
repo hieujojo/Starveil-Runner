@@ -1,5 +1,7 @@
 using UnityEngine;
+using VoidRunner.Core.Interfaces;
 using VoidRunner.Core.Player;
+using VoidRunner.Core.World.Strategies;
 
 namespace VoidRunner.Core.World
 {
@@ -36,15 +38,17 @@ namespace VoidRunner.Core.World
         [SerializeField, Tooltip("Bề rộng 1 lane (m) — mặc định 2 (road 18m / 3 lane)")]
         private float laneWidth = 2f;
 
+        // STRATEGY PATTERN — PatrollerStrategy xử lý patrol logic
+        private PatrollerStrategy _strategy;
+
         private Transform _player;
-        private Vector3 _startPos;
-        private float _phase;
         private bool _active;
 
         private void Awake()
         {
-            _startPos = transform.position;
-            _phase = Random.value * Mathf.PI * 2f; // phase ngẫu nhiên — không đồng bộ với drone khác
+            // STRATEGY PATTERN — khởi tạo patroller strategy
+            _strategy = new PatrollerStrategy();
+            _strategy.SetStartPos(transform.position);
         }
 
         private void OnEnable()
@@ -60,11 +64,17 @@ namespace VoidRunner.Core.World
         }
 
         /// <summary>Gán player (GameManager gọi lúc StartRun — giống EnemyChase.Setup).</summary>
-        public void Setup(Transform playerRef) => _player = playerRef;
+        public void Setup(Transform playerRef)
+        {
+            _player = playerRef;
+            _strategy.Setup(playerRef);
+        }
 
         private void ResetDrone()
         {
-            transform.position = _startPos;
+            // STRATEGY PATTERN — reset strategy
+            _strategy.ResetState();
+            _strategy.ResetPosition(transform);
             _active = true;
         }
 
@@ -73,17 +83,8 @@ namespace VoidRunner.Core.World
             if (_player == null || !_active) return;
             if (GameManager.Instance == null || GameManager.Instance.State != GameState.Playing) return;
 
-            // Bám trước mặt player (trục Z) — vị trí X do lắc kiểm soát, Y giữ nguyên
-            Vector3 pos = transform.position;
-            pos.z = _player.position.z + aheadDistance;
-
-            // Lắc ngang: cos giữa lane min/max — mượt, predictable (player đoán được quỹ đạo)
-            float t = (Mathf.Cos(Time.time * (2f * Mathf.PI / patrolPeriod) + _phase) + 1f) * 0.5f; // 0..1
-            float minX = (patrolMinLane - (laneCount - 1) * 0.5f) * laneWidth;
-            float maxX = (patrolMaxLane - (laneCount - 1) * 0.5f) * laneWidth;
-            pos.x = Mathf.Lerp(minX, maxX, t);
-
-            transform.position = pos;
+            // STRATEGY PATTERN — delegate patrol movement to strategy
+            _strategy.Execute(transform, _player, Time.deltaTime);
         }
     }
 }

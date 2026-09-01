@@ -1,4 +1,6 @@
 using UnityEngine;
+using VoidRunner.Core.Factories;
+using VoidRunner.Core.Interfaces;
 using VoidRunner.Core.Player;
 
 namespace VoidRunner.Core.World
@@ -31,6 +33,9 @@ namespace VoidRunner.Core.World
         [Tooltip("Bề rộng 1 lane (khớp ObstacleManager)")]
         [SerializeField] private float laneWidth = 2f;
 
+        // FACTORY PATTERN — dùng IEnemyFactory thay vì Instantiate trực tiếp
+        private IEnemyFactory _enemyFactory;
+
         private ObstacleManager _obstacleManager;
         private Transform _player;
         private int _activeCount;
@@ -41,6 +46,10 @@ namespace VoidRunner.Core.World
         {
             _obstacleManager = om;
             _player = playerRef;
+
+            // FACTORY PATTERN — khởi tạo enemy factory (nếu chưa có)
+            if (_enemyFactory == null)
+                _enemyFactory = new EnemyFactory(null); // null obstacleTypes = dùng catalog fallback
         }
 
         /// <summary>Gọi từ TileSpawner khi tile được spawn (sau TrySpawn obstacle).</summary>
@@ -58,7 +67,10 @@ namespace VoidRunner.Core.World
             int lane = Random.Range(0, laneCount);
             float x = (lane - (laneCount - 1) * 0.5f) * laneWidth;
 
-            GameObject drone = Instantiate(patrollerPrefab, tile.transform);
+            // FACTORY PATTERN — dùng factory thay vì Instantiate trực tiếp
+            GameObject drone = patrollerPrefab != null
+                ? Instantiate(patrollerPrefab, tile.transform)
+                : _enemyFactory?.Create(EnemyType.Patroller, tile.transform);
             // z ở NỬA SAU tile — xa khỏi obstacle tĩnh (nửa trước), tránh chồng đè
             drone.transform.localPosition = new Vector3(x, 0.5f, tile.Length * 0.7f);
 

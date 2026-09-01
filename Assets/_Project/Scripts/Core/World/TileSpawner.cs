@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VoidRunner.Core.Factories;
+using VoidRunner.Core.Interfaces;
 using VoidRunner.Utils;
 
 namespace VoidRunner.Core.World
@@ -28,6 +30,8 @@ namespace VoidRunner.Core.World
         [SerializeField, Tooltip("UPGRADE_PLAN Mục 6: spawn PatrollerDrone (enemy mới) — để trống = tắt")]
         private PatrollerSpawner patrollerSpawner;
 
+        // FACTORY PATTERN — dùng ITileFactory thay vì Instantiate trực tiếp
+        private ITileFactory _tileFactory;
         private ObjectPool<Tile> _pool;
         private readonly List<Tile> _activeTiles = new List<Tile>();
         private float _nextSpawnZ;
@@ -41,6 +45,9 @@ namespace VoidRunner.Core.World
                 return;
             }
 
+            // FACTORY PATTERN — khởi tạo tile factory
+            _tileFactory = new DefaultTileFactory(tilePrefab, transform);
+
             // Activation do Tile.Activate xử lý — pool chỉ quản lý vòng đời
             _pool = new ObjectPool<Tile>(
                 factory: CreateTile,
@@ -50,10 +57,8 @@ namespace VoidRunner.Core.World
 
         private Tile CreateTile()
         {
-            Tile tile = Instantiate(tilePrefab, transform);
-            tile.name = "Tile";
-            tile.gameObject.SetActive(false);
-            return tile;
+            // FACTORY PATTERN — dùng factory thay vì Instantiate trực tiếp
+            return _tileFactory.Create();
         }
 
         public void Initialize(Transform playerRef, ObstacleManager obstacles)
