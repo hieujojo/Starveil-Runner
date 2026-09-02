@@ -39,7 +39,7 @@ namespace VoidRunner.UI
         {
             howToPlayPanel?.SetActive(false);
             RefreshBestScore();
-            pressStartText.gameObject.SetActive(false); // M2: mặc định ẩn hint
+            if (pressStartText != null) pressStartText.gameObject.SetActive(false); // M2: mặc định ẩn hint
             EnsureCloseButton(); // nút CLOSE trên panel — đóng popup rõ ràng
             EnsureCredits();    // nút CREDITS + panel credits (tạo bằng code, idempotent)
             EnsureShipSelect(); // Task D: panel chọn ship (preview 3D, lưu SaveSystem.SelectedShip)
