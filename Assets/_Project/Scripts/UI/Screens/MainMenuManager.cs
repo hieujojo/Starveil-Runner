@@ -35,23 +35,17 @@ namespace VoidRunner.UI
         // trước đây panel hiện đè lên menu sáng → rất khó đọc)
         private GameObject _dimmer;
 
-private void Start()
+        private void Start()
         {
-howToPlayPanel?.SetActive(false);
-        RefreshBestScore();
-        pressStartText.gameObject.SetActive(false); // Mặc định ẩn
-        EnsureCloseButton(); // nút CLOSE trên panel — đóng popup rõ ràng (không chỉ click dimmer)
-        EnsureCredits();    // nút CREDITS + panel credits (tạo bằng code, idempotent)
-        EnsureShipSelect(); // Task D: panel chọn ship (preview 3D, lưu SaveSystem.SelectedShip)
-        EnsureVolumeSlider(); // 2026-08-12: thay nút bật/tắt âm thanh bằng slider kéo
-        SetupMainMenuPositions(); // FIX M1: cân bằng spacing giữa các nút
-        ShowPressStartHint(); // M2: hiển thị hint bắt đầu
-
-        if (playButton != null) playButton.onClick.AddListener(PlayGame);
+            howToPlayPanel?.SetActive(false);
+            RefreshBestScore();
+            pressStartText.gameObject.SetActive(false); // M2: mặc định ẩn hint
+            EnsureCloseButton(); // nút CLOSE trên panel — đóng popup rõ ràng
             EnsureCredits();    // nút CREDITS + panel credits (tạo bằng code, idempotent)
             EnsureShipSelect(); // Task D: panel chọn ship (preview 3D, lưu SaveSystem.SelectedShip)
             EnsureVolumeSlider(); // 2026-08-12: thay nút bật/tắt âm thanh bằng slider kéo
             SetupMainMenuPositions(); // FIX M1: cân bằng spacing giữa các nút
+            ShowPressStartHint(); // M2: hiển thị hint bắt đầu
 
             if (playButton != null) playButton.onClick.AddListener(PlayGame);
             if (howToPlayButton != null) howToPlayButton.onClick.AddListener(ToggleHowToPlay);
