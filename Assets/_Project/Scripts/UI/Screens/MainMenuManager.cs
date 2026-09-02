@@ -166,7 +166,7 @@ namespace VoidRunner.UI
             // Nút CREDITS — CÙNG HÀNG với nút SHIP (y=-280): CREDITS bên PHẢI (160), SHIP bên TRÁI (-160)
             // (tránh chồng nhau — user thêm chọn ship Task D). KHÔNG subscribe onClick ở đây —
             // Start() đã subscribe (subscribe 2 lần = 1 click toggle 2 lần = nhìn như hỏng — góp ý reviewer).
-            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(160f, -210f), new Vector2(260f, 50f)); // M1: cân bằng spacing — trên ship (-280), dưới volume (-60)
+            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(160f, -160f), new Vector2(260f, 50f)); // M1: cùng hàng với SHIP (-160), dưới VOLUME (-60)
 
             // Panel credits + nút CLOSE
             GameObject panel = CreditsPanelBuilder.EnsurePanel(canvas);
@@ -294,41 +294,45 @@ namespace VoidRunner.UI
         /// Mới: PLAY y=80, HOW TO PLAY y=0, SHIP y=-80, CREDITS y=-160 (khoảng cách 80px đều).
         private void SetupMainMenuPositions()
         {
-            // PLAY: y=80
+            // Layout: PLAY (140) → HOW TO PLAY (40) → VOLUME (-60) → CREDITS + SHIP (-160, -160)
+            // Mỗi gap ~100px — thoáng, không chồng nhau
+
+            // PLAY: y=140 — cao nhất, nổi bật nhất
             if (playButton != null)
             {
                 var rt = playButton.GetComponent<RectTransform>();
-                if (rt != null)
-                {
-                    rt.anchoredPosition = new Vector2(0f, 80f);
-                }
+                if (rt != null) rt.anchoredPosition = new Vector2(0f, 140f);
             }
 
-            // HOW TO PLAY: y=0
+            // HOW TO PLAY: y=40 — cách PLAY 100px
             if (howToPlayButton != null)
             {
                 var rt = howToPlayButton.GetComponent<RectTransform>();
-                if (rt != null)
-                {
-                    rt.anchoredPosition = new Vector2(0f, 0f);
-                }
+                if (rt != null) rt.anchoredPosition = new Vector2(0f, 40f);
             }
 
-            // CREDITS: y=-160 (cùng hàng với ShipSelect theo Task D, ship ở y=-80)
+            // VOLUME: y=-60 — cách HOW TO PLAY 100px
+            var volumeSlider = GameObject.Find("VolumeSlider");
+            if (volumeSlider != null)
+            {
+                var rt = volumeSlider.GetComponent<RectTransform>();
+                if (rt != null) rt.anchoredPosition = new Vector2(0f, -60f);
+            }
+
+            // CREDITS: y=-160 — dưới VOLUME 100px
             if (creditsButton != null)
             {
                 var rt = creditsButton.GetComponent<RectTransform>();
-                if (rt != null)
-                {
-                    rt.anchoredPosition = new Vector2(0f, -160f);
-                }
+                if (rt != null) rt.anchoredPosition = new Vector2(0f, -160f);
             }
 
-            // Ship select button không có field trực tiếp trong MainMenuManager —
-            // được tạo bởi EnsureShipSelect() -> ShipSelectManager, vị trí của ship
-            // phụ thuộc vào ShipSelectManager setup. Nhận định: ship nên ở y=-80
-            // để cân bằng với Credits y=-160 (cách 80px).
-            // Nếu cần điều chỉnh: sửa trong ShipSelectManager hoặc EnsureShipSelect.
+            // SHIP: y=-160 — cùng hàng với CREDITS (cách 200px ngang)
+            var shipButton = GameObject.Find("ShipButton");
+            if (shipButton != null)
+            {
+                var rt = shipButton.GetComponent<RectTransform>();
+                if (rt != null) rt.anchoredPosition = new Vector2(0f, -160f);
+            }
         }
 
         /// <summary>M2: Hiển thị/text nhấp nháy "PRESS SPACE TO START" dưới nút PLAY.</summary>

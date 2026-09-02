@@ -70,7 +70,7 @@ namespace VoidRunner.UI
             var rt = (RectTransform)go.transform;
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(-160f, -280f); // M1: cân bằng spacing — dưới credits (-210), trên cùng hàng với best score area
+            rt.anchoredPosition = new Vector2(-160f, -160f); // M1: cùng hàng với CREDITS (bên phải 160), cách VOLUME 100px
             rt.sizeDelta = new Vector2(300f, 56f);
 
             var img = go.GetComponent<Image>();
