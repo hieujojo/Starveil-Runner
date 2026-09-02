@@ -70,7 +70,7 @@ namespace VoidRunner.UI
             var rt = (RectTransform)go.transform;
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(-160f, -160f); // M1: cùng hàng với CREDITS (bên phải 160), cách VOLUME 100px
+            rt.anchoredPosition = new Vector2(-140f, -160f); // M1: bên trái, cùng hàng với CREDITS (140, -160)
             rt.sizeDelta = new Vector2(300f, 56f);
 
             var img = go.GetComponent<Image>();
@@ -260,7 +260,7 @@ namespace VoidRunner.UI
             rt.anchorMax = aMax;
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(130f, 62f);
+            rt.sizeDelta = new Vector2(80f, 50f); // M5: giảm arrow buttons cho vừa với nội dung
             var img = go.GetComponent<Image>();
             img.color = new Color(0.3f, 0.2f, 0.6f, 1f);
             var btn = go.GetComponent<Button>();

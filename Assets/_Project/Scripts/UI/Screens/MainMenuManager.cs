@@ -166,7 +166,7 @@ namespace VoidRunner.UI
             // Nút CREDITS — CÙNG HÀNG với nút SHIP (y=-280): CREDITS bên PHẢI (160), SHIP bên TRÁI (-160)
             // (tránh chồng nhau — user thêm chọn ship Task D). KHÔNG subscribe onClick ở đây —
             // Start() đã subscribe (subscribe 2 lần = 1 click toggle 2 lần = nhìn như hỏng — góp ý reviewer).
-            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(160f, -160f), new Vector2(260f, 50f)); // M1: cùng hàng với SHIP (-160), dưới VOLUME (-60)
+            creditsButton = CreditsPanelBuilder.EnsureButton(canvas.transform, "CreditsButton", new Vector2(140f, -160f), new Vector2(260f, 50f)); // M1: bên phải, cùng hàng với SHIP (-140, -160)
 
             // Panel credits + nút CLOSE
             GameObject panel = CreditsPanelBuilder.EnsurePanel(canvas);
@@ -319,19 +319,19 @@ namespace VoidRunner.UI
                 if (rt != null) rt.anchoredPosition = new Vector2(0f, -60f);
             }
 
-            // CREDITS: y=-160 — dưới VOLUME 100px
+            // CREDITS: y=-160, bên PHẢI (x=140)
             if (creditsButton != null)
             {
                 var rt = creditsButton.GetComponent<RectTransform>();
-                if (rt != null) rt.anchoredPosition = new Vector2(0f, -160f);
+                if (rt != null) rt.anchoredPosition = new Vector2(140f, -160f);
             }
 
-            // SHIP: y=-160 — cùng hàng với CREDITS (cách 200px ngang)
+            // SHIP: y=-160, bên TRÁI (x=-140) — cùng hàng với CREDITS
             var shipButton = GameObject.Find("ShipButton");
             if (shipButton != null)
             {
                 var rt = shipButton.GetComponent<RectTransform>();
-                if (rt != null) rt.anchoredPosition = new Vector2(0f, -160f);
+                if (rt != null) rt.anchoredPosition = new Vector2(-140f, -160f);
             }
         }
 
