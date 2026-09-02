@@ -25,11 +25,8 @@ namespace VoidRunner.UI
 
         [Header("Text")]
         [SerializeField] private TextMeshProUGUI bestScoreText;
-        [SerializeField] private TextMeshProUGUI pressStartText; // M2: hướng dẫn "PRESS SPACE TO START"
+        [SerializeField] private TextMeshProUGUI pressStartText;
         [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI runnerText;
-        [SerializeField] private TextMeshProUGUI subtitleText;
-        [SerializeField] private TextMeshProUGUI taglineText;
 
         [Header("Scene")]
         [SerializeField, Tooltip("Tên scene Game (khớp tên file .unity)")]
@@ -99,12 +96,6 @@ namespace VoidRunner.UI
                 pressStartText = canvas.transform.Find("PressStartText")?.GetComponent<TextMeshProUGUI>();
             if (titleText == null)
                 titleText = canvas.transform.Find("TitleText")?.GetComponent<TextMeshProUGUI>();
-            if (runnerText == null)
-                runnerText = canvas.transform.Find("RunnerText")?.GetComponent<TextMeshProUGUI>();
-            if (subtitleText == null)
-                subtitleText = canvas.transform.Find("SubtitleText")?.GetComponent<TextMeshProUGUI>();
-            if (taglineText == null)
-                taglineText = canvas.transform.Find("TaglineText")?.GetComponent<TextMeshProUGUI>();
         }
 
         private void OnDestroy()
@@ -387,7 +378,7 @@ namespace VoidRunner.UI
             if (title != null)
             {
                 var rt = title.GetComponent<RectTransform>();
-                if (rt != null) rt.anchoredPosition = new Vector2(0f, 300f);
+                if (rt != null) rt.anchoredPosition = new Vector2(-100f, 300f);
             }
 
             var bestScore = canvas.transform.Find("BestScoreText");
