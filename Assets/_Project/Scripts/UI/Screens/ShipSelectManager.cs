@@ -70,8 +70,8 @@ namespace VoidRunner.UI
             var rt = (RectTransform)go.transform;
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(-180f, -160f); // M1: bên trái, cùng hàng với CREDITS (180, -160), gap 130px
-            rt.sizeDelta = new Vector2(240f, 56f); // M5: giảm width 300→240 cho vừa với gap
+            rt.anchoredPosition = new Vector2(-180f, -80f);
+            rt.sizeDelta = new Vector2(180f, 56f);
 
             var img = go.GetComponent<Image>();
             img.color = new Color(0.15f, 0.65f, 0.9f, 1f); // cyan — nút chính phụ, nổi bật hơn tím
@@ -111,9 +111,18 @@ namespace VoidRunner.UI
             prt.anchorMin = new Vector2(0.5f, 0.5f);
             prt.anchorMax = new Vector2(0.5f, 0.5f);
             prt.anchoredPosition = Vector2.zero;
-            prt.sizeDelta = new Vector2(680f, 720f); // FIX 2026-08-12: 520×560 → 680×720 (user: "cho select ship to thêm, đừng quá tiết kiệm UI")
+            prt.sizeDelta = new Vector2(680f, 720f);
             var pimg = panel.GetComponent<Image>();
-            pimg.color = new Color(0.06f, 0.04f, 0.12f, 1f); // tím đen đục
+            pimg.sprite = GetSprite("Assets/Space_Exploration_GUI_Kit/Settings_&_Menu_Components/Extra Large/setting-container-extra-large.png");
+            if (pimg.sprite != null)
+            {
+                pimg.type = Image.Type.Sliced;
+                pimg.color = Color.white;
+            }
+            else
+            {
+                pimg.color = new Color(0.06f, 0.04f, 0.12f, 1f);
+            }
 
             // 2026-08-12 (user: "ý tôi là UI ở trong nút ship — chủ yếu chi tiết ngoài lề như cạnh viền"):
             // viền cyan neon quanh panel — giống Credits panel (AddNeonBorder dùng chung trong file)
@@ -323,12 +332,20 @@ namespace VoidRunner.UI
                 if (_previewImage != null) _previewImage.texture = _rt;
             }
 
-            // Root chứa model preview — đặt TRƯỚC camera (model nhìn về camera = quay về -Z camera)
+            // Root chứa model preview — tái sử dụng nếu đã tồn tại, tránh tạo trùng khi domain reload
             if (_previewRoot == null)
             {
-                var root = new GameObject("ShipPreviewRoot");
-                _previewRoot = root.transform;
-                _previewRoot.position = new Vector3(0f, 0f, 0f);
+                var existing = GameObject.Find("ShipPreviewRoot");
+                if (existing != null)
+                {
+                    _previewRoot = existing.transform;
+                }
+                else
+                {
+                    var root = new GameObject("ShipPreviewRoot");
+                    _previewRoot = root.transform;
+                    _previewRoot.position = new Vector3(0f, 0f, 0f);
+                }
             }
             // Camera nhìn vào gốc từ phía trước
             _previewCam.transform.position = new Vector3(0f, 0.7f, -4f);
@@ -500,6 +517,12 @@ namespace VoidRunner.UI
             if (tmp.font != null) return;
             var anyTmp = Object.FindAnyObjectByType<TextMeshProUGUI>();
             tmp.font = anyTmp != null ? anyTmp.font : TMP_Settings.defaultFontAsset;
+        }
+
+        private static Sprite GetSprite(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
     }
 }

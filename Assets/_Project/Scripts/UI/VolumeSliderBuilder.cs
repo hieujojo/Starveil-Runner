@@ -31,7 +31,16 @@ namespace VoidRunner.UI
             crt.sizeDelta = size;
 
             var containerBg = container.GetComponent<Image>();
-            containerBg.color = new Color(0.29f, 0.17f, 0.54f, 1f); // tím đậm — khớp BtnDark (Sound cũ)
+            containerBg.sprite = GetSprite("Assets/Space_Exploration_GUI_Kit/Settings_&_Menu_Components/Extra Large/sound-bar-container-extra-large.png");
+            if (containerBg.sprite != null)
+            {
+                containerBg.type = Image.Type.Sliced;
+                containerBg.color = Color.white;
+            }
+            else
+            {
+                containerBg.color = new Color(0.29f, 0.17f, 0.54f, 1f);
+            }
 
             // Label VOLUME (trái)
             var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
@@ -124,6 +133,12 @@ namespace VoidRunner.UI
             });
 
             return slider;
+        }
+
+        private static Sprite GetSprite(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
         private static void AssignFallbackFont(TextMeshProUGUI tmp)

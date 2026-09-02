@@ -37,19 +37,62 @@ namespace VoidRunner.UI
 
         private void Start()
         {
+            ResolveReferences();
             howToPlayPanel?.SetActive(false);
             RefreshBestScore();
-            if (pressStartText != null) pressStartText.gameObject.SetActive(false); // M2: mặc định ẩn hint
-            EnsureCloseButton(); // nút CLOSE trên panel — đóng popup rõ ràng
-            EnsureCredits();    // nút CREDITS + panel credits (tạo bằng code, idempotent)
-            EnsureShipSelect(); // Task D: panel chọn ship (preview 3D, lưu SaveSystem.SelectedShip)
-            EnsureVolumeSlider(); // 2026-08-12: thay nút bật/tắt âm thanh bằng slider kéo
-            SetupMainMenuPositions(); // FIX M1: cân bằng spacing giữa các nút
-            ShowPressStartHint(); // M2: hiển thị hint bắt đầu
+            EnsureStarDust();
+            if (pressStartText != null) pressStartText.gameObject.SetActive(false);
+            EnsureCloseButton();
+            EnsureCredits();
+            EnsureShipSelect();
+            EnsureVolumeSlider();
+            SetupMainMenuPositions();
+            ShowPressStartHint();
 
             if (playButton != null) playButton.onClick.AddListener(PlayGame);
             if (howToPlayButton != null) howToPlayButton.onClick.AddListener(ToggleHowToPlay);
             if (creditsButton != null) creditsButton.onClick.AddListener(ToggleCredits);
+        }
+
+        private void EnsureStarDust()
+        {
+            var canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null) return;
+            var t = canvas.transform.Find("StarDustText");
+            if (t != null) return;
+            var go = new GameObject("StarDustText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            go.transform.SetParent(canvas.transform, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = new Vector2(320f, 300f);
+            rt.sizeDelta = new Vector2(200f, 40f);
+            var tmp = go.GetComponent<TextMeshProUGUI>();
+            tmp.text = "STARDUST: 0";
+            tmp.fontSize = 22;
+            tmp.color = new Color(1f, 0.85f, 0.3f, 1f);
+            tmp.alignment = TextAlignmentOptions.Right;
+            tmp.raycastTarget = false;
+            AssignFallbackFont(tmp);
+        }
+
+        private void ResolveReferences()
+        {
+            var canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            if (playButton == null)
+                playButton = canvas.transform.Find("PlayButton")?.GetComponent<Button>();
+            if (howToPlayButton == null)
+                howToPlayButton = canvas.transform.Find("HowToPlayButton")?.GetComponent<Button>();
+            if (creditsButton == null)
+                creditsButton = canvas.transform.Find("CreditsButton")?.GetComponent<Button>();
+            if (howToPlayPanel == null)
+                howToPlayPanel = canvas.transform.Find("HowToPlayPanel")?.gameObject;
+            if (bestScoreText == null)
+                bestScoreText = canvas.transform.Find("BestScoreText")?.GetComponent<TextMeshProUGUI>();
+            if (pressStartText == null)
+                pressStartText = canvas.transform.Find("PressStartText")?.GetComponent<TextMeshProUGUI>();
         }
 
         private void OnDestroy()
@@ -277,16 +320,15 @@ namespace VoidRunner.UI
         private void EnsureVolumeSlider()
         {
             if (soundButton != null) soundButton.gameObject.SetActive(false);
-            if (soundButton == null) return;
 
-            Canvas canvas = soundButton.GetComponentInParent<Canvas>();
+            Canvas canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null) return;
             if (canvas.transform.Find("VolumeSlider") != null) return;
 
             VolumeSliderBuilder.Build(
                 canvas.transform, "VolumeSlider",
-                new Vector2(0f, -60f), new Vector2(380f, 60f), // v4: gọn hơn 440→380, mỏng hơn 76→60 — tinh tế hơn
-                new Color(0.2f, 0.75f, 1f, 1f)); // cyan — khớp tông nút chính
+                new Vector2(0f, -120f), new Vector2(380f, 60f),
+                new Color(0.2f, 0.75f, 1f, 1f));
         }
 
         /// <summary>FIX M1: Cân bằng spacing giữa các nút Main Menu.</summary>
@@ -294,78 +336,113 @@ namespace VoidRunner.UI
         /// Mới: PLAY y=80, HOW TO PLAY y=0, SHIP y=-80, CREDITS y=-160 (khoảng cách 80px đều).
         private void SetupMainMenuPositions()
         {
-            // Layout: PLAY (140) → HOW TO PLAY (40) → VOLUME (-60) → CREDITS + SHIP (-160, -160)
-            // Mỗi gap ~100px — thoáng, không chồng nhau
+            var canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null) return;
 
-            // PLAY: y=140 — cao nhất, nổi bật nhất
             if (playButton != null)
             {
                 var rt = playButton.GetComponent<RectTransform>();
-                if (rt != null) rt.anchoredPosition = new Vector2(0f, 140f);
+                if (rt != null) rt.anchoredPosition = new Vector2(0f, 100f);
             }
 
-            // HOW TO PLAY: y=40 — cách PLAY 100px
             if (howToPlayButton != null)
             {
                 var rt = howToPlayButton.GetComponent<RectTransform>();
-                if (rt != null) rt.anchoredPosition = new Vector2(0f, 40f);
+                if (rt != null) rt.anchoredPosition = new Vector2(0f, -20f);
             }
 
-            // VOLUME: y=-60 — cách HOW TO PLAY 100px
-            var volumeSlider = GameObject.Find("VolumeSlider");
+            var volumeSlider = canvas.transform.Find("VolumeSlider");
             if (volumeSlider != null)
             {
                 var rt = volumeSlider.GetComponent<RectTransform>();
-                if (rt != null) rt.anchoredPosition = new Vector2(0f, -60f);
+                if (rt != null) rt.anchoredPosition = new Vector2(0f, -90f);
             }
 
-            // CREDITS: y=-160, bên PHẢI (x=140)
             if (creditsButton != null)
             {
                 var rt = creditsButton.GetComponent<RectTransform>();
-                if (rt != null) rt.anchoredPosition = new Vector2(140f, -160f);
+                if (rt != null) rt.anchoredPosition = new Vector2(180f, -80f);
             }
 
-            // SHIP: y=-160, bên TRÁI (x=-180) — cùng hàng với CREDITS, gap 130px
-            var shipButton = GameObject.Find("ShipButton");
+            var shipButton = canvas.transform.Find("ShipButton");
             if (shipButton != null)
             {
                 var rt = shipButton.GetComponent<RectTransform>();
-                if (rt != null) rt.anchoredPosition = new Vector2(-180f, -160f);
+                if (rt != null) rt.anchoredPosition = new Vector2(-180f, -80f);
+            }
+
+            var title = canvas.transform.Find("TitleText");
+            if (title != null)
+            {
+                var rt = title.GetComponent<RectTransform>();
+                if (rt != null) rt.anchoredPosition = new Vector2(0f, 300f);
+            }
+
+            var bestScore = canvas.transform.Find("BestScoreText");
+            if (bestScore != null)
+            {
+                var rt = bestScore.GetComponent<RectTransform>();
+                if (rt != null) rt.anchoredPosition = new Vector2(-320f, 300f);
+            }
+
+            var stardust = canvas.transform.Find("StarDustText");
+            if (stardust != null)
+            {
+                var rt = stardust.GetComponent<RectTransform>();
+                if (rt != null) rt.anchoredPosition = new Vector2(320f, 300f);
             }
         }
 
-        /// <summary>M2: Hiển thị/text nhấp nháy "PRESS SPACE TO START" dưới nút PLAY.</summary>
         private void ShowPressStartHint()
         {
-            if (pressStartText == null) return;
-            // Vị trí: dưới Play button, cách khoảng 20px
+            if (pressStartText == null)
+            {
+                var canvas = FindAnyObjectByType<Canvas>();
+                if (canvas == null) return;
+                pressStartText = canvas.transform.Find("PressStartText")?.GetComponent<TextMeshProUGUI>();
+                if (pressStartText == null) return;
+            }
             if (playButton != null)
             {
                 var playRt = playButton.GetComponent<RectTransform>();
                 var startRt = pressStartText.rectTransform;
                 if (playRt != null && startRt != null)
                 {
-                    // Đặt text ngay dưới Play button, căn giữa horizont
-                    startRt.anchoredPosition = new Vector2(playRt.anchoredPosition.x, playRt.anchoredPosition.y - 30f);
-                    startRt.sizeDelta = new Vector2(300f, 40f); // vừa đủ text
+                    startRt.anchoredPosition = new Vector2(playRt.anchoredPosition.x, playRt.anchoredPosition.y - 40f);
+                    startRt.sizeDelta = new Vector2(300f, 30f);
                 }
             }
-            pressStartText.color = new Color(0.0f, 0.8f, 1f, 1f); // cyan khớp tông nút
-            // Font sẽ được gán qua Inspector (giống bestScoreText)
+            pressStartText.color = new Color(0.0f, 0.8f, 1f, 1f);
+            pressStartText.text = "PRESS SPACE TO START";
+            pressStartText.fontSize = 18;
+            pressStartText.alignment = TextAlignmentOptions.Center;
+            pressStartText.gameObject.SetActive(false);
         }
 
         private void RefreshBestScore()
         {
             if (bestScoreText == null) return;
 
-            // R0.6: best score chỉ hiển thị khi có điểm thật (> 0) — lần đầu chơi = 0 là vô nghĩa
             bool hasBest = SaveSystem.BestScore > 0;
             bestScoreText.gameObject.SetActive(hasBest);
             if (hasBest)
             {
                 bestScoreText.text = $"BEST SCORE: {SaveSystem.BestScore:N0}";
             }
+
+            var stardust = FindAnyObjectByType<Canvas>()?.transform.Find("StarDustText");
+            if (stardust != null)
+            {
+                var tmp = stardust.GetComponent<TextMeshProUGUI>();
+                if (tmp != null) tmp.text = $"STARDUST: {SaveSystem.BestScore:N0}";
+            }
+        }
+
+        private static void AssignFallbackFont(TextMeshProUGUI tmp)
+        {
+            if (tmp.font != null) return;
+            var anyTmp = Object.FindAnyObjectByType<TextMeshProUGUI>();
+            tmp.font = anyTmp != null ? anyTmp.font : TMP_Settings.defaultFontAsset;
         }
 
     }
