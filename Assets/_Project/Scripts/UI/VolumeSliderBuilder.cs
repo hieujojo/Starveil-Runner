@@ -40,11 +40,11 @@ namespace VoidRunner.UI
             lrt.anchorMin = new Vector2(0f, 0.5f);
             lrt.anchorMax = new Vector2(0f, 0.5f);
             lrt.pivot = new Vector2(0f, 0.5f);
-            lrt.anchoredPosition = new Vector2(16f, 0f); // cách mép trái 16px (khoảng trống 2 bên)
-            lrt.sizeDelta = new Vector2(110f, 40f);
+            lrt.anchoredPosition = new Vector2(14f, 0f); // cách mép trái 14px
+            lrt.sizeDelta = new Vector2(90f, 36f);
             var tmp = label.GetComponent<TextMeshProUGUI>();
             tmp.text = "VOLUME";
-            tmp.fontSize = 22;
+            tmp.fontSize = 18;
             tmp.fontStyle = FontStyles.Bold;
             tmp.color = Color.white;
             tmp.alignment = TextAlignmentOptions.Left;
@@ -68,10 +68,10 @@ namespace VoidRunner.UI
             rt.anchorMax = new Vector2(1f, 0.5f);
             rt.pivot = new Vector2(1f, 0.5f);
             rt.anchoredPosition = new Vector2(-ContentPad, 0f);
-            rt.sizeDelta = new Vector2(sliderWidth, 30f);
+            rt.sizeDelta = new Vector2(sliderWidth, 36f); // taller slider cho dễ kéo
 
             var bg = go.GetComponent<Image>();
-            bg.color = new Color(1f, 1f, 1f, 0.18f);      // track nền mờ
+            bg.color = new Color(1f, 1f, 1f, 0.25f);      // track nền sáng hơn — dễ thấy hơn
 
             var slider = go.GetComponent<Slider>();
             slider.transition = Selectable.Transition.None;
@@ -109,7 +109,7 @@ namespace VoidRunner.UI
             var handleGo = new GameObject("Handle", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             handleGo.transform.SetParent(handleArea.transform, false);
             var hrt = (RectTransform)handleGo.transform;
-            hrt.sizeDelta = new Vector2(22f, 22f);
+            hrt.sizeDelta = new Vector2(28f, 28f); // handle to hơn — dễ kéo trên mobile
             var hImg = handleGo.GetComponent<Image>();
             hImg.color = Color.white;
             slider.handleRect = hrt;

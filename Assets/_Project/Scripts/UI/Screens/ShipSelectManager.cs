@@ -70,8 +70,8 @@ namespace VoidRunner.UI
             var rt = (RectTransform)go.transform;
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(-140f, -160f); // M1: bên trái, cùng hàng với CREDITS (140, -160)
-            rt.sizeDelta = new Vector2(300f, 56f);
+            rt.anchoredPosition = new Vector2(-180f, -160f); // M1: bên trái, cùng hàng với CREDITS (180, -160), gap 130px
+            rt.sizeDelta = new Vector2(240f, 56f); // M5: giảm width 300→240 cho vừa với gap
 
             var img = go.GetComponent<Image>();
             img.color = new Color(0.15f, 0.65f, 0.9f, 1f); // cyan — nút chính phụ, nổi bật hơn tím
